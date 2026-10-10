@@ -272,28 +272,28 @@ export default function DashboardPage() {
                 <form onSubmit={handleCreateDrug} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
                     type="text"
-                    placeholder="Serial Number (e.g. SN-2026-001)"
+                    placeholder="enter your serial number"
                     value={newSerial}
                     onChange={(e) => setNewSerial(e.target.value)}
                     className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
                   />
                   <input
                     type="text"
-                    placeholder="Drug Name (e.g. Amoxicillin 500mg)"
+                    placeholder="enter your drug name"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
                   />
                   <input
                     type="text"
-                    placeholder="Manufacturer"
+                    placeholder="enter your manufacturer"
                     value={newManufacturer}
                     onChange={(e) => setNewManufacturer(e.target.value)}
                     className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
                   />
                   <input
                     type="text"
-                    placeholder="Batch Number"
+                    placeholder="enter your batch number"
                     value={newBatch}
                     onChange={(e) => setNewBatch(e.target.value)}
                     className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
