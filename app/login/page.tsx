@@ -176,6 +176,7 @@ export default function LoginPage() {
                     <option value="DISTRIBUTOR">DISTRIBUTOR</option>
                     <option value="PHARMACY">PHARMACY</option>
                     <option value="REGULATOR">REGULATOR</option>
+                    <option value="CUSTOMER">CUSTOMER / PATIENT</option>
                   </select>
                 </div>
                 <div>
