@@ -38,18 +38,18 @@ export default function VerifyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F8FB] text-[#102A43] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#0B1220] text-[#F1F5F9] flex flex-col font-sans">
       <Navigation walletAddress={wallet} onConnectWallet={async () => setWallet(await connectMetaMask())} />
 
       <main className="flex-1 max-w-4xl mx-auto px-4 py-12 w-full">
         <div className="text-center space-y-3 mb-10">
-          <div className="badge badge-lg bg-[#16B8A6]/15 text-[#102A43] border border-[#16B8A6]/30 font-semibold uppercase tracking-wider py-3 px-4">
+          <div className="badge badge-lg bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-semibold uppercase tracking-wider py-3 px-4">
             Public Proof Explorer
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#102A43]">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#F1F5F9]">
             Verify Attestation & Drug Custody
           </h1>
-          <p className="text-[#52677A] text-sm max-w-xl mx-auto">
+          <p className="text-[#94A3B8] text-sm max-w-xl mx-auto">
             Inspect on-chain cryptographic signatures, tamper-evident timestamps, and lifecycle transitions.
           </p>
         </div>
@@ -60,13 +60,13 @@ export default function VerifyPage() {
             value={hashInput}
             onChange={(e) => setHashInput(e.target.value)}
             placeholder="Paste SHA-256 event hash or on-chain attestation hash (0x...)"
-            className="input input-bordered w-full bg-white border-slate-300 rounded-xl px-5 py-4 pl-12 text-sm text-[#102A43] font-mono shadow-sm focus:border-[#16B8A6] focus:outline-none"
+            className="input input-bordered w-full bg-[#243247] border-[#304257] rounded-xl px-5 py-4 pl-12 text-sm text-[#F1F5F9] font-mono shadow-sm focus:border-[#00D6B4] focus:outline-none"
           />
-          <Search className="absolute left-4 top-4 h-5 w-5 text-[#52677A]" />
+          <Search className="absolute left-4 top-4 h-5 w-5 text-[#94A3B8]" />
           <button
             type="submit"
             disabled={loading}
-            className="btn btn-sm bg-[#16B8A6] hover:bg-[#139485] text-white border-none rounded-lg absolute right-2.5 top-2.5 px-5 font-semibold text-xs tracking-wider"
+            className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-lg absolute right-2.5 top-2.5 px-5 font-bold text-xs tracking-wider"
           >
             {loading ? 'Verifying...' : 'Verify Hash'}
           </button>
@@ -76,35 +76,35 @@ export default function VerifyPage() {
           <div
             className={`card shadow-sm rounded-2xl p-6 border ${
               result.exists && result.isValid
-                ? 'bg-[#16A36A]/10 border-[#16A36A]'
+                ? 'bg-[#243247] border-[#A3E635]'
                 : result.exists && !result.isValid
-                ? 'bg-[#DC4545]/10 border-[#DC4545]'
-                : 'bg-[#D97706]/10 border-[#D97706]'
+                ? 'bg-[#243247] border-[#F87171]'
+                : 'bg-[#243247] border-[#FBBF24]'
             }`}
           >
             <div className="flex items-center gap-4 mb-6">
               {result.exists && result.isValid ? (
-                <div className="h-12 w-12 rounded-xl bg-[#16A36A] text-white flex items-center justify-center">
+                <div className="h-12 w-12 rounded-xl bg-[#A3E635] text-[#0B1220] flex items-center justify-center font-bold">
                   <CheckCircle2 className="h-7 w-7" />
                 </div>
               ) : result.exists && !result.isValid ? (
-                <div className="h-12 w-12 rounded-xl bg-[#DC4545] text-white flex items-center justify-center">
+                <div className="h-12 w-12 rounded-xl bg-[#F87171] text-[#0B1220] flex items-center justify-center font-bold">
                   <ShieldAlert className="h-7 w-7" />
                 </div>
               ) : (
-                <div className="h-12 w-12 rounded-xl bg-[#D97706] text-white flex items-center justify-center">
+                <div className="h-12 w-12 rounded-xl bg-[#FBBF24] text-[#0B1220] flex items-center justify-center font-bold">
                   <AlertTriangle className="h-7 w-7" />
                 </div>
               )}
               <div>
-                <h3 className="text-lg font-bold text-[#102A43]">
+                <h3 className="text-lg font-bold text-[#F1F5F9]">
                   {result.exists && result.isValid
-                    ? 'Authentic Medicine (Valid & Untampered)'
+                    ? 'Authentic Medicine (Verified & Untampered)'
                     : result.exists && !result.isValid
-                    ? 'Failed Ledger Verification (Tampered / Revoked)'
+                    ? 'Counterfeit Alert (Failed Ledger Verification)'
                     : 'Suspicious or Unverified Medicine (Record Not Found)'}
                 </h3>
-                <p className="text-xs text-[#52677A] font-mono mt-0.5">
+                <p className="text-xs text-[#94A3B8] font-mono mt-0.5">
                   Hash: {hashInput}
                 </p>
               </div>
@@ -112,35 +112,35 @@ export default function VerifyPage() {
 
             {result.exists && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
-                <div className="p-3.5 bg-white rounded-xl border border-slate-200 flex items-center gap-3">
-                  <Box className="h-5 w-5 text-[#16B8A6] shrink-0" />
+                <div className="p-3.5 bg-[#172638] rounded-xl border border-[#304257] flex items-center gap-3">
+                  <Box className="h-5 w-5 text-[#00D6B4] shrink-0" />
                   <div>
-                    <span className="text-[#52677A] block text-[10px] uppercase font-sans">Drug Serial Number</span>
-                    <span className="text-[#102A43] font-semibold">{result.drugSerialNumber}</span>
+                    <span className="text-[#94A3B8] block text-[10px] uppercase font-sans">Drug Serial Number</span>
+                    <span className="text-[#F1F5F9] font-semibold">{result.drugSerialNumber}</span>
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-white rounded-xl border border-slate-200 flex items-center gap-3">
-                  <LinkIcon className="h-5 w-5 text-[#16B8A6] shrink-0" />
+                <div className="p-3.5 bg-[#172638] rounded-xl border border-[#304257] flex items-center gap-3">
+                  <LinkIcon className="h-5 w-5 text-[#00D6B4] shrink-0" />
                   <div>
-                    <span className="text-[#52677A] block text-[10px] uppercase font-sans">Lifecycle Stage</span>
-                    <span className="text-[#16A36A] font-bold">{result.eventType}</span>
+                    <span className="text-[#94A3B8] block text-[10px] uppercase font-sans">Lifecycle Stage</span>
+                    <span className="text-[#A3E635] font-bold">{result.eventType}</span>
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-white rounded-xl border border-slate-200 flex items-center gap-3">
-                  <User className="h-5 w-5 text-[#16B8A6] shrink-0" />
+                <div className="p-3.5 bg-[#172638] rounded-xl border border-[#304257] flex items-center gap-3">
+                  <User className="h-5 w-5 text-[#00D6B4] shrink-0" />
                   <div>
-                    <span className="text-[#52677A] block text-[10px] uppercase font-sans">Signer Address</span>
-                    <span className="text-[#102A43] truncate block max-w-[200px]">{result.signer}</span>
+                    <span className="text-[#94A3B8] block text-[10px] uppercase font-sans">Signer Address</span>
+                    <span className="text-[#F1F5F9] truncate block max-w-[200px]">{result.signer}</span>
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-white rounded-xl border border-slate-200 flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-[#16B8A6] shrink-0" />
+                <div className="p-3.5 bg-[#172638] rounded-xl border border-[#304257] flex items-center gap-3">
+                  <Clock className="h-5 w-5 text-[#00D6B4] shrink-0" />
                   <div>
-                    <span className="text-[#52677A] block text-[10px] uppercase font-sans">Anchored Timestamp</span>
-                    <span className="text-[#102A43]">
+                    <span className="text-[#94A3B8] block text-[10px] uppercase font-sans">Anchored Timestamp</span>
+                    <span className="text-[#F1F5F9]">
                       {result.timestamp ? new Date(result.timestamp).toUTCString() : 'N/A'}
                     </span>
                   </div>

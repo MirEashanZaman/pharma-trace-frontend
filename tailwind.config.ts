@@ -10,13 +10,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        pharmadark: "#102A43",
-        pharmalight: "#F4F8FB",
-        pharmateal: "#16B8A6",
-        pharmagreen: "#16A36A",
-        pharmaamber: "#D97706",
-        pharmared: "#DC4545",
-        pharmaslate: "#52677A",
+        midnight: "#0B1220",
+        slatepanel: "#243247",
+        panelborder: "#304257",
+        neonteal: "#00D6B4",
+        limegreen: "#A3E635",
+        warningamber: "#FBBF24",
+        alertred: "#F87171",
+        textheading: "#F1F5F9",
+        textmuted: "#94A3B8",
       },
     },
   },
@@ -24,14 +26,18 @@ const config: Config = {
   daisyui: {
     themes: [
       {
-        light: {
-          ...require("daisyui/src/theming/themes")["light"],
-          primary: "#16B8A6",
-          secondary: "#102A43",
-          accent: "#16A36A",
-          neutral: "#52677A",
-          "base-100": "#FFFFFF",
-          "base-200": "#F4F8FB",
+        darkpalette: {
+          "primary": "#00D6B4",
+          "secondary": "#243247",
+          "accent": "#A3E635",
+          "neutral": "#304257",
+          "base-100": "#243247",
+          "base-200": "#0B1220",
+          "base-300": "#172638",
+          "info": "#00D6B4",
+          "success": "#A3E635",
+          "warning": "#FBBF24",
+          "error": "#F87171",
         },
       },
     ],
