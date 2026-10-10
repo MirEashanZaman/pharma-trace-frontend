@@ -9,7 +9,7 @@ export const api = axios.create({
   },
 });
 
-// Attach JWT token to requests if available
+
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('pharma_access_token');
@@ -64,7 +64,7 @@ export interface AttestationVerification {
   onChain: boolean;
 }
 
-// Auth API Methods
+
 export const registerUser = async (data: any): Promise<AuthResponse> => {
   const res = await api.post('/auth/register', data);
   if (res.data.accessToken && typeof window !== 'undefined') {
@@ -106,7 +106,7 @@ export const logoutUser = () => {
   }
 };
 
-// Drug & Traceability Methods
+
 export const fetchDrugs = async (): Promise<Drug[]> => {
   const res = await api.get('/drugs');
   return res.data;

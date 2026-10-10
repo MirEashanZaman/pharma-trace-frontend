@@ -4,7 +4,7 @@ A Next.js 14 (App Router) + Tailwind CSS frontend interface for pharmaceutical t
 
 ---
 
-## 🏛️ Features
+##  Features
 
 * **Hero Landing Page (`app/page.tsx`)**: High-impact introduction to Event Sourcing and Web3 blockchain attestation.
 * **Interactive Dashboard (`app/dashboard/page.tsx`)**:
@@ -16,7 +16,7 @@ A Next.js 14 (App Router) + Tailwind CSS frontend interface for pharmaceutical t
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```text
 pharma-trace-frontend/
@@ -38,7 +38,7 @@ pharma-trace-frontend/
 
 ---
 
-## 🚀 Setup & Execution
+##  Setup & Execution
 
 ```bash
 # Install dependencies
