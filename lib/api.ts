@@ -9,6 +9,30 @@ export const api = axios.create({
   },
 });
 
+// Attach JWT token to requests if available
+api.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('pharma_access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
+export interface UserProfile {
+  id: number;
+  email: string;
+  role: string;
+  walletAddress?: string;
+  organization?: string;
+}
+
+export interface AuthResponse {
+  accessToken: string;
+  user: UserProfile;
+}
+
 export interface Drug {
   id: number;
   serialNumber: string;
@@ -40,6 +64,49 @@ export interface AttestationVerification {
   onChain: boolean;
 }
 
+// Auth API Methods
+export const registerUser = async (data: any): Promise<AuthResponse> => {
+  const res = await api.post('/auth/register', data);
+  if (res.data.accessToken && typeof window !== 'undefined') {
+    localStorage.setItem('pharma_access_token', res.data.accessToken);
+  }
+  return res.data;
+};
+
+export const loginUser = async (data: any): Promise<AuthResponse> => {
+  const res = await api.post('/auth/login', data);
+  if (res.data.accessToken && typeof window !== 'undefined') {
+    localStorage.setItem('pharma_access_token', res.data.accessToken);
+  }
+  return res.data;
+};
+
+export const web3LoginUser = async (data: {
+  walletAddress: string;
+  signature: string;
+  message: string;
+  role?: string;
+  organization?: string;
+}): Promise<AuthResponse> => {
+  const res = await api.post('/auth/web3-login', data);
+  if (res.data.accessToken && typeof window !== 'undefined') {
+    localStorage.setItem('pharma_access_token', res.data.accessToken);
+  }
+  return res.data;
+};
+
+export const fetchProfile = async (): Promise<UserProfile> => {
+  const res = await api.get('/auth/profile');
+  return res.data;
+};
+
+export const logoutUser = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('pharma_access_token');
+  }
+};
+
+// Drug & Traceability Methods
 export const fetchDrugs = async (): Promise<Drug[]> => {
   const res = await api.get('/drugs');
   return res.data;
