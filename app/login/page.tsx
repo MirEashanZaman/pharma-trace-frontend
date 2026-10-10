@@ -124,7 +124,7 @@ export default function LoginPage() {
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="enter your full name"
+                    placeholder="Enter your full name"
                     className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                   />
                   <UserCheck className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
@@ -140,7 +140,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="enter your email"
+                  placeholder="Enter your email"
                   className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                 />
                 <Mail className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
@@ -155,7 +155,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="enter your password"
+                  placeholder="Enter your password"
                   className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                 />
                 <KeyRound className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
@@ -184,7 +184,7 @@ export default function LoginPage() {
                     type="text"
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
-                    placeholder="enter your organization"
+                    placeholder="Enter your organization"
                     className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
                   />
                 </div>
