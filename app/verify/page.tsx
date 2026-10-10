@@ -59,7 +59,7 @@ export default function VerifyPage() {
             type="text"
             value={hashInput}
             onChange={(e) => setHashInput(e.target.value)}
-            placeholder="Paste SHA-256 event hash or on-chain attestation hash (0x...)"
+            placeholder="enter your hash or attestation key (0x...)"
             className="input input-bordered w-full bg-[#243247] border-[#304257] rounded-xl px-5 py-4 pl-12 text-sm text-[#F1F5F9] font-mono shadow-sm focus:border-[#00D6B4] focus:outline-none"
           />
           <Search className="absolute left-4 top-4 h-5 w-5 text-[#94A3B8]" />
