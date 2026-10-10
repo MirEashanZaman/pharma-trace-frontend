@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { loginUser, registerUser, web3LoginUser } from '@/lib/api';
 import { connectMetaMask, signAttestationMessage } from '@/lib/web3';
-import { ShieldCheck, Lock, Mail, KeyRound, Wallet, ArrowRight, UserCheck } from 'lucide-react';
+import { ShieldCheck, Mail, KeyRound, Wallet, ArrowRight, UserCheck } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -80,48 +80,44 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center px-4 font-sans selection:bg-emerald-500 selection:text-slate-950">
+    <div className="min-h-screen bg-[#F4F8FB] text-[#102A43] flex flex-col justify-center items-center px-4 font-sans">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
-          <div className="inline-flex h-12 w-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 items-center justify-center shadow-lg shadow-emerald-500/20">
-            <ShieldCheck className="h-7 w-7 text-slate-950" />
+          <div className="inline-flex h-12 w-12 rounded-2xl bg-[#16B8A6] items-center justify-center text-white shadow-md">
+            <ShieldCheck className="h-7 w-7" />
           </div>
-          <h2 className="text-2xl font-black tracking-tight text-white">
+          <h2 className="text-2xl font-black tracking-tight text-[#102A43]">
             {isRegister ? 'Create PharmaTrace Account' : 'Sign in to PharmaTrace-ES'}
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-[#52677A]">
             Access Event Sourcing, Saga validations, and Web3 smart contract attestations.
           </p>
         </div>
 
         {error && (
-          <div className="p-3 bg-red-950/40 border border-red-500/40 rounded-xl text-xs text-red-300 font-medium">
+          <div className="alert alert-error text-xs rounded-xl shadow-sm text-white">
             {error}
           </div>
         )}
 
-        <div className="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl space-y-5">
-          {/* Web3 Wallet Sign-In Button */}
+        <div className="card bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
           <button
             type="button"
             onClick={handleWeb3Login}
             disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-bold rounded-xl text-xs tracking-wider transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+            className="btn bg-[#102A43] hover:bg-[#0c2135] text-white border-none w-full py-3 rounded-xl font-bold text-xs tracking-wider flex items-center justify-center gap-2 shadow-sm"
           >
-            <Wallet className="h-4 w-4" /> Sign In with Web3 Wallet (MetaMask)
+            <Wallet className="h-4 w-4 text-[#16B8A6]" /> Sign In with Web3 Wallet (MetaMask)
           </button>
 
-          <div className="relative flex items-center justify-center">
-            <div className="border-t border-slate-800 w-full" />
-            <span className="bg-slate-900 px-3 text-[11px] uppercase tracking-wider text-slate-500 font-bold">
-              Or email password
-            </span>
+          <div className="divider text-[11px] uppercase tracking-wider text-[#52677A] font-bold">
+            Or email password
           </div>
 
           <form onSubmit={handleEmailAuth} className="space-y-4">
             {isRegister && (
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Full Name</label>
+                <label className="text-xs text-[#52677A] font-semibold block mb-1">Full Name</label>
                 <div className="relative">
                   <input
                     type="text"
@@ -129,15 +125,15 @@ export default function LoginPage() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. Dr. Jane Doe"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="input input-bordered w-full bg-white border-slate-300 rounded-xl pl-10 pr-4 py-2 text-xs text-[#102A43] focus:border-[#16B8A6]"
                   />
-                  <UserCheck className="h-4 w-4 text-slate-500 absolute left-3.5 top-3" />
+                  <UserCheck className="h-4 w-4 text-[#52677A] absolute left-3.5 top-3" />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Email Address</label>
+              <label className="text-xs text-[#52677A] font-semibold block mb-1">Email Address</label>
               <div className="relative">
                 <input
                   type="email"
@@ -145,14 +141,14 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@pharma-corp.com"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="input input-bordered w-full bg-white border-slate-300 rounded-xl pl-10 pr-4 py-2 text-xs text-[#102A43] focus:border-[#16B8A6]"
                 />
-                <Mail className="h-4 w-4 text-slate-500 absolute left-3.5 top-3" />
+                <Mail className="h-4 w-4 text-[#52677A] absolute left-3.5 top-3" />
               </div>
             </div>
 
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Password</label>
+              <label className="text-xs text-[#52677A] font-semibold block mb-1">Password</label>
               <div className="relative">
                 <input
                   type="password"
@@ -160,20 +156,20 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="input input-bordered w-full bg-white border-slate-300 rounded-xl pl-10 pr-4 py-2 text-xs text-[#102A43] focus:border-[#16B8A6]"
                 />
-                <KeyRound className="h-4 w-4 text-slate-500 absolute left-3.5 top-3" />
+                <KeyRound className="h-4 w-4 text-[#52677A] absolute left-3.5 top-3" />
               </div>
             </div>
 
             {isRegister && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-slate-400 block mb-1">Supply Chain Role</label>
+                  <label className="text-xs text-[#52677A] font-semibold block mb-1">Supply Chain Role</label>
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white"
+                    className="select select-bordered w-full bg-white border-slate-300 rounded-xl text-xs text-[#102A43]"
                   >
                     <option value="MANUFACTURER">MANUFACTURER</option>
                     <option value="DISTRIBUTOR">DISTRIBUTOR</option>
@@ -182,13 +178,13 @@ export default function LoginPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400 block mb-1">Organization</label>
+                  <label className="text-xs text-[#52677A] font-semibold block mb-1">Organization</label>
                   <input
                     type="text"
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
                     placeholder="e.g. Novartis"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white"
+                    className="input input-bordered w-full bg-white border-slate-300 rounded-xl px-3 py-2 text-xs text-[#102A43]"
                   />
                 </div>
               </div>
@@ -197,20 +193,20 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs tracking-wider transition shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-1.5"
+              className="btn bg-[#16B8A6] hover:bg-[#139485] text-white border-none w-full py-3 rounded-xl font-bold text-xs tracking-wider transition shadow-sm flex items-center justify-center gap-1.5"
             >
               {loading ? 'Processing...' : isRegister ? 'Create Account' : 'Sign In'}
               <ArrowRight className="h-4 w-4" />
             </button>
           </form>
 
-          <div className="text-center text-xs text-slate-400 pt-2 border-t border-slate-800/80">
+          <div className="text-center text-xs text-[#52677A] pt-2 border-t border-slate-200">
             {isRegister ? (
               <span>
                 Already have an account?{' '}
                 <button
                   onClick={() => setIsRegister(false)}
-                  className="text-emerald-400 font-bold hover:underline"
+                  className="text-[#16B8A6] font-bold hover:underline"
                 >
                   Sign In
                 </button>
@@ -220,7 +216,7 @@ export default function LoginPage() {
                 Don't have an account?{' '}
                 <button
                   onClick={() => setIsRegister(true)}
-                  className="text-emerald-400 font-bold hover:underline"
+                  className="text-[#16B8A6] font-bold hover:underline"
                 >
                   Register Now
                 </button>

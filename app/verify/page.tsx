@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { verifyAttestation, AttestationVerification } from '@/lib/api';
-import { Search, ShieldAlert, CheckCircle2, Clock, User, Link as LinkIcon, Box } from 'lucide-react';
+import { Search, ShieldAlert, CheckCircle2, Clock, User, Link as LinkIcon, Box, AlertTriangle } from 'lucide-react';
 import { Navigation } from '@/components/navigation';
 import { connectMetaMask } from '@/lib/web3';
 
@@ -38,18 +38,18 @@ export default function VerifyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#F4F8FB] text-[#102A43] flex flex-col font-sans">
       <Navigation walletAddress={wallet} onConnectWallet={async () => setWallet(await connectMetaMask())} />
 
       <main className="flex-1 max-w-4xl mx-auto px-4 py-12 w-full">
         <div className="text-center space-y-3 mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+          <div className="badge badge-lg bg-[#16B8A6]/15 text-[#102A43] border border-[#16B8A6]/30 font-semibold uppercase tracking-wider py-3 px-4">
             Public Proof Explorer
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#102A43]">
             Verify Attestation & Drug Custody
           </h1>
-          <p className="text-slate-400 text-sm max-w-xl mx-auto">
+          <p className="text-[#52677A] text-sm max-w-xl mx-auto">
             Inspect on-chain cryptographic signatures, tamper-evident timestamps, and lifecycle transitions.
           </p>
         </div>
@@ -60,13 +60,13 @@ export default function VerifyPage() {
             value={hashInput}
             onChange={(e) => setHashInput(e.target.value)}
             placeholder="Paste SHA-256 event hash or on-chain attestation hash (0x...)"
-            className="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-5 py-4 pl-12 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono placeholder:font-sans placeholder:text-slate-500 shadow-xl"
+            className="input input-bordered w-full bg-white border-slate-300 rounded-xl px-5 py-4 pl-12 text-sm text-[#102A43] font-mono shadow-sm focus:border-[#16B8A6] focus:outline-none"
           />
-          <Search className="absolute left-4 top-4.5 h-5 w-5 text-slate-400" />
+          <Search className="absolute left-4 top-4 h-5 w-5 text-[#52677A]" />
           <button
             type="submit"
             disabled={loading}
-            className="absolute right-2.5 top-2.5 px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs tracking-wider transition disabled:opacity-50 shadow-md"
+            className="btn btn-sm bg-[#16B8A6] hover:bg-[#139485] text-white border-none rounded-lg absolute right-2.5 top-2.5 px-5 font-semibold text-xs tracking-wider"
           >
             {loading ? 'Verifying...' : 'Verify Hash'}
           </button>
@@ -74,31 +74,37 @@ export default function VerifyPage() {
 
         {result && (
           <div
-            className={`rounded-2xl border p-6 backdrop-blur-xl transition-all ${
+            className={`card shadow-sm rounded-2xl p-6 border ${
               result.exists && result.isValid
-                ? 'bg-emerald-950/20 border-emerald-500/30'
-                : 'bg-red-950/20 border-red-500/30'
+                ? 'bg-[#16A36A]/10 border-[#16A36A]'
+                : result.exists && !result.isValid
+                ? 'bg-[#DC4545]/10 border-[#DC4545]'
+                : 'bg-[#D97706]/10 border-[#D97706]'
             }`}
           >
             <div className="flex items-center gap-4 mb-6">
               {result.exists && result.isValid ? (
-                <div className="h-12 w-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/40">
+                <div className="h-12 w-12 rounded-xl bg-[#16A36A] text-white flex items-center justify-center">
                   <CheckCircle2 className="h-7 w-7" />
                 </div>
-              ) : (
-                <div className="h-12 w-12 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center border border-red-500/40">
+              ) : result.exists && !result.isValid ? (
+                <div className="h-12 w-12 rounded-xl bg-[#DC4545] text-white flex items-center justify-center">
                   <ShieldAlert className="h-7 w-7" />
+                </div>
+              ) : (
+                <div className="h-12 w-12 rounded-xl bg-[#D97706] text-white flex items-center justify-center">
+                  <AlertTriangle className="h-7 w-7" />
                 </div>
               )}
               <div>
-                <h3 className="text-lg font-bold text-white">
+                <h3 className="text-lg font-bold text-[#102A43]">
                   {result.exists && result.isValid
-                    ? 'Valid & Untampered Attestation'
+                    ? 'Authentic Medicine (Valid & Untampered)'
                     : result.exists && !result.isValid
-                    ? 'Tampered / Revoked Attestation Detected'
-                    : 'Attestation Record Not Found'}
+                    ? 'Failed Ledger Verification (Tampered / Revoked)'
+                    : 'Suspicious or Unverified Medicine (Record Not Found)'}
                 </h3>
-                <p className="text-xs text-slate-400 font-mono mt-0.5">
+                <p className="text-xs text-[#52677A] font-mono mt-0.5">
                   Hash: {hashInput}
                 </p>
               </div>
@@ -106,35 +112,35 @@ export default function VerifyPage() {
 
             {result.exists && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
-                <div className="p-3.5 bg-slate-900/60 rounded-xl border border-slate-800 flex items-center gap-3">
-                  <Box className="h-5 w-5 text-emerald-400 shrink-0" />
+                <div className="p-3.5 bg-white rounded-xl border border-slate-200 flex items-center gap-3">
+                  <Box className="h-5 w-5 text-[#16B8A6] shrink-0" />
                   <div>
-                    <span className="text-slate-500 block text-[10px] uppercase font-sans">Drug Serial Number</span>
-                    <span className="text-slate-200 font-semibold">{result.drugSerialNumber}</span>
+                    <span className="text-[#52677A] block text-[10px] uppercase font-sans">Drug Serial Number</span>
+                    <span className="text-[#102A43] font-semibold">{result.drugSerialNumber}</span>
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-slate-900/60 rounded-xl border border-slate-800 flex items-center gap-3">
-                  <LinkIcon className="h-5 w-5 text-emerald-400 shrink-0" />
+                <div className="p-3.5 bg-white rounded-xl border border-slate-200 flex items-center gap-3">
+                  <LinkIcon className="h-5 w-5 text-[#16B8A6] shrink-0" />
                   <div>
-                    <span className="text-slate-500 block text-[10px] uppercase font-sans">Lifecycle Stage</span>
-                    <span className="text-emerald-400 font-semibold">{result.eventType}</span>
+                    <span className="text-[#52677A] block text-[10px] uppercase font-sans">Lifecycle Stage</span>
+                    <span className="text-[#16A36A] font-bold">{result.eventType}</span>
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-slate-900/60 rounded-xl border border-slate-800 flex items-center gap-3">
-                  <User className="h-5 w-5 text-emerald-400 shrink-0" />
+                <div className="p-3.5 bg-white rounded-xl border border-slate-200 flex items-center gap-3">
+                  <User className="h-5 w-5 text-[#16B8A6] shrink-0" />
                   <div>
-                    <span className="text-slate-500 block text-[10px] uppercase font-sans">Signer Address</span>
-                    <span className="text-slate-200 truncate block max-w-[200px]">{result.signer}</span>
+                    <span className="text-[#52677A] block text-[10px] uppercase font-sans">Signer Address</span>
+                    <span className="text-[#102A43] truncate block max-w-[200px]">{result.signer}</span>
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-slate-900/60 rounded-xl border border-slate-800 flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-emerald-400 shrink-0" />
+                <div className="p-3.5 bg-white rounded-xl border border-slate-200 flex items-center gap-3">
+                  <Clock className="h-5 w-5 text-[#16B8A6] shrink-0" />
                   <div>
-                    <span className="text-slate-500 block text-[10px] uppercase font-sans">Anchored Timestamp</span>
-                    <span className="text-slate-200">
+                    <span className="text-[#52677A] block text-[10px] uppercase font-sans">Anchored Timestamp</span>
+                    <span className="text-[#102A43]">
                       {result.timestamp ? new Date(result.timestamp).toUTCString() : 'N/A'}
                     </span>
                   </div>

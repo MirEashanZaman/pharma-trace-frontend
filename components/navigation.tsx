@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Layers, Cpu, Search, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Layers, Search, CheckCircle2, LogIn } from 'lucide-react';
 
 export function Navigation({
   walletAddress,
@@ -10,41 +10,41 @@ export function Navigation({
   onConnectWallet: () => void;
 }) {
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800">
+    <header className="sticky top-0 z-50 bg-[#102A43] text-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-            <ShieldCheck className="h-6 w-6 text-slate-950" />
+          <div className="h-10 w-10 rounded-xl bg-[#16B8A6] flex items-center justify-center text-white shadow-sm">
+            <ShieldCheck className="h-6 w-6" />
           </div>
           <div>
             <Link href="/" className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-              PharmaTrace<span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Web3 ES</span>
+              PharmaTrace<span className="badge badge-sm bg-[#16B8A6] border-none text-white font-mono">ES</span>
             </Link>
           </div>
         </div>
 
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-300">
-          <Link href="/dashboard" className="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-200">
+          <Link href="/dashboard" className="hover:text-[#16B8A6] transition-colors flex items-center gap-1.5">
             <Layers className="h-4 w-4" /> Dashboard
           </Link>
-          <Link href="/verify" className="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+          <Link href="/verify" className="hover:text-[#16B8A6] transition-colors flex items-center gap-1.5">
             <Search className="h-4 w-4" /> Public Verification
           </Link>
-          <Link href="/login" className="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
-            Sign In
+          <Link href="/login" className="hover:text-[#16B8A6] transition-colors flex items-center gap-1.5">
+            <LogIn className="h-4 w-4" /> Sign In
           </Link>
         </nav>
 
         <div className="flex items-center space-x-3">
           {walletAddress ? (
-            <div className="flex items-center space-x-2 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-mono text-emerald-400">
-              <CheckCircle2 className="h-3.5 w-3.5" />
+            <div className="badge badge-lg bg-[#16B8A6]/20 border border-[#16B8A6] text-[#16B8A6] font-mono gap-1.5 py-3">
+              <CheckCircle2 className="h-4 w-4 text-[#16B8A6]" />
               <span>{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
             </div>
           ) : (
             <button
               onClick={onConnectWallet}
-              className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs tracking-wide transition shadow-lg shadow-emerald-500/25"
+              className="btn btn-sm bg-[#16B8A6] hover:bg-[#139485] text-white border-none shadow-sm rounded-lg font-semibold"
             >
               Connect Wallet
             </button>

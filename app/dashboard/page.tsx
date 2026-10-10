@@ -12,9 +12,10 @@ import {
   Lock,
   GitPullRequest,
   CheckCircle,
-  Thermometer,
   Shield,
   ArrowRight,
+  Thermometer,
+  Droplets,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -25,7 +26,6 @@ export default function DashboardPage() {
   const [selectedSerial, setSelectedSerial] = useState<string>('');
   const [events, setEvents] = useState<DrugEvent[]>([]);
 
-  // Modals / forms
   const [newSerial, setNewSerial] = useState('');
   const [newName, setNewName] = useState('');
   const [newManufacturer, setNewManufacturer] = useState('');
@@ -125,88 +125,89 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#F4F8FB] text-[#102A43] flex flex-col font-sans">
       <Navigation walletAddress={wallet} onConnectWallet={async () => setWallet(await connectMetaMask())} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 flex flex-col md:flex-row gap-8">
-        {/* Sidebar */}
-        <aside className="w-full md:w-64 space-y-2">
+        <aside className="w-full md:w-64 space-y-1.5 bg-[#102A43] p-4 rounded-2xl text-white shadow-sm self-start">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 py-2">
+            Navigation Menu
+          </div>
           <button
             onClick={() => setActiveTab('overview')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
               activeTab === 'overview'
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                : 'text-slate-400 hover:bg-slate-900 hover:text-white'
+                ? 'bg-[#16B8A6] text-white shadow-sm font-semibold'
+                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
             }`}
           >
             <Activity className="h-4 w-4" /> Overview & Metrics
           </button>
           <button
             onClick={() => setActiveTab('drugs')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
               activeTab === 'drugs'
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                : 'text-slate-400 hover:bg-slate-900 hover:text-white'
+                ? 'bg-[#16B8A6] text-white shadow-sm font-semibold'
+                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
             }`}
           >
             <Layers className="h-4 w-4" /> Drug Batches
           </button>
           <button
             onClick={() => setActiveTab('events')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
               activeTab === 'events'
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                : 'text-slate-400 hover:bg-slate-900 hover:text-white'
+                ? 'bg-[#16B8A6] text-white shadow-sm font-semibold'
+                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
             }`}
           >
             <FileCheck2 className="h-4 w-4" /> Custody Chain & Saga
           </button>
           <button
             onClick={() => setActiveTab('attestations')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
               activeTab === 'attestations'
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                : 'text-slate-400 hover:bg-slate-900 hover:text-white'
+                ? 'bg-[#16B8A6] text-white shadow-sm font-semibold'
+                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
             }`}
           >
             <Lock className="h-4 w-4" /> Smart Contract Anchors
           </button>
           <button
             onClick={() => setActiveTab('github')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
               activeTab === 'github'
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                : 'text-slate-400 hover:bg-slate-900 hover:text-white'
+                ? 'bg-[#16B8A6] text-white shadow-sm font-semibold'
+                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
             }`}
           >
             <GitPullRequest className="h-4 w-4" /> GitHub & Audit Claims
           </button>
         </aside>
 
-        {/* Main Content Area */}
         <main className="flex-1 space-y-6">
           {activeTab === 'overview' && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-5 bg-slate-900/60 border border-slate-800 rounded-2xl">
-                  <span className="text-xs text-slate-400 uppercase font-bold tracking-wider">Registered Batches</span>
-                  <p className="text-3xl font-extrabold text-white mt-2">{drugs.length}</p>
+                <div className="card bg-white border border-slate-200 shadow-sm rounded-2xl p-5">
+                  <span className="text-xs text-[#52677A] uppercase font-bold tracking-wider">Registered Batches</span>
+                  <p className="text-3xl font-black text-[#102A43] mt-2">{drugs.length}</p>
                 </div>
-                <div className="p-5 bg-slate-900/60 border border-slate-800 rounded-2xl">
-                  <span className="text-xs text-slate-400 uppercase font-bold tracking-wider">Saga Events Processed</span>
-                  <p className="text-3xl font-extrabold text-emerald-400 mt-2">{events.length}</p>
+                <div className="card bg-white border border-slate-200 shadow-sm rounded-2xl p-5">
+                  <span className="text-xs text-[#52677A] uppercase font-bold tracking-wider">Saga Events Processed</span>
+                  <p className="text-3xl font-black text-[#16B8A6] mt-2">{events.length}</p>
                 </div>
-                <div className="p-5 bg-slate-900/60 border border-slate-800 rounded-2xl">
-                  <span className="text-xs text-slate-400 uppercase font-bold tracking-wider">Tamper Detection Rate</span>
-                  <p className="text-3xl font-extrabold text-teal-400 mt-2">100%</p>
+                <div className="card bg-white border border-slate-200 shadow-sm rounded-2xl p-5">
+                  <span className="text-xs text-[#52677A] uppercase font-bold tracking-wider">Tamper Detection Rate</span>
+                  <p className="text-3xl font-black text-[#16A36A] mt-2">100%</p>
                 </div>
               </div>
 
-              <div className="p-6 bg-slate-900/40 border border-slate-800/80 rounded-2xl space-y-4">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-emerald-400" /> Web3 Off-Chain Attestation Pipeline
+              <div className="card bg-white border border-slate-200 shadow-sm rounded-2xl p-6 space-y-4">
+                <h3 className="text-lg font-bold text-[#102A43] flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-[#16B8A6]" /> Web3 Off-Chain Attestation Pipeline
                 </h3>
-                <p className="text-sm text-slate-400 leading-relaxed">
+                <p className="text-sm text-[#52677A] leading-relaxed">
                   PharmaTrace-ES stores extensive IoT sensor readings in PostgreSQL while publishing cryptographic SHA-256
                   merkle roots directly to the EVM smart contract anchor. This guarantees verifiable authenticity without
                   chain congestion.
@@ -217,68 +218,70 @@ export default function DashboardPage() {
 
           {activeTab === 'drugs' && (
             <div className="space-y-6">
-              <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl">
-                <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
-                  <PlusCircle className="h-5 w-5 text-emerald-400" /> Register New Drug Batch
+              <div className="card bg-white border border-slate-200 shadow-sm rounded-2xl p-6">
+                <h3 className="text-base font-bold text-[#102A43] mb-4 flex items-center gap-2">
+                  <PlusCircle className="h-5 w-5 text-[#16B8A6]" /> Add Drug / Register Medicine
                 </h3>
                 <form onSubmit={handleCreateDrug} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
                     type="text"
-                    placeholder="Serial Number (e.g., SN-2026-001)"
+                    placeholder="Serial Number (e.g. SN-2026-001)"
                     value={newSerial}
                     onChange={(e) => setNewSerial(e.target.value)}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="input input-bordered w-full bg-white border-slate-300 rounded-xl px-4 py-2.5 text-sm text-[#102A43] focus:border-[#16B8A6]"
                   />
                   <input
                     type="text"
-                    placeholder="Drug Name (e.g., Amoxicillin 500mg)"
+                    placeholder="Drug Name (e.g. Amoxicillin 500mg)"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="input input-bordered w-full bg-white border-slate-300 rounded-xl px-4 py-2.5 text-sm text-[#102A43] focus:border-[#16B8A6]"
                   />
                   <input
                     type="text"
                     placeholder="Manufacturer"
                     value={newManufacturer}
                     onChange={(e) => setNewManufacturer(e.target.value)}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="input input-bordered w-full bg-white border-slate-300 rounded-xl px-4 py-2.5 text-sm text-[#102A43] focus:border-[#16B8A6]"
                   />
                   <input
                     type="text"
                     placeholder="Batch Number"
                     value={newBatch}
                     onChange={(e) => setNewBatch(e.target.value)}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="input input-bordered w-full bg-white border-slate-300 rounded-xl px-4 py-2.5 text-sm text-[#102A43] focus:border-[#16B8A6]"
                   />
                   <button
                     type="submit"
                     disabled={loading}
-                    className="sm:col-span-2 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-sm transition"
+                    className="btn bg-[#16B8A6] hover:bg-[#139485] text-white border-none sm:col-span-2 py-3 rounded-xl font-bold text-sm transition shadow-sm"
                   >
-                    {loading ? 'Registering...' : 'Register Batch'}
+                    {loading ? 'Registering...' : 'Register Medicine Batch'}
                   </button>
                 </form>
               </div>
 
               <div className="space-y-3">
-                <h4 className="text-sm font-bold text-slate-300">Registered Drugs</h4>
+                <h4 className="text-sm font-bold text-[#102A43]">Registered Drugs & Batches</h4>
                 <div className="grid grid-cols-1 gap-3">
                   {drugs.map((d) => (
                     <div
                       key={d.id}
                       onClick={() => setSelectedSerial(d.serialNumber)}
-                      className={`p-4 rounded-xl border cursor-pointer transition flex items-center justify-between ${
+                      className={`card bg-white p-4 rounded-xl border cursor-pointer transition flex flex-row items-center justify-between shadow-sm ${
                         selectedSerial === d.serialNumber
-                          ? 'bg-emerald-950/20 border-emerald-500/40'
-                          : 'bg-slate-900/40 border-slate-800 hover:border-slate-700'
+                          ? 'border-[#16B8A6] ring-1 ring-[#16B8A6]'
+                          : 'border-slate-200 hover:border-slate-300'
                       }`}
                     >
                       <div>
-                        <span className="text-xs font-mono text-emerald-400 block">{d.serialNumber}</span>
-                        <h5 className="font-bold text-white text-base">{d.name}</h5>
-                        <span className="text-xs text-slate-400">{d.manufacturer} • {d.batchNumber}</span>
+                        <span className="badge badge-sm bg-[#16B8A6]/10 text-[#16B8A6] border-none font-mono font-bold block mb-1">
+                          {d.serialNumber}
+                        </span>
+                        <h5 className="font-bold text-[#102A43] text-base">{d.name}</h5>
+                        <span className="text-xs text-[#52677A]">{d.manufacturer} - {d.batchNumber}</span>
                       </div>
-                      <ArrowRight className="h-5 w-5 text-slate-500" />
+                      <ArrowRight className="h-5 w-5 text-slate-400" />
                     </div>
                   ))}
                 </div>
@@ -288,16 +291,16 @@ export default function DashboardPage() {
 
           {activeTab === 'events' && (
             <div className="space-y-6">
-              <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl">
-                <h3 className="text-base font-bold text-white mb-4">Record Lifecycle Event & Sign</h3>
+              <div className="card bg-white border border-slate-200 shadow-sm rounded-2xl p-6">
+                <h3 className="text-base font-bold text-[#102A43] mb-4">Record Lifecycle Event & Digital Sign</h3>
                 <form onSubmit={handleCreateEvent} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="text-xs text-slate-400 block mb-1">Target Serial</label>
+                      <label className="text-xs text-[#52677A] font-semibold block mb-1">Target Serial</label>
                       <select
                         value={selectedSerial}
                         onChange={(e) => setSelectedSerial(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
+                        className="select select-bordered w-full bg-white border-slate-300 rounded-xl text-sm text-[#102A43]"
                       >
                         {drugs.map((d) => (
                           <option key={d.id} value={d.serialNumber}>
@@ -307,11 +310,11 @@ export default function DashboardPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs text-slate-400 block mb-1">Lifecycle Stage</label>
+                      <label className="text-xs text-[#52677A] font-semibold block mb-1">Lifecycle Stage</label>
                       <select
                         value={selectedEventType}
                         onChange={(e) => setSelectedEventType(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white"
+                        className="select select-bordered w-full bg-white border-slate-300 rounded-xl text-sm text-[#102A43]"
                       >
                         <option value="MANUFACTURED">MANUFACTURED</option>
                         <option value="QUALITY_CHECKED">QUALITY_CHECKED</option>
@@ -323,41 +326,42 @@ export default function DashboardPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs text-slate-400 block mb-1">Temperature (°C)</label>
+                      <label className="text-xs text-[#52677A] font-semibold block mb-1">Temperature (°C)</label>
                       <input
                         type="text"
                         value={temperature}
                         onChange={(e) => setTemperature(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono"
+                        className="input input-bordered w-full bg-white border-slate-300 rounded-xl text-sm text-[#102A43] font-mono"
                       />
                     </div>
                   </div>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-500/20"
+                    className="btn bg-[#16B8A6] hover:bg-[#139485] text-white border-none w-full py-3 rounded-xl font-bold text-sm transition shadow-sm"
                   >
                     {loading ? 'Validating Saga & Anchoring...' : 'Validate Saga & Anchor On-Chain'}
                   </button>
                 </form>
               </div>
 
-              {/* Event Timeline */}
               <div className="space-y-3">
-                <h4 className="text-sm font-bold text-slate-300">Custody Transition Event Log</h4>
+                <h4 className="text-sm font-bold text-[#102A43]">Timeline & Custody History</h4>
                 <div className="space-y-3">
                   {events.map((ev, idx) => (
-                    <div key={ev.id} className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl flex items-center justify-between">
+                    <div key={ev.id} className="card bg-white p-4 border border-slate-200 rounded-xl flex flex-row items-center justify-between shadow-sm">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-xs">
+                        <div className="h-9 w-9 rounded-xl bg-[#102A43] text-white flex items-center justify-center font-bold text-xs">
                           #{idx + 1}
                         </div>
                         <div>
-                          <span className="text-xs font-bold text-emerald-400 block">{ev.eventType}</span>
-                          <span className="text-xs font-mono text-slate-500">{ev.eventHash.slice(0, 24)}...</span>
+                          <span className="badge badge-sm bg-[#16B8A6] text-white border-none font-bold block mb-1">
+                            {ev.eventType}
+                          </span>
+                          <span className="text-xs font-mono text-[#52677A]">{ev.eventHash.slice(0, 28)}...</span>
                         </div>
                       </div>
-                      <div className="text-right text-xs text-slate-400 font-mono">
+                      <div className="text-right text-xs text-[#52677A] font-mono">
                         {new Date(ev.createdAt).toLocaleTimeString()}
                       </div>
                     </div>
@@ -368,23 +372,23 @@ export default function DashboardPage() {
           )}
 
           {activeTab === 'attestations' && (
-            <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl space-y-4">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Lock className="h-5 w-5 text-emerald-400" /> Smart Contract Anchors & Attestations
+            <div className="card bg-white border border-slate-200 shadow-sm rounded-2xl p-6 space-y-4">
+              <h3 className="text-base font-bold text-[#102A43] flex items-center gap-2">
+                <Lock className="h-5 w-5 text-[#16B8A6]" /> Hash & Ledger Information
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-[#52677A]">
                 Review immutable event hashes anchored to the Ethereum / EVM contract.
               </p>
               <div className="space-y-3">
                 {events.map((ev) => (
-                  <div key={ev.id} className="p-4 bg-slate-950 rounded-xl border border-slate-800 font-mono text-xs space-y-1">
-                    <div className="flex justify-between text-slate-300">
-                      <span>Event: <strong className="text-emerald-400">{ev.eventType}</strong></span>
-                      <span className="text-emerald-400 flex items-center gap-1">
-                        <CheckCircle className="h-3 w-3" /> Anchored
+                  <div key={ev.id} className="p-4 bg-[#F4F8FB] rounded-xl border border-slate-200 font-mono text-xs space-y-1">
+                    <div className="flex justify-between text-[#102A43]">
+                      <span>Event: <strong className="text-[#16B8A6]">{ev.eventType}</strong></span>
+                      <span className="text-[#16A36A] font-semibold flex items-center gap-1">
+                        <CheckCircle className="h-3.5 w-3.5" /> Anchored
                       </span>
                     </div>
-                    <div className="text-slate-500 truncate">Hash: {ev.eventHash}</div>
+                    <div className="text-[#52677A] truncate">Hash: {ev.eventHash}</div>
                   </div>
                 ))}
               </div>
@@ -392,16 +396,16 @@ export default function DashboardPage() {
           )}
 
           {activeTab === 'github' && (
-            <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl space-y-4">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <GitPullRequest className="h-5 w-5 text-emerald-400" /> GitHub Activity & Audit Claims
+            <div className="card bg-white border border-slate-200 shadow-sm rounded-2xl p-6 space-y-4">
+              <h3 className="text-base font-bold text-[#102A43] flex items-center gap-2">
+                <GitPullRequest className="h-5 w-5 text-[#16B8A6]" /> GitHub Activity & Audit Claims
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-[#52677A]">
                 Proof of authorship and verifiable code delivery tied to digital contributor signatures.
               </p>
-              <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl font-mono text-xs text-slate-400 space-y-2">
-                <div>Repository: <span className="text-emerald-400 font-bold">MirEashanZaman/pharma-trace</span></div>
-                <div>Status: <span className="text-emerald-400">Audited & Verified</span></div>
+              <div className="p-4 bg-[#F4F8FB] border border-slate-200 rounded-xl font-mono text-xs text-[#52677A] space-y-2">
+                <div>Repository: <span className="text-[#102A43] font-bold">MirEashanZaman/pharma-trace</span></div>
+                <div>Status: <span className="text-[#16A36A] font-bold">Audited & Verified</span></div>
               </div>
             </div>
           )}
