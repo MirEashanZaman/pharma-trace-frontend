@@ -203,6 +203,50 @@ export default function DashboardPage() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="card bg-white border border-slate-200 shadow-sm rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-[#52677A] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <Thermometer className="h-4 w-4 text-[#16B8A6]" /> Cold-Chain Temperature
+                    </span>
+                    <span className="text-xs font-bold font-mono text-[#16B8A6]">Optimal: 2°C - 8°C</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-black text-[#102A43]">4.2°C</span>
+                    <span className="badge badge-sm bg-[#16A36A]/10 text-[#16A36A] font-bold border-none">Normal</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                    <div className="bg-[#16B8A6] h-2.5 rounded-full" style={{ width: '42%' }}></div>
+                  </div>
+                  <div className="flex justify-between text-[11px] font-mono text-[#52677A]">
+                    <span>0°C Min</span>
+                    <span>Avg 4.5°C</span>
+                    <span>15°C Max</span>
+                  </div>
+                </div>
+
+                <div className="card bg-white border border-slate-200 shadow-sm rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-[#52677A] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <Droplets className="h-4 w-4 text-[#3ABFF8]" /> Storage Relative Humidity
+                    </span>
+                    <span className="text-xs font-bold font-mono text-[#3ABFF8]">Optimal: 35% - 60%</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-black text-[#102A43]">48%</span>
+                    <span className="badge badge-sm bg-[#16A36A]/10 text-[#16A36A] font-bold border-none">Stable</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                    <div className="bg-[#3ABFF8] h-2.5 rounded-full" style={{ width: '48%' }}></div>
+                  </div>
+                  <div className="flex justify-between text-[11px] font-mono text-[#52677A]">
+                    <span>20% Min</span>
+                    <span>Avg 46%</span>
+                    <span>80% Max</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="card bg-white border border-slate-200 shadow-sm rounded-2xl p-6 space-y-4">
                 <h3 className="text-lg font-bold text-[#102A43] flex items-center gap-2">
                   <Shield className="h-5 w-5 text-[#16B8A6]" /> Web3 Off-Chain Attestation Pipeline
