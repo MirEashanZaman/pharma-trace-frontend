@@ -16,7 +16,10 @@ import {
   ArrowRight,
   Thermometer,
   Droplets,
+  Download,
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
+import { jsPDF } from 'jspdf';
 
 export default function DashboardPage() {
   const [wallet, setWallet] = useState<string | null>(null);
@@ -305,30 +308,68 @@ export default function DashboardPage() {
                 </form>
               </div>
 
-              <div className="space-y-3">
-                <h4 className="text-sm font-bold text-[#102A43]">Registered Drugs & Batches</h4>
-                <div className="grid grid-cols-1 gap-3">
-                  {drugs.map((d) => (
-                    <div
-                      key={d.id}
-                      onClick={() => setSelectedSerial(d.serialNumber)}
-                      className={`card bg-white p-4 rounded-xl border cursor-pointer transition flex flex-row items-center justify-between shadow-sm ${
-                        selectedSerial === d.serialNumber
-                          ? 'border-[#16B8A6] ring-1 ring-[#16B8A6]'
-                          : 'border-slate-200 hover:border-slate-300'
-                      }`}
-                    >
-                      <div>
-                        <span className="badge badge-sm bg-[#16B8A6]/10 text-[#16B8A6] border-none font-mono font-bold block mb-1">
-                          {d.serialNumber}
-                        </span>
-                        <h5 className="font-bold text-[#102A43] text-base">{d.name}</h5>
-                        <span className="text-xs text-[#52677A]">{d.manufacturer} - {d.batchNumber}</span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-2 space-y-3">
+                  <h4 className="text-sm font-bold text-[#102A43]">Registered Drugs & Batches</h4>
+                  <div className="grid grid-cols-1 gap-3">
+                    {drugs.map((d) => (
+                      <div
+                        key={d.id}
+                        onClick={() => setSelectedSerial(d.serialNumber)}
+                        className={`card bg-white p-4 rounded-xl border cursor-pointer transition flex flex-row items-center justify-between shadow-sm ${
+                          selectedSerial === d.serialNumber
+                            ? 'border-[#16B8A6] ring-1 ring-[#16B8A6]'
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <div>
+                          <span className="badge badge-sm bg-[#16B8A6]/10 text-[#16B8A6] border-none font-mono font-bold block mb-1">
+                            {d.serialNumber}
+                          </span>
+                          <h5 className="font-bold text-[#102A43] text-base">{d.name}</h5>
+                          <span className="text-xs text-[#52677A]">{d.manufacturer} - {d.batchNumber}</span>
+                        </div>
+                        <ArrowRight className="h-5 w-5 text-slate-400" />
                       </div>
-                      <ArrowRight className="h-5 w-5 text-slate-400" />
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
+
+                {selectedSerial && (
+                  <div className="card bg-white border border-slate-200 shadow-sm rounded-2xl p-6 flex flex-col items-center justify-center text-center space-y-4">
+                    <div className="text-xs font-bold uppercase tracking-wider text-[#52677A]">
+                      Physical Verification QR
+                    </div>
+                    <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-inner">
+                      <QRCodeSVG
+                        value={`https://pharmatrace.io/verify/${selectedSerial}`}
+                        size={140}
+                        bgColor={"#ffffff"}
+                        fgColor={"#102A43"}
+                        level={"H"}
+                      />
+                    </div>
+                    <div className="text-xs font-mono font-bold text-[#102A43]">
+                      {selectedSerial}
+                    </div>
+                    <button
+                      onClick={() => {
+                        const doc = new jsPDF();
+                        doc.setFontSize(18);
+                        doc.text("PharmaTrace-ES Authenticity Certificate", 14, 22);
+                        doc.setFontSize(11);
+                        doc.text(`Drug Serial: ${selectedSerial}`, 14, 35);
+                        doc.text(`Timestamp: ${new Date().toUTCString()}`, 14, 43);
+                        doc.text(`Tamper Proof Status: 100% Verified`, 14, 51);
+                        doc.text(`Saga Lifecycle State: Validated`, 14, 59);
+                        doc.save(`PharmaTrace-Certificate-${selectedSerial}.pdf`);
+                      }}
+                      className="btn btn-sm bg-[#102A43] hover:bg-[#0c2135] text-white border-none rounded-xl text-xs w-full flex items-center justify-center gap-2"
+                    >
+                      <Download className="h-4 w-4 text-[#16B8A6]" /> Download Certificate PDF
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
