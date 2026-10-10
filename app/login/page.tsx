@@ -171,6 +171,7 @@ export default function LoginPage() {
                     onChange={(e) => setRole(e.target.value)}
                     className="select select-bordered w-full bg-white border-slate-300 rounded-xl text-xs text-[#102A43]"
                   >
+                    <option value="ADMIN">ADMIN</option>
                     <option value="MANUFACTURER">MANUFACTURER</option>
                     <option value="DISTRIBUTOR">DISTRIBUTOR</option>
                     <option value="PHARMACY">PHARMACY</option>
