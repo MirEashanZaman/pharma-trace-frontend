@@ -69,6 +69,9 @@ export const registerUser = async (data: any): Promise<AuthResponse> => {
   const res = await api.post('/auth/register', data);
   if (res.data.accessToken && typeof window !== 'undefined') {
     localStorage.setItem('pharma_access_token', res.data.accessToken);
+    if (res.data.user) {
+      localStorage.setItem('pharma_user', JSON.stringify(res.data.user));
+    }
   }
   return res.data;
 };
@@ -77,6 +80,9 @@ export const loginUser = async (data: any): Promise<AuthResponse> => {
   const res = await api.post('/auth/login', data);
   if (res.data.accessToken && typeof window !== 'undefined') {
     localStorage.setItem('pharma_access_token', res.data.accessToken);
+    if (res.data.user) {
+      localStorage.setItem('pharma_user', JSON.stringify(res.data.user));
+    }
   }
   return res.data;
 };
@@ -91,18 +97,39 @@ export const web3LoginUser = async (data: {
   const res = await api.post('/auth/web3-login', data);
   if (res.data.accessToken && typeof window !== 'undefined') {
     localStorage.setItem('pharma_access_token', res.data.accessToken);
+    if (res.data.user) {
+      localStorage.setItem('pharma_user', JSON.stringify(res.data.user));
+    }
   }
   return res.data;
 };
 
 export const fetchProfile = async (): Promise<UserProfile> => {
   const res = await api.get('/auth/profile');
+  if (res.data && typeof window !== 'undefined') {
+    localStorage.setItem('pharma_user', JSON.stringify(res.data));
+  }
   return res.data;
+};
+
+export const getStoredUser = (): UserProfile | null => {
+  if (typeof window !== 'undefined') {
+    const raw = localStorage.getItem('pharma_user');
+    if (raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (e) {
+        return null;
+      }
+    }
+  }
+  return null;
 };
 
 export const logoutUser = () => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('pharma_access_token');
+    localStorage.removeItem('pharma_user');
   }
 };
 
