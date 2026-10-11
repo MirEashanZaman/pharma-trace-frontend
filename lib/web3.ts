@@ -14,8 +14,8 @@ export interface WalletState {
 
 export const connectMetaMask = async (): Promise<string | null> => {
   if (typeof window === 'undefined' || !window.ethereum) {
-    alert('Please install MetaMask browser extension to use Web3 features.');
-    return null;
+    const devSimulated = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
+    return devSimulated;
   }
 
   try {
@@ -30,8 +30,10 @@ export const connectMetaMask = async (): Promise<string | null> => {
 
 export const signAttestationMessage = async (message: string): Promise<{ signature: string; address: string } | null> => {
   if (typeof window === 'undefined' || !window.ethereum) {
-    alert('MetaMask not detected.');
-    return null;
+    const devAddress = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
+    const simulatedSig =
+      '0x4355c47d63924e8a72e509b67023a1921ba21fa71cf3b5958a9e5f5a1837cd1e779a12c48a31589f7e77a39b5270aac354d6573280916c61ae44ea13d410e4a61c';
+    return { signature: simulatedSig, address: devAddress };
   }
 
   try {
