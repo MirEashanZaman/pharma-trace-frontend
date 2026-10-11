@@ -34,6 +34,7 @@ import {
   FileSearch,
   ShoppingCart,
   QrCode,
+  ShieldCheck,
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { QRCodeSVG } from 'qrcode.react';
