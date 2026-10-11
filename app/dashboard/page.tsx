@@ -223,38 +223,44 @@ export default function DashboardPage() {
                   : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
               }`}
             >
-              <Layers className="h-4 w-4" /> Drug Batches
+              <Layers className="h-4 w-4" /> {currentRole === 'CUSTOMER' ? 'Browse Medicines & QR' : 'Drug Batches'}
             </button>
-            <button
-              onClick={() => setActiveTab('events')}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-                activeTab === 'events'
-                  ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
-                  : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
-              }`}
-            >
-              <FileCheck2 className="h-4 w-4" /> Custody Chain & Saga
-            </button>
-            <button
-              onClick={() => setActiveTab('attestations')}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-                activeTab === 'attestations'
-                  ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
-                  : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
-              }`}
-            >
-              <Lock className="h-4 w-4" /> Smart Contract Anchors
-            </button>
-            <button
-              onClick={() => setActiveTab('github')}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-                activeTab === 'github'
-                  ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
-                  : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
-              }`}
-            >
-              <GitPullRequest className="h-4 w-4" /> GitHub & Audit Claims
-            </button>
+            {currentRole !== 'CUSTOMER' && (
+              <button
+                onClick={() => setActiveTab('events')}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                  activeTab === 'events'
+                    ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                    : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+                }`}
+              >
+                <FileCheck2 className="h-4 w-4" /> Custody Chain & Saga
+              </button>
+            )}
+            {(currentRole === 'ADMIN' || currentRole === 'REGULATOR') && (
+              <button
+                onClick={() => setActiveTab('attestations')}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                  activeTab === 'attestations'
+                    ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                    : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+                }`}
+              >
+                <Lock className="h-4 w-4" /> Smart Contract Anchors
+              </button>
+            )}
+            {(currentRole === 'ADMIN' || currentRole === 'REGULATOR') && (
+              <button
+                onClick={() => setActiveTab('github')}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                  activeTab === 'github'
+                    ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                    : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+                }`}
+              >
+                <GitPullRequest className="h-4 w-4" /> GitHub & Audit Claims
+              </button>
+            )}
           </div>
         </aside>
 
@@ -506,48 +512,50 @@ export default function DashboardPage() {
 
           {activeTab === 'drugs' && (
             <div className="space-y-6">
-              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6">
-                <h3 className="text-base font-bold text-[#F1F5F9] mb-4 flex items-center gap-2">
-                  <PlusCircle className="h-5 w-5 text-[#00D6B4]" /> Add Drug / Register Medicine
-                </h3>
-                <form onSubmit={handleCreateDrug} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <input
-                    type="text"
-                    placeholder="Enter your serial number"
-                    value={newSerial}
-                    onChange={(e) => setNewSerial(e.target.value)}
-                    className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Enter your drug name"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Enter your manufacturer"
-                    value={newManufacturer}
-                    onChange={(e) => setNewManufacturer(e.target.value)}
-                    className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Enter your batch number"
-                    value={newBatch}
-                    onChange={(e) => setNewBatch(e.target.value)}
-                    className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
-                  />
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none sm:col-span-2 py-3 rounded-xl font-bold text-sm transition shadow-sm"
-                  >
-                    {loading ? 'Registering...' : 'Register Medicine Batch'}
-                  </button>
-                </form>
-              </div>
+              {(currentRole === 'ADMIN' || currentRole === 'MANUFACTURER') && (
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6">
+                  <h3 className="text-base font-bold text-[#F1F5F9] mb-4 flex items-center gap-2">
+                    <PlusCircle className="h-5 w-5 text-[#00D6B4]" /> Add Drug / Register Medicine
+                  </h3>
+                  <form onSubmit={handleCreateDrug} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      placeholder="Enter your serial number"
+                      value={newSerial}
+                      onChange={(e) => setNewSerial(e.target.value)}
+                      className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Enter your drug name"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Enter your manufacturer"
+                      value={newManufacturer}
+                      onChange={(e) => setNewManufacturer(e.target.value)}
+                      className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Enter your batch number"
+                      value={newBatch}
+                      onChange={(e) => setNewBatch(e.target.value)}
+                      className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
+                    />
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none sm:col-span-2 py-3 rounded-xl font-bold text-sm transition shadow-sm"
+                    >
+                      {loading ? 'Registering...' : 'Register Medicine Batch'}
+                    </button>
+                  </form>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2 space-y-3">
