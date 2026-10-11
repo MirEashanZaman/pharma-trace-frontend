@@ -35,6 +35,7 @@ import {
   ShoppingCart,
   QrCode,
 } from 'lucide-react';
+import { io, Socket } from 'socket.io-client';
 import { QRCodeSVG } from 'qrcode.react';
 import { jsPDF } from 'jspdf';
 
@@ -56,9 +57,41 @@ export default function DashboardPage() {
   const [humidity, setHumidity] = useState('45');
   const [loading, setLoading] = useState(false);
 
+  const [liveTemp, setLiveTemp] = useState<number>(4.2);
+  const [liveHumidity, setLiveHumidity] = useState<number>(48);
+  const [wsConnected, setWsConnected] = useState<boolean>(false);
+  const [tempExcursion, setTempExcursion] = useState<boolean>(false);
+
   useEffect(() => {
     loadUser();
     loadDrugs();
+
+    const socketUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3500';
+    const socket: Socket = io(socketUrl, {
+      transports: ['websocket', 'polling'],
+    });
+
+    socket.on('connect', () => {
+      setWsConnected(true);
+    });
+
+    socket.on('disconnect', () => {
+      setWsConnected(false);
+    });
+
+    socket.on('telemetryUpdate', (data: { temperature: number; humidity: number; isExcursion?: boolean }) => {
+      if (typeof data.temperature === 'number') {
+        setLiveTemp(data.temperature);
+        setTempExcursion(Boolean(data.isExcursion || data.temperature < 2 || data.temperature > 8));
+      }
+      if (typeof data.humidity === 'number') {
+        setLiveHumidity(data.humidity);
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const loadUser = async () => {
@@ -454,23 +487,35 @@ export default function DashboardPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
+                <div className={`card bg-[#243247] border shadow-sm rounded-2xl p-5 space-y-3 transition-colors ${
+                  tempExcursion ? 'border-[#F87171] ring-1 ring-[#F87171]' : 'border-[#304257]'
+                }`}>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-[#94A3B8] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      <Thermometer className="h-4 w-4 text-[#00D6B4]" /> Cold-Chain Temperature
+                      <Thermometer className={`h-4 w-4 ${tempExcursion ? 'text-[#F87171]' : 'text-[#00D6B4]'}`} /> Cold-Chain Temperature
                     </span>
-                    <span className="text-xs font-bold font-mono text-[#00D6B4]">Optimal: 2°C - 8°C</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-block h-2 w-2 rounded-full ${wsConnected ? 'bg-[#A3E635] animate-pulse' : 'bg-[#94A3B8]'}`} title={wsConnected ? 'WebSocket Live' : 'Disconnected'} />
+                      <span className="text-xs font-bold font-mono text-[#00D6B4]">Optimal: 2°C - 8°C</span>
+                    </div>
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-[#F1F5F9]">4.2°C</span>
-                    <span className="badge badge-sm bg-[#A3E635]/20 text-[#A3E635] font-bold border border-[#A3E635]/30">Normal</span>
+                    <span className="text-3xl font-black text-[#F1F5F9]">{liveTemp.toFixed(1)}°C</span>
+                    {tempExcursion ? (
+                      <span className="badge badge-sm bg-[#F87171]/20 text-[#F87171] font-bold border border-[#F87171]/40">Excursion Alert</span>
+                    ) : (
+                      <span className="badge badge-sm bg-[#A3E635]/20 text-[#A3E635] font-bold border border-[#A3E635]/30">Normal</span>
+                    )}
                   </div>
                   <div className="w-full bg-[#172638] rounded-full h-2.5 overflow-hidden border border-[#304257]">
-                    <div className="bg-[#00D6B4] h-2.5 rounded-full" style={{ width: '42%' }}></div>
+                    <div
+                      className={`h-2.5 rounded-full transition-all duration-500 ${tempExcursion ? 'bg-[#F87171]' : 'bg-[#00D6B4]'}`}
+                      style={{ width: `${Math.min(Math.max((liveTemp / 15) * 100, 5), 100)}%` }}
+                    />
                   </div>
                   <div className="flex justify-between text-[11px] font-mono text-[#94A3B8]">
                     <span>0°C Min</span>
-                    <span>Avg 4.5°C</span>
+                    <span>Live Telemetry</span>
                     <span>15°C Max</span>
                   </div>
                 </div>
@@ -480,18 +525,24 @@ export default function DashboardPage() {
                     <span className="text-xs text-[#94A3B8] font-bold uppercase tracking-wider flex items-center gap-1.5">
                       <Droplets className="h-4 w-4 text-[#00D6B4]" /> Storage Relative Humidity
                     </span>
-                    <span className="text-xs font-bold font-mono text-[#00D6B4]">Optimal: 35% - 60%</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-block h-2 w-2 rounded-full ${wsConnected ? 'bg-[#A3E635] animate-pulse' : 'bg-[#94A3B8]'}`} title={wsConnected ? 'WebSocket Live' : 'Disconnected'} />
+                      <span className="text-xs font-bold font-mono text-[#00D6B4]">Optimal: 35% - 60%</span>
+                    </div>
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-[#F1F5F9]">48%</span>
+                    <span className="text-3xl font-black text-[#F1F5F9]">{liveHumidity.toFixed(0)}%</span>
                     <span className="badge badge-sm bg-[#A3E635]/20 text-[#A3E635] font-bold border border-[#A3E635]/30">Stable</span>
                   </div>
                   <div className="w-full bg-[#172638] rounded-full h-2.5 overflow-hidden border border-[#304257]">
-                    <div className="bg-[#00D6B4] h-2.5 rounded-full" style={{ width: '48%' }}></div>
+                    <div
+                      className="bg-[#00D6B4] h-2.5 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(Math.max(liveHumidity, 5), 100)}%` }}
+                    />
                   </div>
                   <div className="flex justify-between text-[11px] font-mono text-[#94A3B8]">
                     <span>20% Min</span>
-                    <span>Avg 46%</span>
+                    <span>Live Telemetry</span>
                     <span>80% Max</span>
                   </div>
                 </div>
