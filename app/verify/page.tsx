@@ -177,6 +177,23 @@ export default function VerifyPage() {
                     </span>
                   </div>
                 </div>
+
+                {result.explorerUrl && (
+                  <div className="p-3.5 bg-[#172638] rounded-xl border border-[#304257] flex items-center justify-between col-span-1 sm:col-span-2">
+                    <div className="flex items-center gap-2">
+                      <LinkIcon className="h-4 w-4 text-[#00D6B4]" />
+                      <span className="text-[#94A3B8] text-[11px] font-sans">Etherscan / Polygonscan Audit:</span>
+                    </div>
+                    <a
+                      href={result.explorerUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#00D6B4] hover:underline text-xs font-mono font-bold"
+                    >
+                      View on Block Explorer &rarr;
+                    </a>
+                  </div>
+                )}
               </div>
             )}
           </div>
