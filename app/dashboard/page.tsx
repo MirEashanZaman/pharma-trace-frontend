@@ -3,7 +3,17 @@
 import React, { useEffect, useState } from 'react';
 import { Navigation } from '@/components/navigation';
 import { connectMetaMask, signAttestationMessage } from '@/lib/web3';
-import { fetchDrugs, fetchDrugEvents, createDrug, createDrugEvent, Drug, DrugEvent } from '@/lib/api';
+import {
+  fetchDrugs,
+  fetchDrugEvents,
+  createDrug,
+  createDrugEvent,
+  getStoredUser,
+  fetchProfile,
+  Drug,
+  DrugEvent,
+  UserProfile,
+} from '@/lib/api';
 import {
   Layers,
   Activity,
@@ -17,12 +27,20 @@ import {
   Thermometer,
   Droplets,
   Download,
+  Building,
+  UserCheck,
+  Truck,
+  Store,
+  FileSearch,
+  ShoppingCart,
+  QrCode,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { jsPDF } from 'jspdf';
 
 export default function DashboardPage() {
   const [wallet, setWallet] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'attestations' | 'github'>('overview');
 
   const [drugs, setDrugs] = useState<Drug[]>([]);
@@ -39,14 +57,51 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    loadUser();
     loadDrugs();
   }, []);
+
+  const loadUser = async () => {
+    const cached = getStoredUser();
+    if (cached) {
+      setCurrentUser(cached);
+      setDefaultEventForRole(cached.role);
+    }
+    try {
+      const profile = await fetchProfile();
+      setCurrentUser(profile);
+      setDefaultEventForRole(profile.role);
+    } catch (e) {
+      // using cached or fallback
+    }
+  };
+
+  const setDefaultEventForRole = (role: string) => {
+    if (role === 'MANUFACTURER') setSelectedEventType('MANUFACTURED');
+    else if (role === 'DISTRIBUTOR') setSelectedEventType('SHIPPED');
+    else if (role === 'PHARMACY') setSelectedEventType('RECEIVED');
+    else if (role === 'REGULATOR') setSelectedEventType('QUALITY_CHECKED');
+    else if (role === 'CUSTOMER') setSelectedEventType('TEMPERATURE_MONITORED');
+  };
 
   useEffect(() => {
     if (selectedSerial) {
       loadEvents(selectedSerial);
     }
   }, [selectedSerial]);
+
+  const currentRole = currentUser?.role || 'ADMIN';
+
+  const roleEventOptions: Record<string, string[]> = {
+    ADMIN: ['MANUFACTURED', 'QUALITY_CHECKED', 'PACKAGED', 'SHIPPED', 'RECEIVED', 'DISTRIBUTED', 'TEMPERATURE_MONITORED'],
+    MANUFACTURER: ['MANUFACTURED', 'QUALITY_CHECKED', 'PACKAGED', 'SHIPPED', 'TEMPERATURE_MONITORED'],
+    DISTRIBUTOR: ['RECEIVED', 'DISTRIBUTED', 'SHIPPED', 'TEMPERATURE_MONITORED'],
+    PHARMACY: ['RECEIVED', 'TEMPERATURE_MONITORED'],
+    REGULATOR: ['QUALITY_CHECKED', 'TEMPERATURE_MONITORED'],
+    CUSTOMER: ['TEMPERATURE_MONITORED'],
+  };
+
+  const availableEvents = roleEventOptions[currentRole] || roleEventOptions.ADMIN;
 
   const loadDrugs = async () => {
     try {
@@ -132,65 +187,251 @@ export default function DashboardPage() {
       <Navigation walletAddress={wallet} onConnectWallet={async () => setWallet(await connectMetaMask())} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 flex flex-col md:flex-row gap-8">
-        <aside className="w-full md:w-64 space-y-1.5 bg-[#243247] p-4 rounded-2xl border border-[#304257] text-[#F1F5F9] shadow-sm self-start">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] px-3 py-2">
-            Navigation Menu
+        <aside className="w-full md:w-64 space-y-3 bg-[#243247] p-4 rounded-2xl border border-[#304257] text-[#F1F5F9] shadow-sm self-start">
+          <div className="p-3 bg-[#172638] rounded-xl border border-[#304257] space-y-1">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Active Role Session</div>
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-xs text-[#F1F5F9]">{currentUser?.fullName || 'Active Session'}</span>
+              <span className="badge badge-sm bg-[#00D6B4] text-[#0B1220] font-black border-none text-[10px]">
+                {currentRole}
+              </span>
+            </div>
+            {currentUser?.organization && (
+              <div className="text-[11px] text-[#94A3B8] truncate">{currentUser.organization}</div>
+            )}
           </div>
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-              activeTab === 'overview'
-                ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
-                : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
-            }`}
-          >
-            <Activity className="h-4 w-4" /> Overview & Metrics
-          </button>
-          <button
-            onClick={() => setActiveTab('drugs')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-              activeTab === 'drugs'
-                ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
-                : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
-            }`}
-          >
-            <Layers className="h-4 w-4" /> Drug Batches
-          </button>
-          <button
-            onClick={() => setActiveTab('events')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-              activeTab === 'events'
-                ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
-                : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
-            }`}
-          >
-            <FileCheck2 className="h-4 w-4" /> Custody Chain & Saga
-          </button>
-          <button
-            onClick={() => setActiveTab('attestations')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-              activeTab === 'attestations'
-                ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
-                : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
-            }`}
-          >
-            <Lock className="h-4 w-4" /> Smart Contract Anchors
-          </button>
-          <button
-            onClick={() => setActiveTab('github')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-              activeTab === 'github'
-                ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
-                : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
-            }`}
-          >
-            <GitPullRequest className="h-4 w-4" /> GitHub & Audit Claims
-          </button>
+
+          <div className="space-y-1">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] px-3 py-1">
+              Navigation Menu
+            </div>
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                activeTab === 'overview'
+                  ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                  : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+              }`}
+            >
+              <Activity className="h-4 w-4" /> Overview & Metrics
+            </button>
+            <button
+              onClick={() => setActiveTab('drugs')}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                activeTab === 'drugs'
+                  ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                  : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+              }`}
+            >
+              <Layers className="h-4 w-4" /> Drug Batches
+            </button>
+            <button
+              onClick={() => setActiveTab('events')}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                activeTab === 'events'
+                  ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                  : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+              }`}
+            >
+              <FileCheck2 className="h-4 w-4" /> Custody Chain & Saga
+            </button>
+            <button
+              onClick={() => setActiveTab('attestations')}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                activeTab === 'attestations'
+                  ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                  : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+              }`}
+            >
+              <Lock className="h-4 w-4" /> Smart Contract Anchors
+            </button>
+            <button
+              onClick={() => setActiveTab('github')}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                activeTab === 'github'
+                  ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                  : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+              }`}
+            >
+              <GitPullRequest className="h-4 w-4" /> GitHub & Audit Claims
+            </button>
+          </div>
         </aside>
 
         <main className="flex-1 space-y-6">
           {activeTab === 'overview' && (
             <div className="space-y-6">
+              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <span className="text-xs text-[#00D6B4] font-bold uppercase tracking-wider">Role-Specific Workspace</span>
+                    <h2 className="text-xl font-black text-[#F1F5F9] mt-0.5">
+                      {currentRole === 'MANUFACTURER' && 'Manufacturer Production Desk'}
+                      {currentRole === 'DISTRIBUTOR' && 'Distributor Transit & Logistics Hub'}
+                      {currentRole === 'PHARMACY' && 'Pharmacy Dispensing & Receiving Portal'}
+                      {currentRole === 'REGULATOR' && 'Regulatory Compliance & Quality Audit'}
+                      {currentRole === 'CUSTOMER' && 'Patient & Consumer Medicine Verification'}
+                      {currentRole === 'ADMIN' && 'System Administrator & Governance Console'}
+                    </h2>
+                  </div>
+                  <span className="badge badge-lg bg-[#00D6B4]/15 border border-[#00D6B4] text-[#00D6B4] font-bold">
+                    {currentRole}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                  {currentRole === 'MANUFACTURER' && (
+                    <>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Building className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Permission</span>
+                        <strong className="text-[#F1F5F9]">Register Batches</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <CheckCircle className="h-4 w-4 text-[#A3E635] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Lifecycle Stage</span>
+                        <strong className="text-[#F1F5F9]">MANUFACTURED</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Layers className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Packaging</span>
+                        <strong className="text-[#F1F5F9]">PACKAGED</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Truck className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Dispatch</span>
+                        <strong className="text-[#F1F5F9]">SHIPPED</strong>
+                      </div>
+                    </>
+                  )}
+
+                  {currentRole === 'DISTRIBUTOR' && (
+                    <>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Truck className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Inbound Transit</span>
+                        <strong className="text-[#F1F5F9]">RECEIVE BATCH</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Thermometer className="h-4 w-4 text-[#A3E635] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Cold-Chain</span>
+                        <strong className="text-[#F1F5F9]">IoT Telemetry</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Layers className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Handoff</span>
+                        <strong className="text-[#F1F5F9]">DISTRIBUTED</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Truck className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Outbound Transit</span>
+                        <strong className="text-[#F1F5F9]">SHIP TO PHARMACY</strong>
+                      </div>
+                    </>
+                  )}
+
+                  {currentRole === 'PHARMACY' && (
+                    <>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Store className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Inbound Check</span>
+                        <strong className="text-[#F1F5F9]">RECEIVE FROM DISTRIBUTOR</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <QrCode className="h-4 w-4 text-[#A3E635] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Verification</span>
+                        <strong className="text-[#F1F5F9]">Scan Package QR</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Thermometer className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Storage Status</span>
+                        <strong className="text-[#F1F5F9]">2°C - 8°C Monitored</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <ShoppingCart className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Dispensing</span>
+                        <strong className="text-[#F1F5F9]">Dispense to Patient</strong>
+                      </div>
+                    </>
+                  )}
+
+                  {currentRole === 'REGULATOR' && (
+                    <>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <FileSearch className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Inspection</span>
+                        <strong className="text-[#F1F5F9]">Audit All Batches</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <CheckCircle className="h-4 w-4 text-[#A3E635] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Certification</span>
+                        <strong className="text-[#F1F5F9]">QUALITY_CHECKED</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Lock className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Audit Ledger</span>
+                        <strong className="text-[#F1F5F9]">Verify Merkle Roots</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Shield className="h-4 w-4 text-[#A3E635] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Compliance</span>
+                        <strong className="text-[#F1F5F9]">Zero Violations</strong>
+                      </div>
+                    </>
+                  )}
+
+                  {currentRole === 'CUSTOMER' && (
+                    <>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <QrCode className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Authentication</span>
+                        <strong className="text-[#F1F5F9]">Scan Serial QR</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Shield className="h-4 w-4 text-[#A3E635] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Authenticity Check</span>
+                        <strong className="text-[#F1F5F9]">100% Anti-Counterfeit</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Thermometer className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Cold-Chain Trace</span>
+                        <strong className="text-[#F1F5F9]">View Temperature Log</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Download className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Verification Proof</span>
+                        <strong className="text-[#F1F5F9]">Download Certificate</strong>
+                      </div>
+                    </>
+                  )}
+
+                  {currentRole === 'ADMIN' && (
+                    <>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <UserCheck className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Governance</span>
+                        <strong className="text-[#F1F5F9]">Full RBAC Superuser</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Building className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Management</span>
+                        <strong className="text-[#F1F5F9]">Register Medicine Batches</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <FileCheck2 className="h-4 w-4 text-[#A3E635] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Saga State</span>
+                        <strong className="text-[#F1F5F9]">All Lifecycle Events</strong>
+                      </div>
+                      <div className="p-3 bg-[#172638] rounded-xl border border-[#304257]">
+                        <Lock className="h-4 w-4 text-[#00D6B4] mb-1" />
+                        <span className="text-[#94A3B8] block text-[10px]">Contract Anchor</span>
+                        <strong className="text-[#F1F5F9]">EVM Smart Contracts</strong>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5">
                   <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Registered Batches</span>
@@ -395,19 +636,20 @@ export default function DashboardPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Lifecycle Stage</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-xs text-[#94A3B8] font-semibold block">Lifecycle Stage</label>
+                        <span className="text-[10px] text-[#00D6B4] font-mono">Role: {currentRole}</span>
+                      </div>
                       <select
                         value={selectedEventType}
                         onChange={(e) => setSelectedEventType(e.target.value)}
                         className="select select-bordered w-full bg-[#172638] border-[#304257] rounded-xl text-sm text-[#F1F5F9]"
                       >
-                        <option value="MANUFACTURED">MANUFACTURED</option>
-                        <option value="QUALITY_CHECKED">QUALITY_CHECKED</option>
-                        <option value="PACKAGED">PACKAGED</option>
-                        <option value="SHIPPED">SHIPPED</option>
-                        <option value="RECEIVED">RECEIVED</option>
-                        <option value="DISTRIBUTED">DISTRIBUTED</option>
-                        <option value="TEMPERATURE_MONITORED">TEMPERATURE_MONITORED</option>
+                        {availableEvents.map((evt) => (
+                          <option key={evt} value={evt}>
+                            {evt}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     <div>
