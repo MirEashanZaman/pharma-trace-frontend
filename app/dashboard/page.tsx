@@ -55,6 +55,8 @@ export default function DashboardPage() {
   const [selectedEventType, setSelectedEventType] = useState('MANUFACTURED');
   const [temperature, setTemperature] = useState('22.5');
   const [humidity, setHumidity] = useState('45');
+  const [doctorSig, setDoctorSig] = useState('0xaa719b2239c81b9e0f31481f72895f40398bbad5106180a520f9c2d1b089c25f448c9bf0ad213897b6f3708bb8b067a909673d3ba45e1281e05d0e3a6774c8391b');
+  const [pharmacistSig, setPharmacistSig] = useState('0xbb829a1348c92a8e1e42592a83916a51409cca62107291b631a0d3e2c190d36a559da0e1be324908c7a4819cc9a178b010784e4ca56f2392f16e1f4b7885d9401c');
   const [loading, setLoading] = useState(false);
 
   const [liveTemp, setLiveTemp] = useState<number>(4.2);
@@ -126,10 +128,10 @@ export default function DashboardPage() {
   const currentRole = currentUser?.role || 'ADMIN';
 
   const roleEventOptions: Record<string, string[]> = {
-    ADMIN: ['MANUFACTURED', 'QUALITY_CHECKED', 'PACKAGED', 'SHIPPED', 'RECEIVED', 'DISTRIBUTED', 'TEMPERATURE_MONITORED'],
+    ADMIN: ['MANUFACTURED', 'QUALITY_CHECKED', 'PACKAGED', 'SHIPPED', 'RECEIVED', 'DISTRIBUTED', 'SOLD', 'TEMPERATURE_MONITORED'],
     MANUFACTURER: ['MANUFACTURED', 'QUALITY_CHECKED', 'PACKAGED', 'SHIPPED', 'TEMPERATURE_MONITORED'],
     DISTRIBUTOR: ['RECEIVED', 'DISTRIBUTED', 'SHIPPED', 'TEMPERATURE_MONITORED'],
-    PHARMACY: ['RECEIVED', 'TEMPERATURE_MONITORED'],
+    PHARMACY: ['RECEIVED', 'SOLD', 'TEMPERATURE_MONITORED'],
     REGULATOR: ['QUALITY_CHECKED', 'TEMPERATURE_MONITORED'],
     CUSTOMER: ['TEMPERATURE_MONITORED'],
   };
@@ -205,6 +207,12 @@ export default function DashboardPage() {
           location: 'Cold-Chain Warehouse A',
           signerAddress: wallet || '0x0000000000000000000000000000000000000000',
           signature,
+          ...(selectedEventType === 'SOLD'
+            ? {
+                doctorSignature: doctorSig,
+                pharmacistSignature: pharmacistSig || signature,
+              }
+            : {}),
         },
       });
       await loadEvents(selectedSerial);
@@ -721,6 +729,46 @@ export default function DashboardPage() {
                       />
                     </div>
                   </div>
+
+                  {selectedEventType === 'SOLD' && (
+                    <div className="p-4 rounded-xl bg-[#172638] border border-[#00D6B4]/30 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#00D6B4] uppercase tracking-wider flex items-center gap-1.5">
+                          <ShieldCheck className="h-4 w-4" /> Dual Multi-Signature Dispensing Requirement
+                        </span>
+                        <span className="badge badge-xs bg-[#00D6B4]/20 text-[#00D6B4] border-none font-mono">2-of-2 Required</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[11px] text-[#94A3B8] font-semibold block mb-1">
+                            Doctor Prescription Signature (Hex)
+                          </label>
+                          <input
+                            type="text"
+                            value={doctorSig}
+                            onChange={(e) => setDoctorSig(e.target.value)}
+                            placeholder="0x..."
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] font-mono"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] text-[#94A3B8] font-semibold block mb-1">
+                            Pharmacist Approval Signature (Hex)
+                          </label>
+                          <input
+                            type="text"
+                            value={pharmacistSig}
+                            onChange={(e) => setPharmacistSig(e.target.value)}
+                            placeholder="0x..."
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] font-mono"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     disabled={loading}
