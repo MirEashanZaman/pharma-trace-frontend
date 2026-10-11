@@ -2,23 +2,23 @@
 
 import React, { useState } from 'react';
 import { verifyAttestation, AttestationVerification } from '@/lib/api';
-import { Search, ShieldAlert, CheckCircle2, Clock, User, Link as LinkIcon, Box, AlertTriangle } from 'lucide-react';
+import { Search, ShieldAlert, CheckCircle2, Clock, User, Link as LinkIcon, Box, AlertTriangle, Camera } from 'lucide-react';
 import { Navigation } from '@/components/navigation';
 import { connectMetaMask } from '@/lib/web3';
+import { CameraQrScanner } from '@/components/qr-scanner';
 
 export default function VerifyPage() {
   const [hashInput, setHashInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AttestationVerification | null>(null);
   const [wallet, setWallet] = useState<string | null>(null);
+  const [showScanner, setShowScanner] = useState(false);
 
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!hashInput.trim()) return;
-
+  const performVerification = async (targetHash: string) => {
+    if (!targetHash.trim()) return;
     setLoading(true);
     try {
-      const data = await verifyAttestation(hashInput.trim());
+      const data = await verifyAttestation(targetHash.trim());
       setResult(data);
     } catch (err) {
       console.error(err);
@@ -35,6 +35,21 @@ export default function VerifyPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await performVerification(hashInput);
+  };
+
+  const handleScanSuccess = async (decodedText: string) => {
+    setShowScanner(false);
+    let extracted = decodedText;
+    if (decodedText.includes('/verify/')) {
+      extracted = decodedText.split('/verify/')[1] || decodedText;
+    }
+    setHashInput(extracted);
+    await performVerification(extracted);
   };
 
   return (
@@ -54,23 +69,40 @@ export default function VerifyPage() {
           </p>
         </div>
 
-        <form onSubmit={handleVerify} className="relative mb-10">
-          <input
-            type="text"
-            value={hashInput}
-            onChange={(e) => setHashInput(e.target.value)}
-            placeholder="Enter your hash or attestation key (0x...)"
-            className="input input-bordered w-full bg-[#243247] border-[#304257] rounded-xl px-5 py-4 pl-12 text-sm text-[#F1F5F9] font-mono shadow-sm focus:border-[#00D6B4] focus:outline-none"
-          />
-          <Search className="absolute left-4 top-4 h-5 w-5 text-[#94A3B8]" />
+        <div className="flex flex-col sm:flex-row gap-3 mb-10">
+          <form onSubmit={handleVerify} className="relative flex-1">
+            <input
+              type="text"
+              value={hashInput}
+              onChange={(e) => setHashInput(e.target.value)}
+              placeholder="Enter your hash or attestation key (0x...)"
+              className="input input-bordered w-full bg-[#243247] border-[#304257] rounded-xl px-5 py-4 pl-12 text-sm text-[#F1F5F9] font-mono shadow-sm focus:border-[#00D6B4] focus:outline-none"
+            />
+            <Search className="absolute left-4 top-4 h-5 w-5 text-[#94A3B8]" />
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-lg absolute right-2.5 top-2.5 px-5 font-bold text-xs tracking-wider"
+            >
+              {loading ? 'Verifying...' : 'Verify Hash'}
+            </button>
+          </form>
+
           <button
-            type="submit"
-            disabled={loading}
-            className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-lg absolute right-2.5 top-2.5 px-5 font-bold text-xs tracking-wider"
+            type="button"
+            onClick={() => setShowScanner(true)}
+            className="btn bg-[#172638] hover:bg-[#243247] text-[#00D6B4] border border-[#304257] hover:border-[#00D6B4] rounded-xl px-5 py-3 font-bold text-xs tracking-wider flex items-center justify-center gap-2 shadow-sm shrink-0"
           >
-            {loading ? 'Verifying...' : 'Verify Hash'}
+            <Camera className="h-4 w-4" /> Scan Camera QR
           </button>
-        </form>
+        </div>
+
+        {showScanner && (
+          <CameraQrScanner
+            onScanSuccess={handleScanSuccess}
+            onClose={() => setShowScanner(false)}
+          />
+        )}
 
         {result && (
           <div
