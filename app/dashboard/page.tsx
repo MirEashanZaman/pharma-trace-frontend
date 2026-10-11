@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Navigation } from '@/components/navigation';
+import dynamic from 'next/dynamic';
 import { connectMetaMask, signAttestationMessage } from '@/lib/web3';
 import {
   fetchDrugs,
@@ -35,15 +36,27 @@ import {
   ShoppingCart,
   QrCode,
   ShieldCheck,
+  MapPin,
+  Navigation2,
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { QRCodeSVG } from 'qrcode.react';
 import { jsPDF } from 'jspdf';
 
+const TransitMap = dynamic(() => import('@/components/transit-map'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[480px] w-full rounded-2xl bg-[#0B1220] border border-[#304257] flex flex-col items-center justify-center text-slate-400 gap-3">
+      <div className="loading loading-spinner text-[#00D6B4] loading-lg"></div>
+      <span className="text-xs font-mono tracking-wider uppercase text-slate-400">Loading Live Cartography...</span>
+    </div>
+  ),
+});
+
 export default function DashboardPage() {
   const [wallet, setWallet] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'attestations' | 'github'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'transit-map' | 'attestations' | 'github'>('overview');
 
   const [drugs, setDrugs] = useState<Drug[]>([]);
   const [selectedSerial, setSelectedSerial] = useState<string>('');
@@ -279,6 +292,16 @@ export default function DashboardPage() {
                 <FileCheck2 className="h-4 w-4" /> Custody Chain & Saga
               </button>
             )}
+            <button
+              onClick={() => setActiveTab('transit-map')}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                activeTab === 'transit-map'
+                  ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                  : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+              }`}
+            >
+              <Navigation2 className="h-4 w-4" /> Live Fleet & Route Map
+            </button>
             {(currentRole === 'ADMIN' || currentRole === 'REGULATOR') && (
               <button
                 onClick={() => setActiveTab('attestations')}
@@ -558,6 +581,25 @@ export default function DashboardPage() {
               </div>
 
               <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                    <Navigation2 className="h-5 w-5 text-[#00D6B4]" /> Live Uber-Style Fleet Transit
+                  </h3>
+                  <button
+                    onClick={() => setActiveTab('transit-map')}
+                    className="btn btn-xs bg-[#00D6B4]/15 hover:bg-[#00D6B4]/25 text-[#00D6B4] border border-[#00D6B4]/30 rounded-lg font-bold"
+                  >
+                    View Fullscreen Route & Waypoints &rarr;
+                  </button>
+                </div>
+                <TransitMap
+                  serialNumber={selectedSerial || (drugs[0]?.serialNumber ?? 'RX-994821')}
+                  currentTemp={liveTemp}
+                  isExcursion={tempExcursion}
+                />
+              </div>
+
+              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
                 <h3 className="text-lg font-bold text-[#F1F5F9] flex items-center gap-2">
                   <Shield className="h-5 w-5 text-[#00D6B4]" /> Web3 Off-Chain Attestation Pipeline
                 </h3>
@@ -802,6 +844,34 @@ export default function DashboardPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'transit-map' && (
+            <div className="space-y-6">
+              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-[#F1F5F9] flex items-center gap-2">
+                      <Navigation2 className="h-5 w-5 text-[#00D6B4]" /> Uber-Style Live Fleet & Route Tracking
+                    </h3>
+                    <p className="text-xs text-[#94A3B8]">
+                      Real-time IoT telemetry, dark-mode cartography, and live GPS waypoints across the pharmaceutical cold-chain corridor.
+                    </p>
+                  </div>
+                  {selectedSerial && (
+                    <span className="badge bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-mono font-bold text-xs">
+                      Tracking: {selectedSerial}
+                    </span>
+                  )}
+                </div>
+
+                <TransitMap
+                  serialNumber={selectedSerial || (drugs[0]?.serialNumber ?? 'RX-994821')}
+                  currentTemp={liveTemp}
+                  isExcursion={tempExcursion}
+                />
               </div>
             </div>
           )}
