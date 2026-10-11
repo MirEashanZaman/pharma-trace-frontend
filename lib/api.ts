@@ -63,6 +63,8 @@ export interface AttestationVerification {
   timestamp: number;
   metadataUri: string;
   onChain: boolean;
+  transactionHash?: string;
+  explorerUrl?: string;
 }
 
 
