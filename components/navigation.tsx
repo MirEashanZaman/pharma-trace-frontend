@@ -1,16 +1,56 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Layers, Search, CheckCircle2, LogIn } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ShieldCheck, Layers, Search, CheckCircle2, LogIn, LogOut, User } from 'lucide-react';
+import { getStoredUser, logoutUser, UserProfile } from '@/lib/api';
 
 export function Navigation({
   walletAddress,
   onConnectWallet,
+  currentUser: propUser,
 }: {
-  walletAddress: string | null;
-  onConnectWallet: () => void;
+  walletAddress?: string | null;
+  onConnectWallet?: () => void;
+  currentUser?: UserProfile | null;
 }) {
+  const router = useRouter();
+  const [user, setUser] = useState<UserProfile | null>(propUser || null);
+
+  useEffect(() => {
+    if (propUser !== undefined) {
+      setUser(propUser);
+    } else {
+      setUser(getStoredUser());
+    }
+  }, [propUser]);
+
+  const handleLogout = () => {
+    logoutUser();
+    setUser(null);
+    router.push('/login');
+  };
+
+  const getRoleBadgeColor = (role?: string) => {
+    switch (role) {
+      case 'ADMIN':
+        return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+      case 'MANUFACTURER':
+        return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+      case 'DISTRIBUTOR':
+        return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+      case 'PHARMACY':
+        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+      case 'REGULATOR':
+        return 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+      default:
+        return 'bg-[#00D6B4]/20 text-[#00D6B4] border-[#00D6B4]/30';
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-50 bg-[#0B1220] border-b border-[#304257] text-[#F1F5F9] shadow-sm">
+    <header className="sticky top-0 z-50 bg-[#0B1220]/95 backdrop-blur-md border-b border-[#304257] text-[#F1F5F9] shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="h-10 w-10 rounded-xl bg-[#00D6B4] flex items-center justify-center text-[#0B1220] font-black shadow-sm">
@@ -24,30 +64,58 @@ export function Navigation({
         </div>
 
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-[#94A3B8]">
-          <Link href="/dashboard" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
-            <Layers className="h-4 w-4" /> Dashboard
-          </Link>
           <Link href="/verify" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
-            <Search className="h-4 w-4" /> Public Verification
+            <Search className="h-4 w-4 text-[#00D6B4]" /> Public Verification
           </Link>
-          <Link href="/login" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
-            <LogIn className="h-4 w-4" /> Sign In
+          <Link href="/dashboard" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
+            <Layers className="h-4 w-4" /> Enterprise Dashboard
           </Link>
         </nav>
 
         <div className="flex items-center space-x-3">
-          {walletAddress ? (
-            <div className="badge badge-lg bg-[#00D6B4]/15 border border-[#00D6B4] text-[#00D6B4] font-mono gap-1.5 py-3">
-              <CheckCircle2 className="h-4 w-4 text-[#00D6B4]" />
+          {walletAddress && (
+            <div className="badge badge-sm bg-[#00D6B4]/15 border border-[#00D6B4]/40 text-[#00D6B4] font-mono gap-1 py-2 text-[11px] hidden sm:flex">
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#00D6B4]" />
               <span>{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
             </div>
+          )}
+
+          {user ? (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-[#172638] px-3 py-1.5 rounded-xl border border-[#304257]">
+                <User className="h-3.5 w-3.5 text-[#00D6B4]" />
+                <div className="flex flex-col text-left">
+                  <span className="text-xs font-bold text-[#F1F5F9] leading-tight truncate max-w-[130px]">
+                    {user.fullName || user.email}
+                  </span>
+                  <span className="text-[10px] text-[#94A3B8] leading-tight">
+                    {user.organization || user.role}
+                  </span>
+                </div>
+                <span className={`badge badge-xs font-bold uppercase border ml-1 ${getRoleBadgeColor(user.role)}`}>
+                  {user.role}
+                </span>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                title="Sign Out"
+                className="btn btn-sm btn-ghost hover:bg-rose-500/20 text-[#94A3B8] hover:text-rose-400 border border-[#304257] rounded-xl px-2.5 transition"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline text-xs font-bold">Sign Out</span>
+              </button>
+            </div>
           ) : (
-            <button
-              onClick={onConnectWallet}
-              className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-lg font-bold shadow-sm"
-            >
-              Connect Wallet
-            </button>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/login"
+                className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold shadow-sm flex items-center gap-1.5"
+              >
+                <LogIn className="h-4 w-4" />
+                <span>Enterprise Sign In</span>
+              </Link>
+            </div>
           )}
         </div>
       </div>

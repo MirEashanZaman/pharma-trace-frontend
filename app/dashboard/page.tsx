@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Navigation } from '@/components/navigation';
 import dynamic from 'next/dynamic';
 import { connectMetaMask, signAttestationMessage } from '@/lib/web3';
@@ -11,6 +12,7 @@ import {
   createDrugEvent,
   getStoredUser,
   fetchProfile,
+  logoutUser,
   Drug,
   DrugEvent,
   UserProfile,
@@ -54,6 +56,8 @@ const TransitMap = dynamic(() => import('@/components/transit-map'), {
 });
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const [authChecked, setAuthChecked] = useState(false);
   const [wallet, setWallet] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'transit-map' | 'attestations' | 'github'>('overview');
@@ -79,6 +83,15 @@ export default function DashboardPage() {
   const [tempExcursion, setTempExcursion] = useState<boolean>(false);
 
   useEffect(() => {
+    const cached = getStoredUser();
+    if (!cached) {
+      router.replace('/login');
+      return;
+    }
+    setCurrentUser(cached);
+    setDefaultEventForRole(cached.role);
+    setAuthChecked(true);
+
     loadUser();
     loadDrugs();
 
@@ -111,17 +124,12 @@ export default function DashboardPage() {
   }, []);
 
   const loadUser = async () => {
-    const cached = getStoredUser();
-    if (cached) {
-      setCurrentUser(cached);
-      setDefaultEventForRole(cached.role);
-    }
     try {
       const profile = await fetchProfile();
       setCurrentUser(profile);
       setDefaultEventForRole(profile.role);
     } catch (e) {
-      // using cached or fallback
+      // Preserved cached user session
     }
   };
 
@@ -139,7 +147,7 @@ export default function DashboardPage() {
     }
   }, [selectedSerial]);
 
-  const currentRole = currentUser?.role || 'ADMIN';
+  const currentRole = currentUser?.role || 'CUSTOMER';
 
   const roleEventOptions: Record<string, string[]> = {
     ADMIN: ['MANUFACTURED', 'QUALITY_CHECKED', 'PACKAGED', 'SHIPPED', 'RECEIVED', 'DISTRIBUTED', 'SOLD', 'TEMPERATURE_MONITORED'],
@@ -150,7 +158,7 @@ export default function DashboardPage() {
     CUSTOMER: ['TEMPERATURE_MONITORED'],
   };
 
-  const availableEvents = roleEventOptions[currentRole] || roleEventOptions.ADMIN;
+  const availableEvents = roleEventOptions[currentRole] || roleEventOptions.CUSTOMER;
 
   const loadDrugs = async () => {
     try {
@@ -181,7 +189,7 @@ export default function DashboardPage() {
       await createDrug({
         serialNumber: newSerial,
         name: newName,
-        manufacturer: newManufacturer || 'Global Pharma Labs',
+        manufacturer: newManufacturer || currentUser?.organization || 'Global Pharma Labs',
         batchNumber: newBatch || 'BATCH-001',
         manufactureDate: new Date().toISOString(),
         expiryDate: new Date(Date.now() + 31536000000).toISOString(),
@@ -218,8 +226,12 @@ export default function DashboardPage() {
         eventData: {
           temperature: parseFloat(temperature),
           humidity: parseFloat(humidity),
-          location: 'Cold-Chain Warehouse A',
-          signerAddress: wallet || '0x0000000000000000000000000000000000000000',
+          location: `${currentUser?.organization || 'Authorized Hub'} - Station 1`,
+          handlerName: currentUser?.fullName || currentUser?.email,
+          handlerRole: currentRole,
+          organization: currentUser?.organization,
+          userRole: currentRole,
+          signerAddress: wallet || currentUser?.walletAddress || '0x0000000000000000000000000000000000000000',
           signature,
           ...(selectedEventType === 'SOLD'
             ? {
@@ -237,23 +249,58 @@ export default function DashboardPage() {
     }
   };
 
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-[#0B1220] flex items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-3">
+          <div className="loading loading-spinner text-[#00D6B4] loading-lg"></div>
+          <span className="text-xs font-mono tracking-wider uppercase text-[#94A3B8]">
+            Verifying Enterprise Session...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0B1220] text-[#F1F5F9] flex flex-col font-sans">
-      <Navigation walletAddress={wallet} onConnectWallet={async () => setWallet(await connectMetaMask())} />
+      <Navigation
+        currentUser={currentUser}
+        walletAddress={wallet}
+        onConnectWallet={async () => setWallet(await connectMetaMask())}
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 flex flex-col md:flex-row gap-8">
         <aside className="w-full md:w-64 space-y-3 bg-[#243247] p-4 rounded-2xl border border-[#304257] text-[#F1F5F9] shadow-sm self-start">
-          <div className="p-3 bg-[#172638] rounded-xl border border-[#304257] space-y-1">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Active Role Session</div>
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-xs text-[#F1F5F9]">{currentUser?.fullName || 'Active Session'}</span>
+          <div className="p-3.5 bg-[#172638] rounded-xl border border-[#304257] space-y-2">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] flex items-center justify-between">
+              <span>Active Stakeholder</span>
               <span className="badge badge-sm bg-[#00D6B4] text-[#0B1220] font-black border-none text-[10px]">
                 {currentRole}
               </span>
             </div>
-            {currentUser?.organization && (
-              <div className="text-[11px] text-[#94A3B8] truncate">{currentUser.organization}</div>
+            <div>
+              <div className="font-bold text-xs text-[#F1F5F9] truncate">
+                {currentUser?.fullName || currentUser?.email || 'Authenticated User'}
+              </div>
+              <div className="text-[11px] text-[#94A3B8] truncate">
+                {currentUser?.organization || 'PharmaTrace Enterprise'}
+              </div>
+            </div>
+            {currentUser?.walletAddress && (
+              <div className="text-[10px] font-mono text-[#00D6B4] truncate pt-1.5 border-t border-[#304257]/60">
+                Key: {currentUser.walletAddress.slice(0, 8)}...{currentUser.walletAddress.slice(-6)}
+              </div>
             )}
+            <button
+              onClick={() => {
+                logoutUser();
+                router.push('/login');
+              }}
+              className="btn btn-xs w-full bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 rounded-lg font-bold mt-2"
+            >
+              Sign Out / Switch Stakeholder
+            </button>
           </div>
 
           <div className="space-y-1">
@@ -614,7 +661,7 @@ export default function DashboardPage() {
 
           {activeTab === 'drugs' && (
             <div className="space-y-6">
-              {(currentRole === 'ADMIN' || currentRole === 'MANUFACTURER') && (
+              {(currentRole === 'ADMIN' || currentRole === 'MANUFACTURER') ? (
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6">
                   <h3 className="text-base font-bold text-[#F1F5F9] mb-4 flex items-center gap-2">
                     <PlusCircle className="h-5 w-5 text-[#00D6B4]" /> Add Drug / Register Medicine
@@ -656,6 +703,18 @@ export default function DashboardPage() {
                       {loading ? 'Registering...' : 'Register Medicine Batch'}
                     </button>
                   </form>
+                </div>
+              ) : (
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4 flex flex-row items-center justify-between">
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-[#F1F5F9]">Verified Batch Inventory (Read-Only)</h4>
+                    <p className="text-[11px] text-[#94A3B8]">
+                      Your authenticated role ({currentRole}) can review registered batches and verify certificates. Only authorized Manufacturers and Admins can register new pharmaceutical batches.
+                    </p>
+                  </div>
+                  <span className="badge badge-sm bg-[#172638] text-[#94A3B8] font-mono border border-[#304257] text-[10px]">
+                    Read-Only
+                  </span>
                 </div>
               )}
 
@@ -727,8 +786,18 @@ export default function DashboardPage() {
 
           {activeTab === 'events' && (
             <div className="space-y-6">
-              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6">
-                <h3 className="text-base font-bold text-[#F1F5F9] mb-4">Record Lifecycle Event & Digital Sign</h3>
+              {currentRole === 'CUSTOMER' ? (
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-2">
+                  <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-[#00D6B4]" /> Verified Custody Timeline (Patient View)
+                  </h3>
+                  <p className="text-xs text-[#94A3B8] leading-relaxed">
+                    As an authenticated Patient/Consumer, you have read-only audit access to the immutable supply chain custody trail below. Custody transitions can only be authorized by licensed Manufacturers, Distributors, and Pharmacies.
+                  </p>
+                </div>
+              ) : (
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6">
+                  <h3 className="text-base font-bold text-[#F1F5F9] mb-4">Record Lifecycle Event & Digital Sign</h3>
                 <form onSubmit={handleCreateEvent} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
@@ -821,6 +890,7 @@ export default function DashboardPage() {
                   </button>
                 </form>
               </div>
+            )}
 
               <div className="space-y-3">
                 <h4 className="text-sm font-bold text-[#F1F5F9]">Timeline & Custody History</h4>

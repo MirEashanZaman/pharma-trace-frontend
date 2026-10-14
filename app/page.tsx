@@ -16,15 +16,15 @@ export default function HomePage() {
           <div className="flex items-center gap-4">
             <Link
               href="/verify"
-              className="text-xs font-semibold text-[#94A3B8] hover:text-[#F1F5F9] transition px-3 py-1.5"
+              className="text-xs font-semibold text-[#00D6B4] hover:text-[#00b89a] transition px-3 py-1.5 flex items-center gap-1"
             >
-              Public Verify
+              Public Verify (No Login)
             </Link>
             <Link
               href="/dashboard"
-              className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-lg font-bold shadow-sm"
+              className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold shadow-sm"
             >
-              Launch App
+              Enterprise Portal
             </Link>
           </div>
         </div>
@@ -49,13 +49,13 @@ export default function HomePage() {
             href="/dashboard"
             className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl px-8 font-bold text-sm shadow-md flex items-center gap-2"
           >
-            Open Dashboard <ArrowRight className="h-4 w-4" />
+            Enterprise Dashboard <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
             href="/verify"
             className="btn bg-[#243247] hover:bg-[#172638] text-[#F1F5F9] border border-[#304257] rounded-xl px-8 font-semibold text-sm shadow-sm"
           >
-            Verify a Drug Hash
+            Public Medicine Verification (Patients & Doctors)
           </Link>
         </div>
 
