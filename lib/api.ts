@@ -67,6 +67,42 @@ export interface AttestationVerification {
   explorerUrl?: string;
 }
 
+export interface ComplianceDossier {
+  serialNumber: string;
+  drugName: string;
+  manufacturer: string;
+  batchNumber: string;
+  createdAt: string;
+  complianceSummary: {
+    standard: string;
+    disposition: string;
+    isRecalled: boolean;
+    totalEvents: number;
+    totalTelemetryPings: number;
+    compliantReadings: number;
+    excursionReadings: number;
+    compliancePercentage: number;
+    minTemperature: number;
+    maxTemperature: number;
+    averageTemperature: number;
+    auditTimestamp: string;
+    auditInspectorAuthority: string;
+  };
+  custodyTimeline: Array<{
+    step: number;
+    id: number;
+    eventType: string;
+    timestamp: string;
+    eventHash: string;
+    handler: string;
+    role: string;
+    temperature: number | null;
+    humidity: number | null;
+    location: string;
+    signerAddress: string;
+  }>;
+}
+
 
 export const registerUser = async (data: any): Promise<AuthResponse> => {
   const res = await api.post('/auth/register', data);
@@ -178,6 +214,16 @@ export const simulateIotTelemetry = async (data: {
   location?: string;
 }) => {
   const res = await api.post('/iot/simulate', data);
+  return res.data;
+};
+
+export const fetchAuditDossier = async (serialNumber: string): Promise<ComplianceDossier> => {
+  const res = await api.get(`/drugs/${serialNumber}/audit-dossier`);
+  return res.data;
+};
+
+export const fetchAuditCsv = async (serialNumber: string): Promise<string> => {
+  const res = await api.get(`/drugs/${serialNumber}/export-csv`);
   return res.data;
 };
 
