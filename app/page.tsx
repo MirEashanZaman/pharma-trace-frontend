@@ -59,7 +59,7 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left mt-20 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left mt-16 w-full">
           <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6">
             <div className="h-11 w-11 rounded-xl bg-[#00D6B4]/15 text-[#00D6B4] flex items-center justify-center mb-4">
               <Lock className="h-6 w-6" />
@@ -88,6 +88,104 @@ export default function HomePage() {
             <p className="text-xs text-[#94A3B8] leading-relaxed">
               Instantly detects payload alterations, unauthorized status modifications, and hash collisions.
             </p>
+          </div>
+        </div>
+
+        <div className="w-full mt-16 space-y-6 text-left">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#304257] pb-4">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-[#00D6B4]">
+                Next.js App Router Architecture
+              </span>
+              <h2 className="text-2xl font-black text-[#F1F5F9] mt-0.5">
+                Full-Spectrum Rendering Paradigms (SSR, CSR, SSG, ISR)
+              </h2>
+            </div>
+            <span className="badge badge-sm bg-[#172638] border border-[#304257] text-[#94A3B8] font-mono text-[10px]">
+              Hybrid Engine
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link
+              href="/ledger"
+              className="card bg-[#243247] border border-[#304257] hover:border-[#00D6B4] p-5 rounded-2xl transition shadow-sm space-y-3 group"
+            >
+              <div className="flex items-center justify-between">
+                <span className="badge badge-sm bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/40 font-mono font-bold">
+                  SSR &bull; Dynamic
+                </span>
+                <ArrowRight className="h-4 w-4 text-[#94A3B8] group-hover:text-[#00D6B4] transition" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[#F1F5F9] group-hover:text-[#00D6B4] transition">
+                  Live Ledger
+                </h3>
+                <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
+                  Dynamic server-side rendering per request with `force-dynamic` for real-time blockchain and database query.
+                </p>
+              </div>
+            </Link>
+
+            <Link
+              href="/dashboard"
+              className="card bg-[#243247] border border-[#304257] hover:border-[#00D6B4] p-5 rounded-2xl transition shadow-sm space-y-3 group"
+            >
+              <div className="flex items-center justify-between">
+                <span className="badge badge-sm bg-purple-500/15 text-purple-300 border border-purple-500/40 font-mono font-bold">
+                  CSR &bull; Client
+                </span>
+                <ArrowRight className="h-4 w-4 text-[#94A3B8] group-hover:text-[#00D6B4] transition" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[#F1F5F9] group-hover:text-[#00D6B4] transition">
+                  Enterprise Portal
+                </h3>
+                <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
+                  Interactive client component with WebSockets, Web Audio feedback, haptic pulses, and MetaMask wallet.
+                </p>
+              </div>
+            </Link>
+
+            <Link
+              href="/standards"
+              className="card bg-[#243247] border border-[#304257] hover:border-[#00D6B4] p-5 rounded-2xl transition shadow-sm space-y-3 group"
+            >
+              <div className="flex items-center justify-between">
+                <span className="badge badge-sm bg-blue-500/15 text-blue-300 border border-blue-500/40 font-mono font-bold">
+                  SSG &bull; Static
+                </span>
+                <ArrowRight className="h-4 w-4 text-[#94A3B8] group-hover:text-[#00D6B4] transition" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[#F1F5F9] group-hover:text-[#00D6B4] transition">
+                  Standards Directory
+                </h3>
+                <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
+                  Pre-rendered at build time with `generateStaticParams` for sub-millisecond edge CDN delivery.
+                </p>
+              </div>
+            </Link>
+
+            <Link
+              href="/catalog"
+              className="card bg-[#243247] border border-[#304257] hover:border-[#00D6B4] p-5 rounded-2xl transition shadow-sm space-y-3 group"
+            >
+              <div className="flex items-center justify-between">
+                <span className="badge badge-sm bg-amber-500/15 text-amber-300 border border-amber-500/40 font-mono font-bold">
+                  ISR &bull; 60s Reval
+                </span>
+                <ArrowRight className="h-4 w-4 text-[#94A3B8] group-hover:text-[#00D6B4] transition" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[#F1F5F9] group-hover:text-[#00D6B4] transition">
+                  Medicine Catalog
+                </h3>
+                <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
+                  Statically cached public directory with background regeneration every 60 seconds without redeploying.
+                </p>
+              </div>
+            </Link>
           </div>
         </div>
       </main>
