@@ -40,6 +40,9 @@ import {
   ShieldCheck,
   MapPin,
   Navigation2,
+  AlertOctagon,
+  ShieldAlert,
+  X,
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { QRCodeSVG } from 'qrcode.react';
@@ -81,6 +84,12 @@ export default function DashboardPage() {
   const [liveHumidity, setLiveHumidity] = useState<number>(48);
   const [wsConnected, setWsConnected] = useState<boolean>(false);
   const [tempExcursion, setTempExcursion] = useState<boolean>(false);
+
+  const [showRecallModal, setShowRecallModal] = useState(false);
+  const [recallTargetSerial, setRecallTargetSerial] = useState('');
+  const [recallReason, setRecallReason] = useState('Critical cold-chain excursion (> 14°C) detected');
+  const [recallDirective, setRecallDirective] = useState('FDA Safety Alert #2026-REC-001');
+  const [recallType, setRecallType] = useState<'RECALLED' | 'QUARANTINED'>('RECALLED');
 
   useEffect(() => {
     const cached = getStoredUser();
@@ -150,15 +159,48 @@ export default function DashboardPage() {
   const currentRole = currentUser?.role || 'CUSTOMER';
 
   const roleEventOptions: Record<string, string[]> = {
-    ADMIN: ['MANUFACTURED', 'QUALITY_CHECKED', 'PACKAGED', 'SHIPPED', 'RECEIVED', 'DISTRIBUTED', 'SOLD', 'TEMPERATURE_MONITORED'],
-    MANUFACTURER: ['MANUFACTURED', 'QUALITY_CHECKED', 'PACKAGED', 'SHIPPED', 'TEMPERATURE_MONITORED'],
+    ADMIN: ['MANUFACTURED', 'QUALITY_CHECKED', 'PACKAGED', 'SHIPPED', 'RECEIVED', 'DISTRIBUTED', 'SOLD', 'TEMPERATURE_MONITORED', 'RECALLED', 'QUARANTINED'],
+    MANUFACTURER: ['MANUFACTURED', 'QUALITY_CHECKED', 'PACKAGED', 'SHIPPED', 'TEMPERATURE_MONITORED', 'RECALLED', 'QUARANTINED'],
     DISTRIBUTOR: ['RECEIVED', 'DISTRIBUTED', 'SHIPPED', 'TEMPERATURE_MONITORED'],
     PHARMACY: ['RECEIVED', 'SOLD', 'TEMPERATURE_MONITORED'],
-    REGULATOR: ['QUALITY_CHECKED', 'TEMPERATURE_MONITORED'],
+    REGULATOR: ['QUALITY_CHECKED', 'TEMPERATURE_MONITORED', 'RECALLED', 'QUARANTINED'],
     CUSTOMER: ['TEMPERATURE_MONITORED'],
   };
 
   const availableEvents = roleEventOptions[currentRole] || roleEventOptions.CUSTOMER;
+  const isSelectedBatchRecalled = events.some((e) => e.eventType === 'RECALLED' || e.eventType === 'QUARANTINED');
+
+  const handleTriggerRecall = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const target = recallTargetSerial || selectedSerial;
+    if (!target) return;
+    setLoading(true);
+
+    try {
+      await createDrugEvent({
+        drugSerialNumber: target,
+        eventType: recallType,
+        eventData: {
+          reason: recallReason,
+          directive: recallDirective,
+          authority: currentUser?.organization || 'Regulatory Agency',
+          handlerName: currentUser?.fullName || currentUser?.email,
+          handlerRole: currentRole,
+          temperature: liveTemp,
+          humidity: liveHumidity,
+          signerAddress: wallet || currentUser?.walletAddress || '0x0000000000000000000000000000000000000000',
+        },
+      });
+      setShowRecallModal(false);
+      await loadEvents(target);
+      await loadDrugs();
+      alert(`Emergency ${recallType} directive anchored to the ledger for ${target}. The batch is now suspended across the entire supply chain.`);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to issue emergency recall');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadDrugs = async () => {
     try {
@@ -720,7 +762,20 @@ export default function DashboardPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2 space-y-3">
-                  <h4 className="text-sm font-bold text-[#F1F5F9]">Registered Drugs & Batches</h4>
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold text-[#F1F5F9]">Registered Drugs & Batches</h4>
+                    {(currentRole === 'REGULATOR' || currentRole === 'MANUFACTURER' || currentRole === 'ADMIN') && (
+                      <button
+                        onClick={() => {
+                          setRecallTargetSerial(selectedSerial || drugs[0]?.serialNumber || '');
+                          setShowRecallModal(true);
+                        }}
+                        className="btn btn-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 rounded-lg font-bold flex items-center gap-1.5"
+                      >
+                        <AlertOctagon className="h-3.5 w-3.5 text-rose-400" /> Emergency Recall / Quarantine
+                      </button>
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 gap-3">
                     {drugs.map((d) => (
                       <div
@@ -797,8 +852,27 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6">
-                  <h3 className="text-base font-bold text-[#F1F5F9] mb-4">Record Lifecycle Event & Digital Sign</h3>
-                <form onSubmit={handleCreateEvent} className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <h3 className="text-base font-bold text-[#F1F5F9]">Record Lifecycle Event & Digital Sign</h3>
+                    {isSelectedBatchRecalled && (
+                      <span className="badge bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold text-xs uppercase py-3 px-3 flex items-center gap-1.5 animate-pulse">
+                        <AlertOctagon className="h-4 w-4 text-rose-400" /> BATCH RECALLED &mdash; TRANSFERS FROZEN
+                      </span>
+                    )}
+                  </div>
+
+                  {isSelectedBatchRecalled && (
+                    <div className="p-4 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-200 text-xs mb-4 space-y-1">
+                      <div className="font-bold flex items-center gap-1.5 text-rose-400">
+                        <ShieldAlert className="h-4 w-4" /> Regulatory Lockdown Active
+                      </div>
+                      <p>
+                        This pharmaceutical batch has been officially RECALLED/QUARANTINED. The Saga circuit breaker blocks all further custody transfers, packaging, shipping, and patient sales.
+                      </p>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleCreateEvent} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Target Serial</label>
@@ -883,10 +957,18 @@ export default function DashboardPage() {
 
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-3 rounded-xl font-bold text-sm transition shadow-sm"
+                    disabled={loading || isSelectedBatchRecalled}
+                    className={`btn border-none w-full py-3 rounded-xl font-bold text-sm transition shadow-sm ${
+                      isSelectedBatchRecalled
+                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 cursor-not-allowed'
+                        : 'bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220]'
+                    }`}
                   >
-                    {loading ? 'Validating Saga & Anchoring...' : 'Validate Saga & Anchor On-Chain'}
+                    {isSelectedBatchRecalled
+                      ? 'Custody Transfer Blocked (Batch Under Recall Lockdown)'
+                      : loading
+                      ? 'Validating Saga & Anchoring...'
+                      : 'Validate Saga & Anchor On-Chain'}
                   </button>
                 </form>
               </div>
@@ -986,6 +1068,115 @@ export default function DashboardPage() {
           )}
         </main>
       </div>
+
+      {showRecallModal && (
+        <div className="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="card bg-[#172638] border border-rose-500/50 shadow-2xl rounded-2xl max-w-lg w-full p-6 space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+              <div className="flex items-center gap-2 text-rose-400 font-black text-base uppercase tracking-wider">
+                <AlertOctagon className="h-5 w-5 text-rose-400" /> Issue Emergency Recall Directive
+              </div>
+              <button
+                onClick={() => setShowRecallModal(false)}
+                className="btn btn-sm btn-ghost btn-circle text-[#94A3B8] hover:text-[#F1F5F9]"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-[#94A3B8] leading-relaxed">
+              This action activates the <strong>Saga Emergency Circuit Breaker</strong>. Once anchored to the ledger, all pharmacies and distributors will be immediately blocked from shipping or dispensing this batch, and public verification scans will display an active hazard alert.
+            </p>
+
+            <form onSubmit={handleTriggerRecall} className="space-y-4">
+              <div>
+                <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Target Medicine Serial</label>
+                <select
+                  value={recallTargetSerial || selectedSerial}
+                  onChange={(e) => setRecallTargetSerial(e.target.value)}
+                  className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                  required
+                >
+                  {drugs.map((d) => (
+                    <option key={d.id} value={d.serialNumber}>
+                      {d.serialNumber} - {d.name} ({d.batchNumber})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Directive Severity</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setRecallType('RECALLED')}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition ${
+                      recallType === 'RECALLED'
+                        ? 'bg-rose-500/20 border-rose-500 text-rose-300'
+                        : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                    }`}
+                  >
+                    Permanent Recall
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRecallType('QUARANTINED')}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition ${
+                      recallType === 'QUARANTINED'
+                        ? 'bg-amber-500/20 border-amber-500 text-amber-300'
+                        : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                    }`}
+                  >
+                    Quarantine Hold
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Regulatory Reason & Justification</label>
+                <textarea
+                  value={recallReason}
+                  onChange={(e) => setRecallReason(e.target.value)}
+                  placeholder="Specify critical findings (e.g. Temperature excursion > 14°C, seal tampering, contamination)"
+                  className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] h-20"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Official Directive Reference #</label>
+                <input
+                  type="text"
+                  value={recallDirective}
+                  onChange={(e) => setRecallDirective(e.target.value)}
+                  placeholder="e.g. FDA-DIRECTIVE-2026-09"
+                  className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowRecallModal(false)}
+                  className="btn btn-sm btn-ghost text-[#94A3B8] text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn btn-sm bg-rose-600 hover:bg-rose-700 text-white border-none rounded-xl font-bold text-xs px-5 shadow-lg flex items-center gap-1.5"
+                >
+                  <AlertOctagon className="h-4 w-4" />
+                  {loading ? 'Anchoring Recall Directive...' : 'Sign & Anchor Recall Directive'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
