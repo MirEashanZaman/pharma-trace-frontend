@@ -13,6 +13,7 @@ import {
   getStoredUser,
   fetchProfile,
   logoutUser,
+  simulateIotTelemetry,
   Drug,
   DrugEvent,
   UserProfile,
@@ -43,6 +44,16 @@ import {
   AlertOctagon,
   ShieldAlert,
   X,
+  Sliders,
+  Volume2,
+  VolumeX,
+  Play,
+  Square,
+  Zap,
+  Flame,
+  Snowflake,
+  RefreshCw,
+  Radio,
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { QRCodeSVG } from 'qrcode.react';
@@ -63,7 +74,7 @@ export default function DashboardPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [wallet, setWallet] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'transit-map' | 'attestations' | 'github'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'simulation' | 'transit-map' | 'attestations' | 'github'>('overview');
 
   const [drugs, setDrugs] = useState<Drug[]>([]);
   const [selectedSerial, setSelectedSerial] = useState<string>('');
@@ -84,6 +95,143 @@ export default function DashboardPage() {
   const [liveHumidity, setLiveHumidity] = useState<number>(48);
   const [wsConnected, setWsConnected] = useState<boolean>(false);
   const [tempExcursion, setTempExcursion] = useState<boolean>(false);
+
+  const socketRef = React.useRef<Socket | null>(null);
+  const [simTemp, setSimTemp] = useState<number>(4.2);
+  const [simHumidity, setSimHumidity] = useState<number>(48);
+  const [simLocation, setSimLocation] = useState<string>('Apex Reefer Van #408');
+  const [simIsAuto, setSimIsAuto] = useState<boolean>(false);
+  const [soundAlerts, setSoundAlerts] = useState<boolean>(false);
+  const soundAlertsRef = React.useRef(soundAlerts);
+  const [simHistory, setSimHistory] = useState<Array<{
+    id: string;
+    timestamp: string;
+    temp: number;
+    humidity: number;
+    isExcursion: boolean;
+    location: string;
+  }>>([
+    {
+      id: 'init-1',
+      timestamp: new Date().toLocaleTimeString(),
+      temp: 4.2,
+      humidity: 48,
+      isExcursion: false,
+      location: 'Apex Reefer Van #408',
+    },
+  ]);
+
+  useEffect(() => {
+    soundAlertsRef.current = soundAlerts;
+  }, [soundAlerts]);
+
+  const playExcursionTone = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    } catch (e) {
+    }
+  };
+
+  const SIMULATION_PRESETS = [
+    {
+      id: 'optimal',
+      name: 'Optimal Reefer',
+      temp: 4.2,
+      humidity: 45,
+      location: 'Apex Reefer Van #408 - Interstate Route',
+      description: 'GxP Cold-Chain Standard (2.0°C to 8.0°C)',
+      statusLabel: 'Normal Operation',
+      badgeClass: 'bg-[#A3E635]/20 text-[#A3E635] border-[#A3E635]/30',
+    },
+    {
+      id: 'mild-excursion',
+      name: 'Mild Thermal Drift',
+      temp: 9.5,
+      humidity: 62,
+      location: 'Cross-Dock Depot B (Loading Bay Transit)',
+      description: 'Upper Threshold Breach (> 8.0°C)',
+      statusLabel: 'Threshold Drift Warning',
+      badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    },
+    {
+      id: 'compressor-fail',
+      name: 'Compressor Malfunction',
+      temp: 16.8,
+      humidity: 85,
+      location: 'High-Risk Transit Corridor (Reefer Failure)',
+      description: 'Critical Excursion Hazard (> 15.0°C)',
+      statusLabel: 'Excursion Hazard Alert',
+      badgeClass: 'bg-[#F87171]/20 text-[#F87171] border-[#F87171]/40',
+    },
+    {
+      id: 'subzero-freeze',
+      name: 'Sub-Zero Cryo Freeze',
+      temp: -3.5,
+      humidity: 28,
+      location: 'Cold-Storage Blast Facility (Overcool)',
+      description: 'Sub-Zero Freezing Hazard (< 2.0°C)',
+      statusLabel: 'Cryo Freeze Alert',
+      badgeClass: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+    },
+  ];
+
+  const handleTransmitSimulation = async (tempVal: number, humVal: number, locVal?: string) => {
+    const targetSerial = selectedSerial || (drugs[0]?.serialNumber ?? 'GLOBAL-FLEET');
+    const loc = locVal || simLocation || 'Reefer Van TX-92 - Mobile Unit';
+    const payload = {
+      serialNumber: targetSerial,
+      temperature: Number(Number(tempVal).toFixed(1)),
+      humidity: Number(Number(humVal).toFixed(1)),
+      location: loc,
+    };
+
+    const isExc = payload.temperature < 2 || payload.temperature > 8;
+    if (isExc && soundAlerts) {
+      playExcursionTone();
+    }
+
+    if (socketRef.current && wsConnected) {
+      socketRef.current.emit('simulateTelemetry', payload);
+    } else {
+      try {
+        await simulateIotTelemetry(payload);
+        setLiveTemp(payload.temperature);
+        setLiveHumidity(payload.humidity);
+        setTempExcursion(isExc);
+      } catch (e) {
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!simIsAuto) return;
+    const timer = setInterval(() => {
+      setSimTemp((prev) => {
+        const delta = (Math.random() - 0.48) * 0.4;
+        const nextTemp = Number((prev + delta).toFixed(1));
+        const nextHum = Math.min(Math.max(Math.round(simHumidity + (Math.random() - 0.5) * 2), 15), 95);
+        setSimHumidity(nextHum);
+        handleTransmitSimulation(nextTemp, nextHum, simLocation);
+        return nextTemp;
+      });
+    }, 3500);
+
+    return () => clearInterval(timer);
+  }, [simIsAuto, simHumidity, simLocation, selectedSerial, drugs, wsConnected, soundAlerts]);
 
   const [showRecallModal, setShowRecallModal] = useState(false);
   const [recallTargetSerial, setRecallTargetSerial] = useState('');
@@ -108,6 +256,7 @@ export default function DashboardPage() {
     const socket: Socket = io(socketUrl, {
       transports: ['websocket', 'polling'],
     });
+    socketRef.current = socket;
 
     socket.on('connect', () => {
       setWsConnected(true);
@@ -117,17 +266,35 @@ export default function DashboardPage() {
       setWsConnected(false);
     });
 
-    socket.on('telemetryUpdate', (data: { temperature: number; humidity: number; isExcursion?: boolean }) => {
+    socket.on('telemetryUpdate', (data: { temperature: number; humidity: number; isExcursion?: boolean; location?: string; serialNumber?: string }) => {
       if (typeof data.temperature === 'number') {
+        const isExc = Boolean(data.isExcursion || data.temperature < 2 || data.temperature > 8);
         setLiveTemp(data.temperature);
-        setTempExcursion(Boolean(data.isExcursion || data.temperature < 2 || data.temperature > 8));
+        setTempExcursion(isExc);
+        if (isExc && soundAlertsRef.current) {
+          playExcursionTone();
+        }
       }
       if (typeof data.humidity === 'number') {
         setLiveHumidity(data.humidity);
       }
+      if (typeof data.temperature === 'number') {
+        setSimHistory((prev) => [
+          {
+            id: `${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+            timestamp: new Date().toLocaleTimeString(),
+            temp: data.temperature,
+            humidity: typeof data.humidity === 'number' ? data.humidity : 50,
+            isExcursion: Boolean(data.isExcursion || data.temperature < 2 || data.temperature > 8),
+            location: data.location || 'Transit Hub - In Route',
+          },
+          ...prev.slice(0, 19),
+        ]);
+      }
     });
 
     return () => {
+      socketRef.current = null;
       socket.disconnect();
     };
   }, []);
@@ -381,6 +548,21 @@ export default function DashboardPage() {
                 <FileCheck2 className="h-4 w-4" /> Custody Chain & Saga
               </button>
             )}
+            <button
+              onClick={() => setActiveTab('simulation')}
+              className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                activeTab === 'simulation'
+                  ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                  : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Sliders className="h-4 w-4" /> Cold-Chain Simulation
+              </div>
+              {tempExcursion && (
+                <span className="h-2 w-2 rounded-full bg-[#F87171] animate-ping" />
+              )}
+            </button>
             <button
               onClick={() => setActiveTab('transit-map')}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
@@ -665,6 +847,124 @@ export default function DashboardPage() {
                     <span>20% Min</span>
                     <span>Live Telemetry</span>
                     <span>80% Max</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <span className="text-xs text-[#00D6B4] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <Sliders className="h-4 w-4" /> Live IoT Cold-Chain Simulation Deck
+                    </span>
+                    <h3 className="text-base font-bold text-[#F1F5F9] mt-0.5">
+                      Real-Time Telemetry & Scenario Injection
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSoundAlerts(!soundAlerts)}
+                      className={`btn btn-xs rounded-lg border font-mono ${
+                        soundAlerts
+                          ? 'bg-[#00D6B4]/15 border-[#00D6B4] text-[#00D6B4]'
+                          : 'bg-[#172638] border-[#304257] text-[#94A3B8]'
+                      }`}
+                    >
+                      {soundAlerts ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+                      Audio Alert: {soundAlerts ? 'ON' : 'OFF'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('simulation')}
+                      className="btn btn-xs bg-[#00D6B4]/15 hover:bg-[#00D6B4]/25 text-[#00D6B4] border border-[#00D6B4]/30 rounded-lg font-bold"
+                    >
+                      Open Full Cockpit &rarr;
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {SIMULATION_PRESETS.map((preset) => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => {
+                        setSimTemp(preset.temp);
+                        setSimHumidity(preset.humidity);
+                        setSimLocation(preset.location);
+                        handleTransmitSimulation(preset.temp, preset.humidity, preset.location);
+                      }}
+                      className="p-3 bg-[#172638] hover:bg-[#1E2E44] border border-[#304257] hover:border-[#00D6B4]/50 rounded-xl text-left transition-all group"
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs font-bold text-[#F1F5F9] group-hover:text-[#00D6B4] transition-colors">
+                          {preset.name}
+                        </span>
+                        <span className="font-mono text-xs font-black text-[#F1F5F9]">
+                          {preset.temp > 0 ? `+${preset.temp}` : preset.temp}°C
+                        </span>
+                      </div>
+                      <span className={`inline-block text-[10px] px-2 py-0.5 rounded-md border font-semibold mb-1.5 ${preset.badgeClass}`}>
+                        {preset.statusLabel}
+                      </span>
+                      <p className="text-[11px] text-[#94A3B8] leading-tight line-clamp-2">
+                        {preset.description}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="bg-[#172638] border border-[#304257] rounded-xl p-4 space-y-3">
+                  <div className="flex items-center justify-between text-xs font-semibold">
+                    <span className="text-[#94A3B8] flex items-center gap-1.5">
+                      <Thermometer className="h-3.5 w-3.5 text-[#00D6B4]" /> Manual Slider Injection
+                    </span>
+                    <span className="font-mono font-bold text-[#F1F5F9]">
+                      {simTemp.toFixed(1)}°C &bull; {simHumidity}% RH
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[11px] font-mono text-[#94A3B8]">
+                        <span>-10°C (Freezing)</span>
+                        <span className="text-[#00D6B4] font-bold">Temperature</span>
+                        <span>+30°C (Hazard)</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="-10"
+                        max="30"
+                        step="0.5"
+                        value={simTemp}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          setSimTemp(val);
+                          handleTransmitSimulation(val, simHumidity);
+                        }}
+                        className="range range-xs range-accent w-full bg-[#0B1220]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[11px] font-mono text-[#94A3B8]">
+                        <span>10% (Dry)</span>
+                        <span className="text-[#00D6B4] font-bold">Relative Humidity</span>
+                        <span>100% (Saturated)</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="10"
+                        max="100"
+                        step="1"
+                        value={simHumidity}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          setSimHumidity(val);
+                          handleTransmitSimulation(simTemp, val);
+                        }}
+                        className="range range-xs range-accent w-full bg-[#0B1220]"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -995,6 +1295,358 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'simulation' && (
+            <div className="space-y-6">
+              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <span className="text-xs text-[#00D6B4] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <Sliders className="h-4 w-4" /> Real-Time Telemetry Cockpit
+                    </span>
+                    <h2 className="text-xl font-black text-[#F1F5F9] mt-0.5">
+                      Live IoT Cold-Chain Simulation & Scenario Injection
+                    </h2>
+                    <p className="text-xs text-[#94A3B8] mt-1">
+                      Inject calibrated environmental readings directly into the WebSocket cluster and test supply chain response, excursion alerts, and circuit-breaker triggers.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSoundAlerts(!soundAlerts)}
+                      className={`btn btn-sm rounded-xl border text-xs font-mono font-bold transition flex items-center gap-1.5 ${
+                        soundAlerts
+                          ? 'bg-[#00D6B4]/15 border-[#00D6B4] text-[#00D6B4]'
+                          : 'bg-[#172638] border-[#304257] text-[#94A3B8]'
+                      }`}
+                    >
+                      {soundAlerts ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                      Audio Alert: {soundAlerts ? 'ENABLED' : 'MUTED'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSimIsAuto(!simIsAuto)}
+                      className={`btn btn-sm rounded-xl border text-xs font-bold transition flex items-center gap-1.5 ${
+                        simIsAuto
+                          ? 'bg-[#A3E635]/20 border-[#A3E635] text-[#A3E635]'
+                          : 'bg-[#172638] border-[#304257] text-[#94A3B8]'
+                      }`}
+                    >
+                      {simIsAuto ? <Square className="h-3.5 w-3.5 fill-current" /> : <Play className="h-3.5 w-3.5 fill-current" />}
+                      Auto Stream: {simIsAuto ? 'RUNNING' : 'STOPPED'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSimTemp(4.2);
+                        setSimHumidity(45);
+                        handleTransmitSimulation(4.2, 45, 'Apex Reefer Van #408');
+                      }}
+                      className="btn btn-sm bg-[#172638] hover:bg-[#1E2E44] text-[#F1F5F9] border-[#304257] rounded-xl text-xs font-bold flex items-center gap-1.5"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5 text-[#00D6B4]" /> Reset 4.2°C
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-7 space-y-5">
+                    <div className="bg-[#172638] border border-[#304257] rounded-xl p-5 space-y-4">
+                      <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                          <Zap className="h-4 w-4 text-[#00D6B4]" /> One-Click Scenario Presets
+                        </span>
+                        <span className="text-[11px] font-mono text-[#94A3B8]">
+                          Click to inject instant telemetry state
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {SIMULATION_PRESETS.map((preset) => (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            onClick={() => {
+                              setSimTemp(preset.temp);
+                              setSimHumidity(preset.humidity);
+                              setSimLocation(preset.location);
+                              handleTransmitSimulation(preset.temp, preset.humidity, preset.location);
+                            }}
+                            className="p-3.5 bg-[#0B1220] hover:bg-[#131F31] border border-[#304257] hover:border-[#00D6B4]/60 rounded-xl text-left transition-all group space-y-2"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-black text-[#F1F5F9] group-hover:text-[#00D6B4] transition-colors">
+                                {preset.name}
+                              </span>
+                              <span className="font-mono text-xs font-black text-[#F1F5F9]">
+                                {preset.temp > 0 ? `+${preset.temp}` : preset.temp}°C
+                              </span>
+                            </div>
+                            <span className={`inline-block text-[10px] px-2 py-0.5 rounded-md border font-bold ${preset.badgeClass}`}>
+                              {preset.statusLabel}
+                            </span>
+                            <div className="text-[11px] text-[#94A3B8] leading-tight">
+                              {preset.description}
+                            </div>
+                            <div className="text-[10px] font-mono text-[#64748B] truncate">
+                              Node: {preset.location}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-[#172638] border border-[#304257] rounded-xl p-5 space-y-5">
+                      <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                          <Sliders className="h-4 w-4 text-[#00D6B4]" /> Precision Manual Tuning Deck
+                        </span>
+                        <span className="font-mono text-xs font-black text-[#00D6B4]">
+                          Target: {simTemp.toFixed(1)}°C &bull; {simHumidity}% RH
+                        </span>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-semibold text-[#94A3B8] flex items-center gap-1.5">
+                              <Thermometer className="h-4 w-4 text-[#00D6B4]" /> Calibrated Temperature
+                            </span>
+                            <div className="flex items-center gap-2">
+                              {simTemp < 2 ? (
+                                <span className="badge badge-sm bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-bold">Freezing Shock</span>
+                              ) : simTemp > 8 ? (
+                                <span className="badge badge-sm bg-[#F87171]/20 text-[#F87171] border-[#F87171]/40 font-bold">Thermal Excursion</span>
+                              ) : (
+                                <span className="badge badge-sm bg-[#A3E635]/20 text-[#A3E635] border-[#A3E635]/30 font-bold">Optimal Reefer (2°-8°C)</span>
+                              )}
+                              <span className="font-mono font-black text-sm text-[#F1F5F9]">{simTemp.toFixed(1)}°C</span>
+                            </div>
+                          </div>
+                          <input
+                            type="range"
+                            min="-10"
+                            max="30"
+                            step="0.2"
+                            value={simTemp}
+                            onChange={(e) => setSimTemp(parseFloat(e.target.value))}
+                            className="range range-sm range-accent w-full bg-[#0B1220]"
+                          />
+                          <div className="flex justify-between text-[10px] font-mono text-[#64748B]">
+                            <span>-10°C (Cryo Freeze)</span>
+                            <span className="text-[#00D6B4] font-bold">2.0°C - 8.0°C Safe Zone</span>
+                            <span>+30°C (Thermal Hazard)</span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-semibold text-[#94A3B8] flex items-center gap-1.5">
+                              <Droplets className="h-4 w-4 text-[#00D6B4]" /> Relative Humidity
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="badge badge-sm bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-bold">
+                                {simHumidity < 30 ? 'Dry' : simHumidity > 70 ? 'Humid' : 'Standard'}
+                              </span>
+                              <span className="font-mono font-black text-sm text-[#F1F5F9]">{simHumidity}% RH</span>
+                            </div>
+                          </div>
+                          <input
+                            type="range"
+                            min="10"
+                            max="100"
+                            step="1"
+                            value={simHumidity}
+                            onChange={(e) => setSimHumidity(parseInt(e.target.value, 10))}
+                            className="range range-sm range-accent w-full bg-[#0B1220]"
+                          />
+                          <div className="flex justify-between text-[10px] font-mono text-[#64748B]">
+                            <span>10% RH Min</span>
+                            <span className="text-[#00D6B4] font-bold">40% - 60% Optimal</span>
+                            <span>100% Saturated</span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                          <div>
+                            <label className="text-[11px] font-bold uppercase text-[#94A3B8] block mb-1">
+                              Simulated Waypoint Location
+                            </label>
+                            <input
+                              type="text"
+                              value={simLocation}
+                              onChange={(e) => setSimLocation(e.target.value)}
+                              placeholder="e.g. Apex Reefer Van #408"
+                              className="input input-sm input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-bold uppercase text-[#94A3B8] block mb-1">
+                              Target Drug Serial
+                            </label>
+                            <select
+                              value={selectedSerial}
+                              onChange={(e) => setSelectedSerial(e.target.value)}
+                              className="select select-sm select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            >
+                              {drugs.map((d) => (
+                                <option key={d.id} value={d.serialNumber}>
+                                  {d.serialNumber} ({d.name})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleTransmitSimulation(simTemp, simHumidity, simLocation)}
+                          className="btn btn-sm w-full bg-[#00D6B4] hover:bg-[#00D6B4]/80 text-[#0B1220] font-black border-none rounded-xl text-xs shadow-lg flex items-center justify-center gap-2 mt-2"
+                        >
+                          <Radio className="h-4 w-4" /> Broadcast Telemetry Ping to Supply Chain Cluster
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-5">
+                    <div className={`card border shadow-sm rounded-xl p-5 space-y-3 transition-colors ${
+                      tempExcursion
+                        ? 'bg-[#1C1720] border-[#F87171] ring-1 ring-[#F87171]'
+                        : 'bg-[#172638] border-[#304257]'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black uppercase tracking-wider text-[#F1F5F9] flex items-center gap-1.5">
+                          <Activity className={`h-4 w-4 ${tempExcursion ? 'text-[#F87171]' : 'text-[#00D6B4]'}`} />
+                          Live Environmental State
+                        </span>
+                        <span className={`badge badge-sm font-bold border ${
+                          tempExcursion
+                            ? 'bg-[#F87171]/20 text-[#F87171] border-[#F87171]/40 animate-pulse'
+                            : 'bg-[#A3E635]/20 text-[#A3E635] border-[#A3E635]/30'
+                        }`}>
+                          {tempExcursion ? 'EXCURSION BREACH' : 'GXP COMPLIANT'}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 py-1">
+                        <div className="bg-[#0B1220] p-3 rounded-xl border border-[#304257]">
+                          <span className="text-[10px] text-[#94A3B8] uppercase font-bold block">Current Temp</span>
+                          <span className={`text-2xl font-black font-mono ${tempExcursion ? 'text-[#F87171]' : 'text-[#F1F5F9]'}`}>
+                            {liveTemp.toFixed(1)}°C
+                          </span>
+                        </div>
+                        <div className="bg-[#0B1220] p-3 rounded-xl border border-[#304257]">
+                          <span className="text-[10px] text-[#94A3B8] uppercase font-bold block">Relative Humidity</span>
+                          <span className="text-2xl font-black font-mono text-[#00D6B4]">
+                            {liveHumidity.toFixed(0)}%
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-xs leading-relaxed text-[#94A3B8] bg-[#0B1220]/70 p-3 rounded-xl border border-[#304257]">
+                        {liveTemp < 2 ? (
+                          <div className="text-cyan-300 font-semibold flex items-start gap-2">
+                            <Snowflake className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                            <span>Freezing temperature hazard (&lt; 2.0°C). Liquid biologics risk crystallization and potency degradation.</span>
+                          </div>
+                        ) : liveTemp > 8 ? (
+                          <div className="text-rose-300 font-semibold flex items-start gap-2">
+                            <Flame className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                            <span>Thermal excursion breach (&gt; 8.0°C). Temperature exceeded cold-chain specifications. Protocol requires quarantine hold.</span>
+                          </div>
+                        ) : (
+                          <div className="text-[#A3E635] font-semibold flex items-start gap-2">
+                            <CheckCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                            <span>Standard 2.0°C to 8.0°C cold-chain verified. Safe for active transit and storage.</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {tempExcursion && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRecallTargetSerial(selectedSerial || (drugs[0]?.serialNumber ?? ''));
+                            setRecallReason(`Automated simulation excursion alert: Live temperature reached ${liveTemp.toFixed(1)}°C, breaching the 2°C - 8°C cold-chain envelope.`);
+                            setShowRecallModal(true);
+                          }}
+                          className="btn btn-sm w-full bg-rose-600 hover:bg-rose-700 text-white font-bold border-none rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg mt-2"
+                        >
+                          <AlertOctagon className="h-4 w-4" /> Trigger Emergency Batch Recall
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="bg-[#172638] border border-[#304257] rounded-xl p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-1.5">
+                          <Navigation2 className="h-4 w-4 text-[#00D6B4]" /> Cartography Dispatch Link
+                        </span>
+                        <span className="text-[10px] font-mono text-[#94A3B8]">
+                          Synchronized Live
+                        </span>
+                      </div>
+                      <TransitMap
+                        serialNumber={selectedSerial || (drugs[0]?.serialNumber ?? 'RX-994821')}
+                        currentTemp={liveTemp}
+                        isExcursion={tempExcursion}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#172638] border border-[#304257] rounded-xl p-5 space-y-3">
+                  <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-[#00D6B4]" /> Simulated Telemetry Stream Log
+                    </span>
+                    <span className="text-[11px] font-mono text-[#94A3B8]">
+                      Last {simHistory.length} Telemetry Events
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto max-h-56 overflow-y-auto">
+                    <table className="table table-xs w-full text-left font-mono">
+                      <thead>
+                        <tr className="border-b border-[#304257] text-[#94A3B8] text-[10px]">
+                          <th>Timestamp</th>
+                          <th>Temperature</th>
+                          <th>Humidity</th>
+                          <th>Status</th>
+                          <th>Transit Node</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#304257]/40 text-xs">
+                        {simHistory.map((item) => (
+                          <tr key={item.id} className="hover:bg-[#0B1220]/40">
+                            <td className="text-[#94A3B8]">{item.timestamp}</td>
+                            <td className={`font-bold ${item.isExcursion ? 'text-[#F87171]' : 'text-[#00D6B4]'}`}>
+                              {item.temp.toFixed(1)}°C
+                            </td>
+                            <td className="text-[#F1F5F9]">{item.humidity.toFixed(0)}% RH</td>
+                            <td>
+                              {item.isExcursion ? (
+                                <span className="badge badge-xs bg-[#F87171]/20 text-[#F87171] border border-[#F87171]/40 font-bold">
+                                  EXCURSION
+                                </span>
+                              ) : (
+                                <span className="badge badge-xs bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/30 font-bold">
+                                  NORMAL
+                                </span>
+                              )}
+                            </td>
+                            <td className="text-[#94A3B8] truncate max-w-xs">{item.location}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
