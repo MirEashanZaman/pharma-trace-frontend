@@ -170,3 +170,14 @@ export const verifyWalletSignature = async (message: string, signature: string, 
   const res = await api.post('/blockchain/verify-signature', { message, signature, address });
   return res.data;
 };
+
+export const simulateIotTelemetry = async (data: {
+  serialNumber?: string;
+  temperature: number;
+  humidity: number;
+  location?: string;
+}) => {
+  const res = await api.post('/iot/simulate', data);
+  return res.data;
+};
+
