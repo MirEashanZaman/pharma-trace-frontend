@@ -65,10 +65,12 @@ import {
   FileText,
   FileJson,
   Award,
+  Camera,
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { QRCodeSVG } from 'qrcode.react';
 import { jsPDF } from 'jspdf';
+import { CameraQrScanner } from '@/components/qr-scanner';
 
 const TransitMap = dynamic(() => import('@/components/transit-map'), {
   ssr: false,
@@ -315,6 +317,18 @@ export default function DashboardPage() {
   const [recallReason, setRecallReason] = useState('Critical cold-chain excursion (> 14°C) detected');
   const [recallDirective, setRecallDirective] = useState('FDA Safety Alert #2026-REC-001');
   const [recallType, setRecallType] = useState<'RECALLED' | 'QUARANTINED'>('RECALLED');
+
+  const [showScanner, setShowScanner] = useState(false);
+
+  const handleScanPackageQr = (decodedText: string) => {
+    setShowScanner(false);
+    let extracted = decodedText;
+    if (decodedText.includes('/verify/')) {
+      extracted = decodedText.split('/verify/')[1] || decodedText;
+    }
+    setSelectedSerial(extracted);
+    setActiveTab('drugs');
+  };
 
   useEffect(() => {
     const cached = getStoredUser();
@@ -674,6 +688,16 @@ export default function DashboardPage() {
                 <GitPullRequest className="h-4 w-4" /> GitHub & Audit Claims
               </button>
             )}
+
+            <div className="pt-2 border-t border-[#304257]">
+              <button
+                type="button"
+                onClick={() => setShowScanner(true)}
+                className="btn btn-sm w-full bg-[#172638] hover:bg-[#1E2E44] text-[#00D6B4] border border-[#00D6B4]/30 hover:border-[#00D6B4] rounded-xl font-bold flex items-center justify-center gap-2 transition"
+              >
+                <Camera className="h-4 w-4" /> Scan Package QR
+              </button>
+            </div>
           </div>
         </aside>
 
@@ -1238,17 +1262,26 @@ export default function DashboardPage() {
                 <div className="md:col-span-2 space-y-3">
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-bold text-[#F1F5F9]">Registered Drugs & Batches</h4>
-                    {(currentRole === 'REGULATOR' || currentRole === 'MANUFACTURER' || currentRole === 'ADMIN') && (
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={() => {
-                          setRecallTargetSerial(selectedSerial || drugs[0]?.serialNumber || '');
-                          setShowRecallModal(true);
-                        }}
-                        className="btn btn-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 rounded-lg font-bold flex items-center gap-1.5"
+                        type="button"
+                        onClick={() => setShowScanner(true)}
+                        className="btn btn-xs bg-[#172638] hover:bg-[#1E2E44] text-[#00D6B4] border border-[#00D6B4]/40 rounded-lg font-bold flex items-center gap-1.5"
                       >
-                        <AlertOctagon className="h-3.5 w-3.5 text-rose-400" /> Emergency Recall / Quarantine
+                        <Camera className="h-3.5 w-3.5 text-[#00D6B4]" /> Scan Physical Package
                       </button>
-                    )}
+                      {(currentRole === 'REGULATOR' || currentRole === 'MANUFACTURER' || currentRole === 'ADMIN') && (
+                        <button
+                          onClick={() => {
+                            setRecallTargetSerial(selectedSerial || drugs[0]?.serialNumber || '');
+                            setShowRecallModal(true);
+                          }}
+                          className="btn btn-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 rounded-lg font-bold flex items-center gap-1.5"
+                        >
+                          <AlertOctagon className="h-3.5 w-3.5 text-rose-400" /> Emergency Recall / Quarantine
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="grid grid-cols-1 gap-3">
                     {drugs.map((d) => (
@@ -2029,6 +2062,13 @@ export default function DashboardPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {showScanner && (
+        <CameraQrScanner
+          onScanSuccess={handleScanPackageQr}
+          onClose={() => setShowScanner(false)}
+        />
       )}
     </div>
   );
