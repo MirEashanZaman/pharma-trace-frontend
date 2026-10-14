@@ -7,6 +7,7 @@ import {
   downloadComplianceCsv,
   downloadComplianceJson,
 } from '@/lib/compliance-report';
+import { playScannerSound, triggerHaptic } from '@/lib/scanner-audio';
 import {
   Search,
   ShieldAlert,
@@ -132,6 +133,7 @@ export default function VerifyPage() {
         };
       }
 
+      let hasRecall = false;
       const serialToQuery = data.drugSerialNumber || targetHash.trim();
       if (serialToQuery) {
         try {
@@ -153,6 +155,7 @@ export default function VerifyPage() {
 
             const recallEv = events.find((e) => e.eventType === 'RECALLED' || e.eventType === 'QUARANTINED');
             if (recallEv) {
+              hasRecall = true;
               setRecallInfo({
                 isRecalled: true,
                 type: recallEv.eventType,
@@ -167,9 +170,19 @@ export default function VerifyPage() {
           console.error(evErr);
         }
       }
+
       setResult(data);
+      if (hasRecall || !data.exists || !data.isValid) {
+        playScannerSound('hazard');
+        triggerHaptic('hazard');
+      } else {
+        playScannerSound('success');
+        triggerHaptic('success');
+      }
     } catch (err) {
       console.error(err);
+      playScannerSound('hazard');
+      triggerHaptic('hazard');
       setResult({
         exists: false,
         isValid: false,
