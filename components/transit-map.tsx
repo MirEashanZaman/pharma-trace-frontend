@@ -92,7 +92,8 @@ export default function TransitMap({ serialNumber, currentTemp = 4.2, isExcursio
   const createCustomIcon = (status: RoutePoint['status']) => {
     const isLive = status === 'IN_TRANSIT';
     const isCompleted = status === 'COMPLETED';
-    const bgCol = isLive ? '#00D6B4' : isCompleted ? '#3B82F6' : '#64748B';
+    const liveColor = isExcursion ? '#F87171' : '#00D6B4';
+    const bgCol = isLive ? liveColor : isCompleted ? '#3B82F6' : '#64748B';
 
     return L.divIcon({
       className: 'custom-leaflet-icon',
@@ -103,7 +104,7 @@ export default function TransitMap({ serialNumber, currentTemp = 4.2, isExcursio
           height: 22px;
           border-radius: 50%;
           border: 3px solid #0B1220;
-          box-shadow: 0 0 ${isLive ? '16px #00D6B4' : '6px rgba(0,0,0,0.5)'};
+          box-shadow: 0 0 ${isLive ? (isExcursion ? '18px #F87171' : '16px #00D6B4') : '6px rgba(0,0,0,0.5)'};
           display: flex;
           align-items: center;
           justify-content: center;
@@ -211,10 +212,10 @@ export default function TransitMap({ serialNumber, currentTemp = 4.2, isExcursio
                   center={[point.lat, point.lng]}
                   radius={24}
                   pathOptions={{
-                    color: '#00D6B4',
-                    fillColor: '#00D6B4',
-                    fillOpacity: 0.2,
-                    weight: 1,
+                    color: isExcursion ? '#F87171' : '#00D6B4',
+                    fillColor: isExcursion ? '#F87171' : '#00D6B4',
+                    fillOpacity: isExcursion ? 0.35 : 0.2,
+                    weight: isExcursion ? 2 : 1,
                   }}
                 />
               )}
