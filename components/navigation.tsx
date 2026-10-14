@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShieldCheck, Layers, Search, CheckCircle2, LogIn, LogOut, User } from 'lucide-react';
+import { ShieldCheck, Layers, Search, CheckCircle2, LogIn, LogOut, User, Server, RefreshCw, BookOpen } from 'lucide-react';
 import { getStoredUser, logoutUser, UserProfile } from '@/lib/api';
 
 export function Navigation({
@@ -63,12 +63,30 @@ export function Navigation({
           </div>
         </div>
 
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-[#94A3B8]">
-          <Link href="/verify" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
-            <Search className="h-4 w-4 text-[#00D6B4]" /> Public Verification
+        <nav className="hidden lg:flex items-center space-x-5 text-xs font-semibold text-[#94A3B8]">
+          <Link href="/ledger" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
+            <Server className="h-3.5 w-3.5 text-[#00D6B4]" />
+            <span>Ledger</span>
+            <span className="badge badge-xs bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-mono">SSR</span>
+          </Link>
+          <Link href="/catalog" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
+            <RefreshCw className="h-3.5 w-3.5 text-[#00D6B4]" />
+            <span>Catalog</span>
+            <span className="badge badge-xs bg-amber-500/15 text-amber-300 border border-amber-500/30 font-mono">ISR</span>
+          </Link>
+          <Link href="/standards" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
+            <BookOpen className="h-3.5 w-3.5 text-[#00D6B4]" />
+            <span>Standards</span>
+            <span className="badge badge-xs bg-blue-500/15 text-blue-300 border border-blue-500/30 font-mono">SSG</span>
           </Link>
           <Link href="/dashboard" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
-            <Layers className="h-4 w-4" /> Enterprise Dashboard
+            <Layers className="h-3.5 w-3.5 text-[#00D6B4]" />
+            <span>Dashboard</span>
+            <span className="badge badge-xs bg-purple-500/15 text-purple-300 border border-purple-500/30 font-mono">CSR</span>
+          </Link>
+          <Link href="/verify" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
+            <Search className="h-3.5 w-3.5 text-[#00D6B4]" />
+            <span>Verify</span>
           </Link>
         </nav>
 
