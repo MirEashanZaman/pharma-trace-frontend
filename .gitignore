@@ -22,6 +22,8 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 *.pem
+*.key
+*.cert
 
 # debug & logs
 logs
@@ -53,3 +55,14 @@ next-env.d.ts
 .vscode
 *.sublime-workspace
 *.sw?
+
+# temp & runtime
+pids
+*.pid
+*.seed
+*.pid.lock
+.temp
+.tmp
+.cache/
+.turbo/
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
