@@ -227,3 +227,39 @@ export const fetchAuditCsv = async (serialNumber: string): Promise<string> => {
   return res.data;
 };
 
+export const resolveGs1DigitalLink = async (gtin: string, serial: string) => {
+  const res = await api.get(`/blockchain/gs1/resolve/${gtin}/${serial}`);
+  return res.data;
+};
+
+export const parseGs1Uri = async (uri: string) => {
+  const res = await api.post('/blockchain/gs1/parse', { uri });
+  return res.data;
+};
+
+export const verifyDigitalTwin = async (serialNumber: string) => {
+  const res = await api.get(`/blockchain/twin/verify/${serialNumber}`);
+  return res.data;
+};
+
+export const burnDigitalTwin = async (serialNumber: string, dispenserAddress: string) => {
+  const res = await api.post('/blockchain/twin/burn', { serialNumber, dispenserAddress });
+  return res.data;
+};
+
+export const verifyNfcTap = async (tagUid: string, tapCounter: number, cmac: string) => {
+  const res = await api.post('/iot/nfc/verify', { tagUid, tapCounter, cmac });
+  return res.data;
+};
+
+export const simulateNfcTap = async (tagUid: string) => {
+  const res = await api.get(`/iot/nfc/simulate-tap/${tagUid}`);
+  return res.data;
+};
+
+export const checkEscrowAutomation = async () => {
+  const res = await api.get('/blockchain/escrow/automation/check');
+  return res.data;
+};
+
+
