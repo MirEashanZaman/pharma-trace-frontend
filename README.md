@@ -4,8 +4,13 @@ A Next.js 14 (App Router) + Tailwind CSS frontend interface for pharmaceutical t
 
 ---
 
-##  Features
+## Features
 
+* **Interactive Provenance DAG Visualizer (`components/provenance-dag.tsx` & `app/provenance/page.tsx`)**:
+  * **Dual-View DAG Engine**: Toggle between Custody Handover Chain DAG and GS1 EPCIS 2.0 Packaging Aggregation Tree.
+  * **Interactive SVG Canvas**: Vector graph rendering with smooth Bezier links, pan and zoom controls, fit-to-view, and animated edge flow.
+  * **Cryptographic Node Inspector**: Inspect Merkle batch tree roots, IPFS CIDs, EIP-712 Dual Handshakes, Hardware HSM KMS key identities, and IoT telemetry.
+  * **Acyclic Validation**: Graph validation verifying unidirectional custody progression with zero cycle anomalies.
 * **Hero Landing Page (`app/page.tsx`)**: High-impact introduction to Event Sourcing and Web3 blockchain attestation.
 * **Interactive Dashboard (`app/dashboard/page.tsx`)**:
   * **Batch Management**: Register new pharmaceutical drugs and batches.
@@ -16,18 +21,20 @@ A Next.js 14 (App Router) + Tailwind CSS frontend interface for pharmaceutical t
 
 ---
 
-##  Project Structure
+## Project Structure
 
 ```text
 pharma-trace-frontend/
 ├── app/
 │   ├── dashboard/page.tsx             # Interactive Batch, Saga & Attestation Dashboard
+│   ├── provenance/page.tsx            # Dedicated Provenance DAG Visualizer Page
 │   ├── verify/page.tsx                # Step 5 Public Verification Page
 │   ├── globals.css                    # Tailwind CSS Design System
 │   ├── layout.tsx                     # App Root Layout
 │   └── page.tsx                       # Landing Hero Page
 ├── components/
-│   └── navigation.tsx                 # Responsive Header with MetaMask Wallet Connect
+│   ├── navigation.tsx                 # Responsive Header with MetaMask Wallet Connect
+│   └── provenance-dag.tsx             # Interactive SVG Provenance DAG Visualizer
 ├── lib/
 │   ├── api.ts                         # Axios client for NestJS Backend
 │   └── web3.ts                        # Ethers.js Wallet Connection & EIP-191 Signer
