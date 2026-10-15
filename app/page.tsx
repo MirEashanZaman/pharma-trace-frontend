@@ -15,10 +15,16 @@ export default function HomePage() {
 
           <div className="flex items-center gap-4">
             <Link
-              href="/verify"
+              href="/provenance"
               className="text-xs font-semibold text-[#00D6B4] hover:text-[#00b89a] transition px-3 py-1.5 flex items-center gap-1"
             >
-              Public Verify (No Login)
+              Provenance DAG
+            </Link>
+            <Link
+              href="/verify"
+              className="text-xs font-semibold text-[#94A3B8] hover:text-[#F1F5F9] transition px-3 py-1.5 flex items-center gap-1"
+            >
+              Public Verify
             </Link>
             <Link
               href="/dashboard"
@@ -52,10 +58,16 @@ export default function HomePage() {
             Enterprise Dashboard <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
+            href="/provenance"
+            className="btn bg-[#172638] hover:bg-[#243247] text-[#00D6B4] border border-[#00D6B4]/40 rounded-xl px-8 font-bold text-sm shadow-sm flex items-center gap-2"
+          >
+            Audit Provenance DAG
+          </Link>
+          <Link
             href="/verify"
             className="btn bg-[#243247] hover:bg-[#172638] text-[#F1F5F9] border border-[#304257] rounded-xl px-8 font-semibold text-sm shadow-sm"
           >
-            Public Medicine Verification (Patients & Doctors)
+            Public Medicine Verification
           </Link>
         </div>
 
