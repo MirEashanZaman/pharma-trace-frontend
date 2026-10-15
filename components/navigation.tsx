@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShieldCheck, Layers, Search, CheckCircle2, LogIn, LogOut, User, Server, RefreshCw, BookOpen, Flame } from 'lucide-react';
+import { ShieldCheck, Layers, Search, CheckCircle2, LogIn, LogOut, User, Server, RefreshCw, BookOpen, Flame, Network } from 'lucide-react';
 import { getStoredUser, logoutUser, UserProfile } from '@/lib/api';
 
 export function Navigation({
@@ -78,6 +78,11 @@ export function Navigation({
             <BookOpen className="h-3.5 w-3.5 text-[#00D6B4]" />
             <span>Standards</span>
             <span className="badge badge-xs bg-blue-500/15 text-blue-300 border border-blue-500/30 font-mono">SSG</span>
+          </Link>
+          <Link href="/provenance" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
+            <Network className="h-3.5 w-3.5 text-[#00D6B4]" />
+            <span>Provenance</span>
+            <span className="badge badge-xs bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-mono">DAG</span>
           </Link>
           <Link href="/dashboard" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
             <Layers className="h-3.5 w-3.5 text-[#00D6B4]" />
