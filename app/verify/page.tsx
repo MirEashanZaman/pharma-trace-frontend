@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import NextLink from 'next/link';
 import { verifyAttestation, fetchDrugEvents, fetchAuditDossier, AttestationVerification, ComplianceDossier } from '@/lib/api';
 import {
   downloadCompliancePdf,
@@ -23,6 +24,7 @@ import {
   FileText,
   FileJson,
   Award,
+  Network,
 } from 'lucide-react';
 import { Navigation } from '@/components/navigation';
 import { connectMetaMask } from '@/lib/web3';
@@ -422,6 +424,12 @@ export default function VerifyPage() {
                     >
                       <FileJson className="h-3.5 w-3.5 text-[#00D6B4]" /> JSON Package
                     </button>
+                    <NextLink
+                      href="/provenance"
+                      className="btn btn-xs bg-[#172638] hover:bg-[#1E2E44] text-[#00D6B4] border border-[#00D6B4]/40 rounded-lg font-bold flex items-center gap-1.5"
+                    >
+                      <Network className="h-3.5 w-3.5" /> Provenance DAG
+                    </NextLink>
                   </div>
                 </div>
               </div>
