@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShieldCheck, Layers, Search, CheckCircle2, LogIn, LogOut, User, Server, RefreshCw, BookOpen } from 'lucide-react';
+import { ShieldCheck, Layers, Search, CheckCircle2, LogIn, LogOut, User, Server, RefreshCw, BookOpen, Flame } from 'lucide-react';
 import { getStoredUser, logoutUser, UserProfile } from '@/lib/api';
 
 export function Navigation({
@@ -83,6 +83,11 @@ export function Navigation({
             <Layers className="h-3.5 w-3.5 text-[#00D6B4]" />
             <span>Dashboard</span>
             <span className="badge badge-xs bg-purple-500/15 text-purple-300 border border-purple-500/30 font-mono">CSR</span>
+          </Link>
+          <Link href="/dispense" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
+            <Flame className="h-3.5 w-3.5 text-[#00D6B4]" />
+            <span>Dispense</span>
+            <span className="badge badge-xs bg-rose-500/15 text-rose-300 border border-rose-500/30 font-mono">Burn</span>
           </Link>
           <Link href="/verify" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
             <Search className="h-3.5 w-3.5 text-[#00D6B4]" />
