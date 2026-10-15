@@ -42,16 +42,23 @@ export function CameraQrScanner({ onScanSuccess, onClose }: QrScannerProps) {
 
     scanner.render(
       (decodedText) => {
+        const cleanText = decodedText.trim();
+        const gs1AlphanumericRegex = /^[A-Za-z0-9\-_#:.]{3,128}$/;
+        if (!gs1AlphanumericRegex.test(cleanText) || cleanText.includes('<') || cleanText.includes('>') || cleanText.toLowerCase().includes('javascript:')) {
+          setScanError('Suspicious or invalid barcode data. Scanned code must match GS1 SGTIN alphanumeric format.');
+          return;
+        }
+        setScanError('');
         if (soundRef.current) {
           playScannerSound('beep');
         }
         if (hapticRef.current) {
           triggerHaptic('beep');
         }
-        setDetectedText(decodedText);
+        setDetectedText(cleanText);
         scanner.clear().catch(() => {});
         setTimeout(() => {
-          onScanSuccess(decodedText);
+          onScanSuccess(cleanText);
         }, 280);
       },
       () => {}
