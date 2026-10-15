@@ -66,11 +66,13 @@ import {
   FileJson,
   Award,
   Camera,
+  Network,
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { QRCodeSVG } from 'qrcode.react';
 import { jsPDF } from 'jspdf';
 import { CameraQrScanner } from '@/components/qr-scanner';
+import { ProvenanceDagVisualizer } from '@/components/provenance-dag';
 
 const TransitMap = dynamic(() => import('@/components/transit-map'), {
   ssr: false,
@@ -87,7 +89,7 @@ export default function DashboardPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [wallet, setWallet] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'simulation' | 'transit-map' | 'attestations' | 'github'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'simulation' | 'transit-map' | 'provenance' | 'attestations' | 'github'>('overview');
 
   const [drugs, setDrugs] = useState<Drug[]>([]);
   const [selectedSerial, setSelectedSerial] = useState<string>('');
@@ -663,6 +665,16 @@ export default function DashboardPage() {
               }`}
             >
               <Navigation2 className="h-4 w-4" /> Live Fleet & Route Map
+            </button>
+            <button
+              onClick={() => setActiveTab('provenance')}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                activeTab === 'provenance'
+                  ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                  : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+              }`}
+            >
+              <Network className="h-4 w-4" /> Provenance DAG
             </button>
             {(currentRole === 'ADMIN' || currentRole === 'REGULATOR') && (
               <button
@@ -1951,6 +1963,10 @@ export default function DashboardPage() {
                 <div>Status: <span className="text-[#A3E635] font-bold">Audited & Verified</span></div>
               </div>
             </div>
+          )}
+
+          {activeTab === 'provenance' && (
+            <ProvenanceDagVisualizer initialBatch={selectedSerial || 'SN-2026-AMOX500'} />
           )}
         </main>
       </div>
