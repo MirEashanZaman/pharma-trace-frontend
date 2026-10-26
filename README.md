@@ -1,23 +1,40 @@
-# PharmaTrace-ES: Web3 Frontend Application
+# PharmaTrace-ES: Web3 Enterprise Frontend Application
 
-A Next.js 14 (App Router) + Tailwind CSS frontend interface for pharmaceutical traceability, Web3 attestation signing, and public proof verification.
+A responsive Next.js 14 (App Router) + Tailwind CSS and DaisyUI frontend interface implementing the Midnight Navy / Neon Teal design system (`#0B1220`, `#00D6B4`, `#243247`, `#172638`) for pharmaceutical supply chain traceability, decentralized escrow, carrier staking, and regulatory timelock governance.
 
 ---
 
-## Features
+## Web3 Portals & Features
 
-* **Interactive Provenance DAG Visualizer (`components/provenance-dag.tsx` & `app/provenance/page.tsx`)**:
-  * **Dual-View DAG Engine**: Toggle between Custody Handover Chain DAG and GS1 EPCIS 2.0 Packaging Aggregation Tree.
-  * **Interactive SVG Canvas**: Vector graph rendering with smooth Bezier links, pan and zoom controls, fit-to-view, and animated edge flow.
-  * **Cryptographic Node Inspector**: Inspect Merkle batch tree roots, IPFS CIDs, EIP-712 Dual Handshakes, Hardware HSM KMS key identities, and IoT telemetry.
-  * **Acyclic Validation**: Graph validation verifying unidirectional custody progression with zero cycle anomalies.
-* **Hero Landing Page (`app/page.tsx`)**: High-impact introduction to Event Sourcing and Web3 blockchain attestation.
-* **Interactive Dashboard (`app/dashboard/page.tsx`)**:
-  * **Batch Management**: Register new pharmaceutical drugs and batches.
-  * **Saga Lifecycle Engine**: Trigger state-validated custody transitions (`MANUFACTURED` -> `QUALITY_CHECKED` -> `PACKAGED` -> `SHIPPED` -> `RECEIVED` -> `DISTRIBUTED`).
-  * **Digital Wallet Attestations**: Sign transfers with MetaMask (EIP-191) and view immutable anchors.
-  * **GitHub Audit & Trace**: Associate pull requests and commits with contribution/custody claims.
-* **Public Proof Explorer (`app/verify/page.tsx`)**: Publicly inspect any SHA-256 event hash, on-chain transaction anchor, signer address, and validity state.
+* **Carrier Collateral Staking & Bond Portal (`app/staking/page.tsx`)**:
+  * ERC-20 collateral deposits and unlocked stake withdrawals.
+  * Shipment SLA bond locking linked to manufacturer indemnity beneficiaries.
+  * Multi-sensor checkpoint consensus evaluation for automated bond settlement or breach slashing.
+* **Cold-Chain Escrow & Chainlink Relayer Portal (`app/escrow/page.tsx`)**:
+  * Commercial delivery escrow locking with configurable min/max temperature bands.
+  * Chainlink Automation 2.0 relayer monitoring (`checkUpkeep` / `performUpkeep`).
+  * ERC-4337 Account Abstraction paymaster gas sponsorship simulation.
+* **Multi-Sig Regulatory Governance & Timelock (`app/governance/page.tsx`)**:
+  * OpenZeppelin TimelockController multi-signature quorum for regulatory nodes (FDA, EMA, WHO).
+  * 2-of-3 guardian signature threshold validation.
+  * Timelock delay enforcement for emergency product recalls and directive execution.
+* **NFC DNA Verification & Digital Twin Burn (`app/dispense/page.tsx`)**:
+  * NTAG 424 DNA dynamic AES-128 CMAC validation.
+  * GS1 Digital Link resolver linking 2D data matrix barcodes directly to on-chain credentials.
+  * ERC-721 physical-digital twin burn on patient dispensing to eliminate counterfeit recirculations.
+* **Interactive Provenance DAG Visualizer (`app/provenance/page.tsx`)**:
+  * Vector graph rendering with smooth Bezier links, pan and zoom controls, fit-to-view, and animated edge flow.
+  * Dual-view mode: Custody Handover Chain DAG and GS1 EPCIS 2.0 Packaging Aggregation Tree.
+* **SSR Immutable Cryptographic Ledger (`app/ledger/page.tsx`)**:
+  * Server-side rendered hash-chain verification with real-time on-chain Merkle root validation.
+* **ISR Dynamic Pharmaceutical Catalog (`app/catalog/page.tsx`)**:
+  * Incremental Static Regeneration catalog displaying verified pharmaceutical batches and serialization parameters.
+* **SSG Regulatory Compliance Matrix (`app/standards/page.tsx`)**:
+  * Pre-rendered regulatory framework mapping (FDA 21 CFR Part 11, EU GMP Annex 11, WHO TRS 961, US DSCSA Title II).
+* **Interactive Custody Dashboard (`app/dashboard/page.tsx`)**:
+  * Batch serialization, Saga state validation, and live IoT telemetry stream.
+* **Public Authenticity Verifier (`app/verify/page.tsx`)**:
+  * Instant consumer and patient authenticity verification using serial numbers or QR codes.
 
 ---
 
@@ -26,36 +43,48 @@ A Next.js 14 (App Router) + Tailwind CSS frontend interface for pharmaceutical t
 ```text
 pharma-trace-frontend/
 ├── app/
+│   ├── staking/page.tsx               # Carrier Collateral Staking & Bond Portal
+│   ├── escrow/page.tsx                # Cold-Chain Escrow & Chainlink Relayer
+│   ├── governance/page.tsx            # Multi-Sig Regulatory Timelock Governance
+│   ├── dispense/page.tsx              # NFC DNA Authentication & Digital Twin Burn
+│   ├── provenance/page.tsx            # Dedicated Provenance DAG Visualizer
+│   ├── ledger/page.tsx                # SSR Immutable Cryptographic Ledger
+│   ├── catalog/page.tsx               # ISR Dynamic Pharmaceutical Catalog
+│   ├── standards/page.tsx             # SSG Regulatory Compliance Matrix
 │   ├── dashboard/page.tsx             # Interactive Batch, Saga & Attestation Dashboard
-│   ├── provenance/page.tsx            # Dedicated Provenance DAG Visualizer Page
-│   ├── verify/page.tsx                # Step 5 Public Verification Page
-│   ├── globals.css                    # Tailwind CSS Design System
+│   ├── verify/page.tsx                # Public Consumer & Hospital Verification Page
+│   ├── login/page.tsx                 # Web3 MetaMask & Enterprise JWT Authentication
+│   ├── globals.css                    # Tailwind CSS & DaisyUI Stylesheet
 │   ├── layout.tsx                     # App Root Layout
-│   └── page.tsx                       # Landing Hero Page
+│   └── page.tsx                       # Hero Landing Page
 ├── components/
-│   ├── navigation.tsx                 # Responsive Header with MetaMask Wallet Connect
+│   ├── navigation.tsx                 # Responsive Header with Enterprise Role Badges
 │   └── provenance-dag.tsx             # Interactive SVG Provenance DAG Visualizer
 ├── lib/
-│   ├── api.ts                         # Axios client for NestJS Backend
+│   ├── api.ts                         # Axios Web3 Client SDK for Backend API (Port 3500)
 │   └── web3.ts                        # Ethers.js Wallet Connection & EIP-191 Signer
+├── tailwind.config.ts                 # Midnight Navy & Neon Teal Design Tokens
 ├── package.json
-├── tailwind.config.ts
 └── tsconfig.json
 ```
 
 ---
 
-##  Setup & Execution
+## Setup & Execution
 
+### Install Dependencies
 ```bash
-# Install dependencies
 npm install
-
-# Start local development server
-npm run dev
-
-# Build for production
-npm run build
-npm run start
 ```
-*Frontend runs on `http://localhost:3000` (or `http://localhost:3001` if backend uses port 3000)*
+
+### Start Development Server
+```bash
+npm run dev -- -p 3001
+```
+*Application runs on `http://localhost:3001`.*
+
+### Build for Production
+```bash
+npm run build
+npm run start -- -p 3001
+```
