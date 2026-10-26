@@ -13,8 +13,8 @@ export const api = axios.create({
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('pharma_access_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (token && typeof token === 'string' && token.split('.').length === 3) {
+      config.headers.Authorization = `Bearer ${token.trim()}`;
     }
   }
   return config;
@@ -156,8 +156,12 @@ export const getStoredUser = (): UserProfile | null => {
     const raw = localStorage.getItem('pharma_user');
     if (raw) {
       try {
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && parsed.email && parsed.role) {
+          return parsed;
+        }
       } catch (e) {
+        localStorage.removeItem('pharma_user');
         return null;
       }
     }
