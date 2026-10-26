@@ -262,4 +262,158 @@ export const checkEscrowAutomation = async () => {
   return res.data;
 };
 
+export const depositStake = async (data: { carrierAddress: string; amount: number }) => {
+  const res = await api.post('/blockchain/carrier-staking/deposit', data);
+  return res.data;
+};
+
+export const getCarrierAccount = async (carrierAddress: string) => {
+  const res = await api.get(`/blockchain/carrier-staking/account/${carrierAddress}`);
+  return res.data;
+};
+
+export const lockShipmentBond = async (data: {
+  carrierAddress: string;
+  shipmentId: string;
+  bondAmount: number;
+  manufacturerAddress: string;
+}) => {
+  const res = await api.post('/blockchain/carrier-staking/bond/lock', data);
+  return res.data;
+};
+
+export const getShipmentBond = async (shipmentId: string) => {
+  const res = await api.get(`/blockchain/carrier-staking/bond/${shipmentId}`);
+  return res.data;
+};
+
+export const listShipmentBonds = async (params?: { carrierAddress?: string; status?: string; limit?: number }) => {
+  const res = await api.get('/blockchain/carrier-staking/bonds', { params });
+  return res.data;
+};
+
+export const resolveShipmentBond = async (data: {
+  shipmentId: string;
+  sensorClusters: any[];
+  slashPercentage?: number;
+}) => {
+  const res = await api.post('/blockchain/carrier-staking/bond/resolve', data);
+  return res.data;
+};
+
+export const unstakeCarrier = async (data: { carrierAddress: string; amount: number }) => {
+  const res = await api.post('/blockchain/carrier-staking/unstake', data);
+  return res.data;
+};
+
+export const getCarrierIndemnity = async (manufacturerAddress: string) => {
+  const res = await api.get(`/blockchain/carrier-staking/indemnity/${manufacturerAddress}`);
+  return res.data;
+};
+
+export const createEscrowOrder = async (data: any) => {
+  const res = await api.post('/blockchain/escrow/create', data);
+  return res.data;
+};
+
+export const getEscrowOrder = async (orderId: string) => {
+  const res = await api.get(`/blockchain/escrow/${orderId}`);
+  return res.data;
+};
+
+export const releaseEscrowOrder = async (orderId: string, callerAddress: string) => {
+  const res = await api.post('/blockchain/escrow/release', { orderId, callerAddress });
+  return res.data;
+};
+
+export const evaluateEscrowWithConsensus = async (data: {
+  orderId: string;
+  sensorClusters: any[];
+  callerAddress: string;
+}) => {
+  const res = await api.post('/blockchain/escrow/evaluate-consensus', data);
+  return res.data;
+};
+
+export const refundEscrowOrder = async (orderId: string, reason: string) => {
+  const res = await api.post('/blockchain/escrow/refund', { orderId, reason });
+  return res.data;
+};
+
+export const performEscrowAutomation = async (orderId: string, actionType: number) => {
+  const res = await api.post('/blockchain/escrow/automation/perform', { orderId, actionType });
+  return res.data;
+};
+
+export const pollEscrowAutomation = async () => {
+  const res = await api.post('/blockchain/escrow/automation/poll');
+  return res.data;
+};
+
+export const fetchGovernanceGuardians = async () => {
+  const res = await api.get('/blockchain/governance/guardians');
+  return res.data;
+};
+
+export const fetchGovernanceProposals = async (params?: { status?: string; target?: string }) => {
+  const res = await api.get('/blockchain/governance/proposals', { params });
+  return res.data;
+};
+
+export const fetchGovernanceProposal = async (id: string) => {
+  const res = await api.get(`/blockchain/governance/proposals/${id}`);
+  return res.data;
+};
+
+export const createGovernanceProposal = async (data: any) => {
+  const res = await api.post('/blockchain/governance/propose', data);
+  return res.data;
+};
+
+export const confirmGovernanceProposal = async (proposalId: string, guardianAddress: string) => {
+  const res = await api.post('/blockchain/governance/confirm', { proposalId, guardianAddress });
+  return res.data;
+};
+
+export const executeGovernanceProposal = async (proposalId: string, executorAddress: string) => {
+  const res = await api.post('/blockchain/governance/execute', { proposalId, executorAddress });
+  return res.data;
+};
+
+export const cancelGovernanceProposal = async (proposalId: string, guardianAddress: string, reason?: string) => {
+  const res = await api.post('/blockchain/governance/cancel', { proposalId, guardianAddress, reason });
+  return res.data;
+};
+
+export const estimateUserOpGas = async (userOp: any) => {
+  const res = await api.post('/blockchain/aa/estimate-gas', userOp);
+  return res.data;
+};
+
+export const sponsorUserOp = async (userOp: any, actionName: string) => {
+  const res = await api.post('/blockchain/aa/sponsor', { userOp, actionName });
+  return res.data;
+};
+
+export const sendUserOp = async (userOp: any) => {
+  const res = await api.post('/blockchain/aa/send-userop', userOp);
+  return res.data;
+};
+
+export const bundleAndExecuteUserOps = async (data?: { maxBatchSize?: number; beneficiary?: string }) => {
+  const res = await api.post('/blockchain/aa/bundle-and-execute', data || {});
+  return res.data;
+};
+
+export const getUserOpReceipt = async (hash: string) => {
+  const res = await api.get(`/blockchain/aa/receipt/${hash}`);
+  return res.data;
+};
+
+export const getBundlerMempool = async () => {
+  const res = await api.get('/blockchain/aa/mempool');
+  return res.data;
+};
+
+
 
