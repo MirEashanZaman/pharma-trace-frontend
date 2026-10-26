@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShieldCheck, Layers, Search, CheckCircle2, LogIn, LogOut, User, Server, RefreshCw, BookOpen, Flame, Network } from 'lucide-react';
+import { ShieldCheck, Layers, Search, CheckCircle2, LogIn, LogOut, User, Server, RefreshCw, BookOpen, Flame, Network, Lock, Scale, Vote } from 'lucide-react';
 import { getStoredUser, logoutUser, UserProfile } from '@/lib/api';
 
 export function Navigation({
@@ -63,7 +63,7 @@ export function Navigation({
           </div>
         </div>
 
-        <nav className="hidden lg:flex items-center space-x-5 text-xs font-semibold text-[#94A3B8]">
+        <nav className="hidden xl:flex items-center space-x-4 text-xs font-semibold text-[#94A3B8]">
           <Link href="/ledger" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
             <Server className="h-3.5 w-3.5 text-[#00D6B4]" />
             <span>Ledger</span>
@@ -83,6 +83,21 @@ export function Navigation({
             <Network className="h-3.5 w-3.5 text-[#00D6B4]" />
             <span>Provenance</span>
             <span className="badge badge-xs bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-mono">DAG</span>
+          </Link>
+          <Link href="/staking" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
+            <Lock className="h-3.5 w-3.5 text-[#00D6B4]" />
+            <span>Staking</span>
+            <span className="badge badge-xs bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono">BOND</span>
+          </Link>
+          <Link href="/escrow" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
+            <Scale className="h-3.5 w-3.5 text-[#00D6B4]" />
+            <span>Escrow</span>
+            <span className="badge badge-xs bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-mono">KEEPER</span>
+          </Link>
+          <Link href="/governance" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
+            <Vote className="h-3.5 w-3.5 text-[#00D6B4]" />
+            <span>Governance</span>
+            <span className="badge badge-xs bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-mono">TIMELOCK</span>
           </Link>
           <Link href="/dashboard" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
             <Layers className="h-3.5 w-3.5 text-[#00D6B4]" />
