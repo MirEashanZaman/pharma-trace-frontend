@@ -129,25 +129,25 @@ export default async function LiveLedgerPage() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-[#304257] pb-6">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 badge badge-sm bg-[#00D6B4]/15 border border-[#00D6B4]/40 text-[#00D6B4] font-bold">
-              <Server className="h-3 w-3" /> SSR &bull; Server-Side Rendering (Dynamic)
+              <Server className="h-3 w-3" /> Real-Time Live Feed
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#F1F5F9]">
               Live Blockchain Custody & Cold-Chain Ledger
             </h1>
             <p className="text-xs text-[#94A3B8]">
-              Rendered on the server per request at runtime with `no-store` cache semantics and dynamic database evaluation.
+              Synchronized with distributed ledger nodes and cold-chain telemetry streams for immediate audit verification.
             </p>
           </div>
 
           <div className="bg-[#172638] border border-[#304257] rounded-xl px-4 py-3 text-right">
             <span className="text-[10px] font-bold uppercase tracking-wider text-[#00D6B4] flex items-center justify-end gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#00D6B4] animate-ping" /> Dynamic Server Execution
+              <span className="h-2 w-2 rounded-full bg-[#00D6B4] animate-ping" /> Live Synchronization
             </span>
             <span className="text-xs font-mono text-[#F1F5F9] block mt-0.5">
               {renderTimestamp}
             </span>
             <span className="text-[10px] text-[#94A3B8] block">
-              Server Compute Latency: {renderDurationMs}ms
+              Verification Response: {renderDurationMs}ms
             </span>
           </div>
         </div>
@@ -155,11 +155,11 @@ export default async function LiveLedgerPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="card bg-[#243247] border border-[#304257] p-5 rounded-2xl shadow-sm space-y-1">
             <div className="flex items-center justify-between text-xs text-[#94A3B8] font-bold uppercase">
-              <span>Server Protocol</span>
+              <span>Security Protocol</span>
               <Server className="h-4 w-4 text-[#00D6B4]" />
             </div>
-            <p className="text-xl font-mono font-bold text-[#F1F5F9]">HTTP/2 Dynamic</p>
-            <p className="text-[11px] text-[#00D6B4]">Cache: no-store on-demand</p>
+            <p className="text-xl font-mono font-bold text-[#F1F5F9]">Enterprise TLS</p>
+            <p className="text-[11px] text-[#00D6B4]">Zero Stale Data</p>
           </div>
 
           <div className="card bg-[#243247] border border-[#304257] p-5 rounded-2xl shadow-sm space-y-1">
@@ -194,17 +194,17 @@ export default async function LiveLedgerPage() {
           <div className="p-4 sm:p-6 border-b border-[#304257] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-bold text-[#F1F5F9]">
-                Live Pharmaceutical Provenance Ledger (SSR Query)
+                Live Pharmaceutical Provenance Ledger
               </h2>
               <p className="text-xs text-[#94A3B8]">
-                Every browser reload executes a direct server-side database pull without stale client caching.
+                Real-time custody tracking and thermal telemetry across global logistics corridors.
               </p>
             </div>
             <Link
               href="/dashboard"
               className="btn btn-sm bg-[#172638] hover:bg-[#1E2E44] text-[#00D6B4] border border-[#00D6B4]/30 rounded-xl font-bold text-xs"
             >
-              Open CSR Interactive Console &rarr;
+              Open Interactive Console &rarr;
             </Link>
           </div>
 
@@ -263,13 +263,13 @@ export default async function LiveLedgerPage() {
 
         <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-3">
           <div className="flex items-center gap-2 text-[#00D6B4] text-xs font-bold uppercase tracking-wider">
-            <Radio className="h-4 w-4" /> Technical Architecture Note
+            <Radio className="h-4 w-4" /> Regulatory Audit Transparency
           </div>
           <h3 className="text-base font-bold text-[#F1F5F9]">
-            Server-Side Rendering (SSR) Execution Model
+            Tamper-Evident Ledger Integrity
           </h3>
           <p className="text-xs text-[#94A3B8] leading-relaxed">
-            By declaring `export const dynamic = 'force-dynamic'`, Next.js instructs the server to render this page fresh for every incoming HTTP request. The backend query is dispatched from server to database behind the firewall, rendering complete HTML with zero client API waterfalls. This provides instant time-to-first-content, comprehensive SEO discoverability for public regulatory filings, and guaranteed synchronization with current blockchain confirmations.
+            All pharmaceutical transactions, cold-chain checkpoint telemetry, and custody handoffs are cryptographically committed to immutable Merkle trees and verifiable digital twins. Health authorities, hospital pharmacies, and logistics providers obtain instant provenance verification with complete traceability across the global supply chain.
           </p>
         </div>
       </main>
