@@ -66,3 +66,7 @@ pids
 .cache/
 .turbo/
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+.eslintcache
+test-results/
+playwright-report/
+blob-report/
