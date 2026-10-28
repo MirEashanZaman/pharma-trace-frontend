@@ -58,7 +58,7 @@ export function Navigation({
           </div>
           <div>
             <Link href="/" className="text-xl font-bold tracking-tight text-[#F1F5F9] flex items-center gap-2">
-              PharmaTrace<span className="badge badge-sm bg-[#00D6B4] text-[#0B1220] font-bold border-none">ES</span>
+              PharmaTrace
             </Link>
           </div>
         </div>
@@ -67,47 +67,38 @@ export function Navigation({
           <Link href="/ledger" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
             <Server className="h-3.5 w-3.5 text-[#00D6B4]" />
             <span>Ledger</span>
-            <span className="badge badge-xs bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-mono">SSR</span>
           </Link>
           <Link href="/catalog" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
             <RefreshCw className="h-3.5 w-3.5 text-[#00D6B4]" />
             <span>Catalog</span>
-            <span className="badge badge-xs bg-amber-500/15 text-amber-300 border border-amber-500/30 font-mono">ISR</span>
           </Link>
           <Link href="/standards" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
             <BookOpen className="h-3.5 w-3.5 text-[#00D6B4]" />
             <span>Standards</span>
-            <span className="badge badge-xs bg-blue-500/15 text-blue-300 border border-blue-500/30 font-mono">SSG</span>
           </Link>
           <Link href="/provenance" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
             <Network className="h-3.5 w-3.5 text-[#00D6B4]" />
             <span>Provenance</span>
-            <span className="badge badge-xs bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-mono">DAG</span>
           </Link>
           <Link href="/staking" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
             <Lock className="h-3.5 w-3.5 text-[#00D6B4]" />
             <span>Staking</span>
-            <span className="badge badge-xs bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono">BOND</span>
           </Link>
           <Link href="/escrow" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
             <Scale className="h-3.5 w-3.5 text-[#00D6B4]" />
             <span>Escrow</span>
-            <span className="badge badge-xs bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-mono">KEEPER</span>
           </Link>
           <Link href="/governance" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
             <Vote className="h-3.5 w-3.5 text-[#00D6B4]" />
             <span>Governance</span>
-            <span className="badge badge-xs bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-mono">TIMELOCK</span>
           </Link>
           <Link href="/dashboard" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
             <Layers className="h-3.5 w-3.5 text-[#00D6B4]" />
             <span>Dashboard</span>
-            <span className="badge badge-xs bg-purple-500/15 text-purple-300 border border-purple-500/30 font-mono">CSR</span>
           </Link>
           <Link href="/dispense" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
             <Flame className="h-3.5 w-3.5 text-[#00D6B4]" />
             <span>Dispense</span>
-            <span className="badge badge-xs bg-rose-500/15 text-rose-300 border border-rose-500/30 font-mono">Burn</span>
           </Link>
           <Link href="/verify" className="hover:text-[#00D6B4] transition-colors flex items-center gap-1.5">
             <Search className="h-3.5 w-3.5 text-[#00D6B4]" />
