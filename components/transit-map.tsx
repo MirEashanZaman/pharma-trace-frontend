@@ -120,8 +120,8 @@ export default function TransitMap({ serialNumber, currentTemp = 4.2, isExcursio
   const polylineCoords = DEFAULT_ROUTE.map((pt) => [pt.lat, pt.lng] as [number, number]);
 
   return (
-    <div className="relative rounded-2xl overflow-hidden border border-[#304257] bg-[#0B1220] shadow-2xl">
-      <div className="absolute top-4 left-4 z-[1000] max-w-sm w-full bg-[#0B1220]/90 backdrop-blur-md p-4 rounded-xl border border-[#304257] shadow-xl text-[#F1F5F9] space-y-3 pointer-events-auto">
+    <div className="relative isolate z-0 rounded-2xl overflow-hidden border border-[#304257] bg-[#0B1220] shadow-2xl">
+      <div className="absolute top-4 left-4 z-10 max-w-sm w-full bg-[#0B1220]/90 backdrop-blur-md p-4 rounded-xl border border-[#304257] shadow-xl text-[#F1F5F9] space-y-3 pointer-events-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2.5 w-2.5">
@@ -167,7 +167,7 @@ export default function TransitMap({ serialNumber, currentTemp = 4.2, isExcursio
         </div>
       </div>
 
-      <div className="absolute bottom-4 right-4 z-[1000] bg-[#0B1220]/90 backdrop-blur-md px-3 py-2 rounded-xl border border-[#304257] shadow-xl text-[11px] text-slate-300 flex items-center gap-4 pointer-events-auto">
+      <div className="absolute bottom-4 right-4 z-10 bg-[#0B1220]/90 backdrop-blur-md px-3 py-2 rounded-xl border border-[#304257] shadow-xl text-[11px] text-slate-300 flex items-center gap-4 pointer-events-auto">
         <div className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-[#3B82F6]"></span>
           <span>Checkpoint Passed</span>
@@ -182,7 +182,7 @@ export default function TransitMap({ serialNumber, currentTemp = 4.2, isExcursio
         </div>
       </div>
 
-      <div className="h-[480px] w-full z-0">
+      <div className="relative isolate z-0 h-[480px] w-full">
         <MapContainer
           center={[40.7589, -73.9851]}
           zoom={12.5}
