@@ -107,14 +107,14 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#304257] pb-4">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-[#00D6B4]">
-                Next.js App Router Architecture
+                Enterprise Supply Chain Architecture
               </span>
               <h2 className="text-2xl font-black text-[#F1F5F9] mt-0.5">
-                Full-Spectrum Rendering Paradigms (SSR, CSR, SSG, ISR)
+                Core Tracking & Verification Modules
               </h2>
             </div>
             <span className="badge badge-sm bg-[#172638] border border-[#304257] text-[#94A3B8] font-mono text-[10px]">
-              Hybrid Engine
+              Production Suite
             </span>
           </div>
 
@@ -125,7 +125,7 @@ export default function HomePage() {
             >
               <div className="flex items-center justify-between">
                 <span className="badge badge-sm bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/40 font-mono font-bold">
-                  SSR &bull; Dynamic
+                  Live Audit Feed
                 </span>
                 <ArrowRight className="h-4 w-4 text-[#94A3B8] group-hover:text-[#00D6B4] transition" />
               </div>
@@ -134,7 +134,7 @@ export default function HomePage() {
                   Live Ledger
                 </h3>
                 <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
-                  Dynamic server-side rendering per request with `force-dynamic` for real-time blockchain and database query.
+                  Real-time blockchain audit trail with instant synchronization for regulatory compliance and dispute resolution.
                 </p>
               </div>
             </Link>
@@ -145,16 +145,16 @@ export default function HomePage() {
             >
               <div className="flex items-center justify-between">
                 <span className="badge badge-sm bg-purple-500/15 text-purple-300 border border-purple-500/40 font-mono font-bold">
-                  CSR &bull; Client
+                  Enterprise Portal
                 </span>
                 <ArrowRight className="h-4 w-4 text-[#94A3B8] group-hover:text-[#00D6B4] transition" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-[#F1F5F9] group-hover:text-[#00D6B4] transition">
-                  Enterprise Portal
+                  Operations Console
                 </h3>
                 <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
-                  Interactive client component with WebSockets, Web Audio feedback, haptic pulses, and MetaMask wallet.
+                  Interactive custody transfers, IoT cold-chain simulation, verifiable credentials, and hardware oracle controls.
                 </p>
               </div>
             </Link>
@@ -165,16 +165,16 @@ export default function HomePage() {
             >
               <div className="flex items-center justify-between">
                 <span className="badge badge-sm bg-blue-500/15 text-blue-300 border border-blue-500/40 font-mono font-bold">
-                  SSG &bull; Static
+                  Global Standards
                 </span>
                 <ArrowRight className="h-4 w-4 text-[#94A3B8] group-hover:text-[#00D6B4] transition" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-[#F1F5F9] group-hover:text-[#00D6B4] transition">
-                  Standards Directory
+                  Compliance Matrix
                 </h3>
                 <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
-                  Pre-rendered at build time with `generateStaticParams` for sub-millisecond edge CDN delivery.
+                  Direct cross-reference mapping across FDA 21 CFR Part 11, EU GMP Annex 11, and DSCSA Title II.
                 </p>
               </div>
             </Link>
@@ -185,7 +185,7 @@ export default function HomePage() {
             >
               <div className="flex items-center justify-between">
                 <span className="badge badge-sm bg-amber-500/15 text-amber-300 border border-amber-500/40 font-mono font-bold">
-                  ISR &bull; 60s Reval
+                  Master Directory
                 </span>
                 <ArrowRight className="h-4 w-4 text-[#94A3B8] group-hover:text-[#00D6B4] transition" />
               </div>
@@ -194,7 +194,7 @@ export default function HomePage() {
                   Medicine Catalog
                 </h3>
                 <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
-                  Statically cached public directory with background regeneration every 60 seconds without redeploying.
+                  Verified public index of registered pharmaceutical batches, GS1 serialization, and cold-chain parameters.
                 </p>
               </div>
             </Link>
