@@ -198,6 +198,23 @@ export default function LoginPage() {
           </p>
         </div>
 
+        <div className="p-4 rounded-2xl bg-[#172638] border border-[#00D6B4]/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-[#00D6B4]/15 text-[#00D6B4] flex items-center justify-center shrink-0">
+              <Lock className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-[#F1F5F9] flex items-center gap-2">
+                <span>Enterprise Dashboard Authentication Required</span>
+                <span className="badge badge-xs bg-[#00D6B4] text-[#0B1220] font-bold border-none">RBAC Protected</span>
+              </div>
+              <div className="text-[11px] text-[#94A3B8] mt-0.5">
+                The Enterprise Dashboard manages batch registration, IoT telemetrics, and attestation signing. Select any 1-Click Stakeholder Persona below or sign in to access the Dashboard.
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="p-4 rounded-2xl bg-[#172638] border border-[#304257] flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-[#00D6B4]/15 text-[#00D6B4] flex items-center justify-center shrink-0">
