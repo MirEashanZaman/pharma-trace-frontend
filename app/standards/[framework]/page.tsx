@@ -194,7 +194,7 @@ export default function StandardDetailPage({
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <span className="badge badge-sm bg-[#00D6B4]/15 border border-[#00D6B4]/40 text-[#00D6B4] font-bold">
-                  SSG Pre-Rendered
+                  Certified Standard
                 </span>
                 <span className="badge badge-sm bg-[#172638] border border-[#304257] text-[#94A3B8] font-mono">
                   {standard.classification}
