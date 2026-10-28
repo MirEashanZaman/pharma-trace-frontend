@@ -112,7 +112,7 @@ const CUSTODY_NODES: DagNode[] = [
     actor: 'US FDA Inspectorate / CDER Office',
     actorAddress: '0xF60e3C557686fA391FbB72724b22eeC2613e5e53',
     hash: '0x7e1c9a05b38290fa8201cd93821948ba0821049c8120fa89b380291df93021aa',
-    x: 420,
+    x: 510,
     y: 100,
     details: {
       kmsKeyId: 'kms-pharma-reg-01',
@@ -131,7 +131,7 @@ const CUSTODY_NODES: DagNode[] = [
     actor: 'Autonomous Settlement Vault',
     actorAddress: '0x509aC7B938B7383DB474B3A3348baab03abcEf79',
     hash: '0x362b5e961dbcc608879de250333b9d8f83f5159458e3f6478792d477b8a9e54c',
-    x: 420,
+    x: 510,
     y: 280,
     details: {
       escrowAmountEth: 2.5,
@@ -149,7 +149,7 @@ const CUSTODY_NODES: DagNode[] = [
     actor: 'Secondary Packaging Unit A4',
     actorAddress: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
     hash: '0x9fd20434b9429e59158ea3c99dda50ac9be4d6a5ad47a55ed389acc525603c17',
-    x: 780,
+    x: 960,
     y: 190,
     details: {
       sscc: 'SSCC-PALLET-901',
@@ -169,7 +169,7 @@ const CUSTODY_NODES: DagNode[] = [
     actor: 'Apex Global Reefer Fleet Van #408',
     actorAddress: '0x0d9Bf9Da442ba0700999E16399EF60Bb91C092DF',
     hash: '0x68c6bf7be0687168c0fa507c154dc9613dd66ec8dc2a7f0da4a1c26606ab7222',
-    x: 1140,
+    x: 1410,
     y: 190,
     details: {
       temperature: 4.2,
@@ -189,7 +189,7 @@ const CUSTODY_NODES: DagNode[] = [
     actor: 'Regional Receiving Supervisor',
     actorAddress: '0x90F79bf6EB2c4f870365E785982E1f101E93b906',
     hash: '0x2efa1e4a26f9017732507f735f202eccaa004d4306ec1d64c53e00e7bc453413',
-    x: 1500,
+    x: 1860,
     y: 190,
     details: {
       gln: '0844514000056',
@@ -208,7 +208,7 @@ const CUSTODY_NODES: DagNode[] = [
     actor: 'Licensed Lead Pharmacist',
     actorAddress: '0x2c54FfeF295aE9E54bc428Ce804b64524Ea468b9',
     hash: '0x8b81911c7e05a23981987708a2334f91ab8c7b81013e5ed4b36e2ab0501bfebf',
-    x: 1860,
+    x: 2310,
     y: 190,
     details: {
       gln: '0844514000104',
@@ -228,7 +228,7 @@ const CUSTODY_NODES: DagNode[] = [
     actor: 'Clinical Care Protocol Engine',
     actorAddress: '0x0000000000000000000000000000000000000000',
     hash: '0xa68b4e3c01e483778d5fc46f3a9c61741c29679301d6c7720e2eeb5201b3854c',
-    x: 2220,
+    x: 2760,
     y: 190,
     details: {
       contractAnchor: '0x362b5e961dbcc608879de250333b9d8f83f5159458e3f6478792d477b8a9e54c',
@@ -307,7 +307,7 @@ const PACKAGING_NODES: DagNode[] = [
     actor: 'Central Distribution Logistics Hub',
     actorAddress: '0x0d9Bf9Da442ba0700999E16399EF60Bb91C092DF',
     hash: '0x9fd20434b9429e59158ea3c99dda50ac9be4d6a5ad47a55ed389acc525603c17',
-    x: 580,
+    x: 660,
     y: 50,
     details: {
       sscc: '001084451400901001',
@@ -327,7 +327,7 @@ const PACKAGING_NODES: DagNode[] = [
     actor: 'Cleanroom Packaging Line #2',
     actorAddress: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
     hash: '0x68c6bf7be0687168c0fa507c154dc9613dd66ec8dc2a7f0da4a1c26606ab7222',
-    x: 150,
+    x: 100,
     y: 200,
     details: {
       sscc: '001084451400501003',
@@ -346,7 +346,7 @@ const PACKAGING_NODES: DagNode[] = [
     actor: 'Cleanroom Packaging Line #2',
     actorAddress: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
     hash: '0x2efa1e4a26f9017732507f735f202eccaa004d4306ec1d64c53e00e7bc453413',
-    x: 580,
+    x: 660,
     y: 200,
     details: {
       sscc: '001084451400502000',
@@ -365,7 +365,7 @@ const PACKAGING_NODES: DagNode[] = [
     actor: 'Cryogenic Packaging Cell #1',
     actorAddress: '0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1',
     hash: '0x7e1c9a05b38290fa8201cd93821948ba0821049c8120fa89b380291df93021aa',
-    x: 1010,
+    x: 1220,
     y: 200,
     details: {
       sscc: '001084451400503007',
@@ -384,7 +384,7 @@ const PACKAGING_NODES: DagNode[] = [
     actor: 'High-Speed Serialization Marker',
     actorAddress: '0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1',
     hash: '0x4f8b21ca88921df378b901ac89d312bc90a881347621d98a09b82143ea01cd82',
-    x: 20,
+    x: 0,
     y: 350,
     details: {
       gtin: '00300018899201',
@@ -403,7 +403,7 @@ const PACKAGING_NODES: DagNode[] = [
     actor: 'High-Speed Serialization Marker',
     actorAddress: '0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1',
     hash: '0x8b81911c7e05a23981987708a2334f91ab8c7b81013e5ed4b36e2ab0501bfebf',
-    x: 280,
+    x: 300,
     y: 350,
     details: {
       gtin: '00300018899201',
@@ -421,7 +421,7 @@ const PACKAGING_NODES: DagNode[] = [
     actor: 'Sterile Biologics Packaging',
     actorAddress: '0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1',
     hash: '0x362b5e961dbcc608879de250333b9d8f83f5159458e3f6478792d477b8a9e54c',
-    x: 580,
+    x: 660,
     y: 350,
     details: {
       gtin: '00300018899317',
@@ -440,7 +440,7 @@ const PACKAGING_NODES: DagNode[] = [
     actor: 'Automated Cryo-Labeling Unit',
     actorAddress: '0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1',
     hash: '0xa68b4e3c01e483778d5fc46f3a9c61741c29679301d6c7720e2eeb5201b3854c',
-    x: 1010,
+    x: 1220,
     y: 350,
     details: {
       gtin: '00300018899447',
@@ -514,8 +514,8 @@ export function ProvenanceDagVisualizer({
   const [filterRole, setFilterRole] = useState<string>('ALL');
   const [selectedBatch, setSelectedBatch] = useState<string>(initialBatch);
 
-  const [zoom, setZoom] = useState(0.85);
-  const [pan, setPan] = useState({ x: 30, y: 30 });
+  const [zoom, setZoom] = useState(0.72);
+  const [pan, setPan] = useState({ x: 30, y: 35 });
   const [isPanning, setIsPanning] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -595,8 +595,8 @@ export function ProvenanceDagVisualizer({
   };
 
   const handleReset = () => {
-    setZoom(0.85);
-    setPan({ x: 30, y: 30 });
+    setZoom(0.72);
+    setPan({ x: 30, y: 35 });
     setSelectedNodeId(viewMode === 'custody' ? 'node-mfg' : 'pack-pallet-901');
   };
 
@@ -876,8 +876,8 @@ export function ProvenanceDagVisualizer({
                       connectedNodeIds.has(edge.source) && connectedNodeIds.has(edge.target);
 
                     const isCustody = viewMode === 'custody';
-                    const cardWidth = 220;
-                    const cardHeight = 80;
+                    const cardWidth = 260;
+                    const cardHeight = 82;
 
                     const x1 = isCustody ? sourceNode.x + cardWidth : sourceNode.x + cardWidth / 2;
                     const y1 = isCustody ? sourceNode.y + cardHeight / 2 : sourceNode.y + cardHeight;
@@ -929,8 +929,8 @@ export function ProvenanceDagVisualizer({
                         opacity={isVisible ? 1 : 0.25}
                       >
                         <rect
-                          width={220}
-                          height={80}
+                          width={260}
+                          height={82}
                           rx={14}
                           fill="#243247"
                           stroke={
@@ -948,7 +948,7 @@ export function ProvenanceDagVisualizer({
                           x={0}
                           y={0}
                           width={6}
-                          height={80}
+                          height={82}
                           rx={3}
                           fill={nodeColor}
                         />
@@ -975,47 +975,43 @@ export function ProvenanceDagVisualizer({
                           x={44}
                           y={22}
                           fill="#F1F5F9"
-                          fontSize="10.5"
+                          fontSize="10"
                           fontWeight="700"
                           fontFamily="sans-serif"
                         >
-                          {node.label.length > 25
-                            ? node.label.slice(0, 24) + '...'
-                            : node.label}
+                          {node.label}
                         </text>
 
                         <text
                           x={44}
-                          y={34}
+                          y={35}
                           fill="#94A3B8"
-                          fontSize="9"
+                          fontSize="8.5"
                           fontFamily="sans-serif"
                         >
-                          {node.sublabel.length > 28
-                            ? node.sublabel.slice(0, 27) + '...'
-                            : node.sublabel}
+                          {node.sublabel}
                         </text>
 
                         <line
                           x1={14}
-                          y1={46}
-                          x2={206}
-                          y2={46}
+                          y1={47}
+                          x2={246}
+                          y2={47}
                           stroke="#304257"
                           strokeWidth={0.7}
                         />
 
                         <rect
                           x={14}
-                          y={54}
-                          width={68}
-                          height={16}
+                          y={55}
+                          width={74}
+                          height={17}
                           rx={4}
                           fill="#172638"
                         />
                         <text
-                          x={48}
-                          y={65}
+                          x={51}
+                          y={67}
                           textAnchor="middle"
                           fill={nodeColor}
                           fontSize="8"
@@ -1026,8 +1022,8 @@ export function ProvenanceDagVisualizer({
                         </text>
 
                         <text
-                          x={206}
-                          y={65}
+                          x={246}
+                          y={67}
                           textAnchor="end"
                           fill="#00D6B4"
                           fontSize="8"
@@ -1051,8 +1047,8 @@ export function ProvenanceDagVisualizer({
                       connectedNodeIds.has(edge.source) && connectedNodeIds.has(edge.target);
 
                     const isCustody = viewMode === 'custody';
-                    const cardWidth = 220;
-                    const cardHeight = 80;
+                    const cardWidth = 260;
+                    const cardHeight = 82;
 
                     const x1 = isCustody ? sourceNode.x + cardWidth : sourceNode.x + cardWidth / 2;
                     const y1 = isCustody ? sourceNode.y + cardHeight / 2 : sourceNode.y + cardHeight;
@@ -1062,31 +1058,30 @@ export function ProvenanceDagVisualizer({
                     const midX = (x1 + x2) / 2;
                     const midY = (y1 + y2) / 2;
 
-                    const badgeWidth = Math.max(86, Math.min(134, edge.label.length * 5.4 + 16));
-                    const displayLabel = edge.label.length > 22 ? edge.label.slice(0, 20) + '...' : edge.label;
+                    const badgeWidth = Math.max(90, edge.label.length * 5.8 + 18);
 
                     return (
                       <g key={`label-${edge.id}`} className="transition-all duration-200">
                         <rect
                           x={midX - badgeWidth / 2}
-                          y={midY - 9}
+                          y={midY - 10}
                           width={badgeWidth}
-                          height={18}
-                          rx={5}
+                          height={20}
+                          rx={6}
                           fill="#172638"
                           stroke={isHighlighted ? '#00D6B4' : '#304257'}
                           strokeWidth={1}
                         />
                         <text
                           x={midX}
-                          y={midY + 3}
+                          y={midY + 3.5}
                           textAnchor="middle"
                           fill={isHighlighted ? '#00D6B4' : '#94A3B8'}
                           fontSize="8.5"
                           fontWeight="600"
                           fontFamily="monospace"
                         >
-                          {displayLabel}
+                          {edge.label}
                         </text>
                       </g>
                     );
