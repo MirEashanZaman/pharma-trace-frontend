@@ -4,6 +4,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3500';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -19,6 +20,17 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401 && typeof window !== 'undefined') {
+      localStorage.removeItem('pharma_access_token');
+      localStorage.removeItem('pharma_user');
+    }
+    return Promise.reject(error);
+  },
+);
 
 export interface UserProfile {
   id: number;
