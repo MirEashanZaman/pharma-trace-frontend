@@ -71,13 +71,13 @@ export default function StandardsIndexPage() {
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
         <div className="text-center space-y-3 mb-12">
           <div className="inline-flex items-center gap-2 badge badge-lg bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-semibold uppercase tracking-wider py-3 px-4">
-            <BookOpen className="h-4 w-4 text-[#00D6B4]" /> SSG &bull; Static Site Generation
+            <BookOpen className="h-4 w-4 text-[#00D6B4]" /> Global Compliance Frameworks
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#F1F5F9]">
             Regulatory Standards & GxP Compliance
           </h1>
           <p className="text-[#94A3B8] text-sm max-w-2xl mx-auto">
-            These compliance guides are fully pre-rendered at build time via Next.js Static Site Generation (SSG), guaranteeing sub-millisecond edge CDN delivery for worldwide healthcare regulators.
+            Comprehensive regulatory frameworks, GxP guidelines, and electronic signature protocols for global pharmaceutical compliance.
           </p>
         </div>
 
@@ -120,7 +120,7 @@ export default function StandardsIndexPage() {
                   href={`/standards/${std.slug}`}
                   className="btn btn-sm w-full bg-[#172638] hover:bg-[#1E2E44] text-[#00D6B4] border border-[#00D6B4]/30 hover:border-[#00D6B4] rounded-xl font-bold flex items-center justify-center gap-2 transition"
                 >
-                  Inspect Static Proof Dossier <ArrowRight className="h-4 w-4" />
+                  Inspect Compliance Framework <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             </div>
@@ -129,13 +129,13 @@ export default function StandardsIndexPage() {
 
         <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-3">
           <div className="flex items-center gap-2 text-[#00D6B4] text-xs font-bold uppercase tracking-wider">
-            <Cpu className="h-4 w-4" /> Technical Architecture Note
+            <Cpu className="h-4 w-4" /> Validated Electronic Records
           </div>
           <h3 className="text-base font-bold text-[#F1F5F9]">
-            Build-Time Deterministic Compilation (SSG)
+            Regulatory Authority Compliance Architecture
           </h3>
           <p className="text-xs text-[#94A3B8] leading-relaxed">
-            The regulatory documentation routes are compiled to static HTML during `next build` using `generateStaticParams`. Because the legal definitions of FDA 21 CFR Part 11, EU Annex 11, and DSCSA Title II are static statutes, generating static pages eliminates runtime latency, bypasses server load, and allows offline distribution in field inspections.
+            The pharmaceutical platform adheres to computerized system validation standards established by FDA 21 CFR Part 11, EU GMP Annex 11, and DSCSA Title II. Cryptographic audit trails, hardware KMS signatures, and role-based access control guarantee electronic record integrity and tamper evidence during regulatory inspections.
           </p>
         </div>
       </main>
