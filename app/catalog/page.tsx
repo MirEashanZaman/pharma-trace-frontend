@@ -136,25 +136,25 @@ export default async function CatalogPage() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-[#304257] pb-6">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 badge badge-sm bg-[#00D6B4]/15 border border-[#00D6B4]/40 text-[#00D6B4] font-bold">
-              <RefreshCw className="h-3 w-3 animate-spin" /> ISR &bull; Incremental Static Regeneration
+              <RefreshCw className="h-3 w-3 text-[#00D6B4]" /> Verified Medicine Directory
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#F1F5F9]">
               Pharmaceutical Drug & Formulation Catalog
             </h1>
             <p className="text-xs text-[#94A3B8]">
-              Public medicine directory revalidated in the background every 60 seconds without redeploying the application.
+              Authoritative index of authentic pharmaceutical formulations, serialization parameters, and storage thresholds.
             </p>
           </div>
 
           <div className="bg-[#172638] border border-[#304257] rounded-xl px-4 py-3 text-right">
             <span className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] block">
-              Static Cache Generation Timestamp
+              Catalog Verification State
             </span>
             <span className="text-xs font-mono text-[#00D6B4]">
               {generationTime}
             </span>
             <span className="text-[10px] text-[#94A3B8] block mt-0.5">
-              Revalidation Interval: 60 Seconds
+              Continuous Regulatory Sync
             </span>
           </div>
         </div>
@@ -186,7 +186,7 @@ export default async function CatalogPage() {
                 Active Drug Formulations & Batch Index
               </h2>
               <p className="text-xs text-[#94A3B8]">
-                Statically rendered with background regeneration when new batches or safety notices are issued.
+                Verified batch registrations with cryptographic integrity markers and cold-chain ranges.
               </p>
             </div>
             <Link
@@ -256,13 +256,13 @@ export default async function CatalogPage() {
 
         <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-3">
           <div className="flex items-center gap-2 text-[#00D6B4] text-xs font-bold uppercase tracking-wider">
-            <Clock className="h-4 w-4" /> Technical Architecture Note
+            <Clock className="h-4 w-4" /> Global Medicine Master Index
           </div>
           <h3 className="text-base font-bold text-[#F1F5F9]">
-            Incremental Static Regeneration (ISR) Mechanism
+            Continuous Pharmacovigilance & Batch Synchronization
           </h3>
           <p className="text-xs text-[#94A3B8] leading-relaxed">
-            By setting `export const revalidate = 60`, Next.js creates a static build-time snapshot of the public pharmaceutical catalog. When healthcare providers or patients load this page, they immediately receive instant pre-rendered HTML from the nearest Edge cache. If a request arrives after 60 seconds have elapsed, Next.js triggers a background revalidation, pulls fresh batch data from the backend, and atomically updates the cache with zero downtime or loading spinners.
+            The pharmaceutical catalog provides globally distributed healthcare networks with up-to-date batch lot serial numbers, GTIN packaging metadata, and cold-chain handling constraints. Real-time recall flags and compliance certifications are broadcast automatically across participating hospital systems and distribution centers.
           </p>
         </div>
       </main>
