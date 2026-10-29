@@ -31,9 +31,9 @@ import {
 } from '@/lib/api';
 
 export default function GovernancePage() {
-  const [guardians, setGuardians] = useState<string[]>([]);
+  const [guardians, setGuardians] = useState<any[]>([]);
   const [proposals, setProposals] = useState<any[]>([]);
-  const [selectedGuardian, setSelectedGuardian] = useState('');
+  const [selectedGuardian, setSelectedGuardian] = useState<string>('');
   
   const [description, setDescription] = useState('Emergency Recall: Contaminated Paracetamol Lot 2026-09');
   const [targetAddress, setTargetAddress] = useState('0xa2D05738825b4f81F8D50c30d783c5958EbcC1Ae');
@@ -43,6 +43,23 @@ export default function GovernancePage() {
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  const getGuardianAddress = (g: any): string => {
+    if (!g) return '';
+    if (typeof g === 'string') return g;
+    return g.address || '';
+  };
+
+  const getGuardianAuthority = (g: any, idx: number): string => {
+    if (!g) return `Guardian Node ${idx + 1}`;
+    if (typeof g === 'object' && g.authorityName) return g.authorityName;
+    return `Guardian Node ${idx + 1}`;
+  };
+
+  const getGuardianJurisdiction = (g: any): string => {
+    if (typeof g === 'object' && g.jurisdiction) return g.jurisdiction;
+    return 'REGULATORY';
+  };
+
   const loadGovernanceData = async () => {
     setLoading(true);
     setStatusMessage(null);
@@ -51,9 +68,10 @@ export default function GovernancePage() {
         fetchGovernanceGuardians().catch(() => []),
         fetchGovernanceProposals().catch(() => []),
       ]);
-      setGuardians(guardiansList);
-      if (guardiansList.length > 0 && !selectedGuardian) {
-        setSelectedGuardian(guardiansList[0]);
+      const safeGuardians = Array.isArray(guardiansList) ? guardiansList : [];
+      setGuardians(safeGuardians);
+      if (safeGuardians.length > 0 && !selectedGuardian) {
+        setSelectedGuardian(getGuardianAddress(safeGuardians[0]));
       }
       setProposals(Array.isArray(proposalsList) ? proposalsList : []);
     } catch (err: any) {
@@ -104,7 +122,7 @@ export default function GovernancePage() {
       const res = await confirmGovernanceProposal(proposalId, selectedGuardian);
       setStatusMessage({
         type: 'success',
-        message: `Guardian ${selectedGuardian.slice(0, 8)}... confirmed proposal. Status: ${res.status}.`,
+        message: `Guardian ${typeof selectedGuardian === 'string' ? selectedGuardian.slice(0, 8) : ''}... confirmed proposal. Status: ${res.status}.`,
       });
       await loadGovernanceData();
     } catch (err: any) {
@@ -236,31 +254,37 @@ export default function GovernancePage() {
                 Connecting to EVM Guardian Registry...
               </div>
             ) : (
-              guardians.map((guardian, idx) => (
-                <div
-                  key={guardian}
-                  onClick={() => setSelectedGuardian(guardian)}
-                  className={`p-4 rounded-xl border cursor-pointer transition ${
-                    selectedGuardian === guardian
-                      ? 'bg-[#00D6B4]/10 border-[#00D6B4] text-[#F1F5F9]'
-                      : 'bg-[#0B1220] border-[#304257] text-[#94A3B8] hover:border-[#00D6B4]/50'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#00D6B4]">
-                      Guardian Node {idx + 1}
-                    </span>
-                    <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-none font-bold">
-                      ACTIVE
-                    </span>
+              guardians.map((guardian, idx) => {
+                const addr = getGuardianAddress(guardian);
+                const name = getGuardianAuthority(guardian, idx);
+                const jurisdiction = getGuardianJurisdiction(guardian);
+                const isSelected = selectedGuardian.toLowerCase() === addr.toLowerCase();
+                return (
+                  <div
+                    key={addr || idx}
+                    onClick={() => setSelectedGuardian(addr)}
+                    className={`p-4 rounded-xl border cursor-pointer transition ${
+                      isSelected
+                        ? 'bg-[#00D6B4]/10 border-[#00D6B4] text-[#F1F5F9]'
+                        : 'bg-[#0B1220] border-[#304257] text-[#94A3B8] hover:border-[#00D6B4]/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-[#00D6B4] truncate max-w-[150px]">
+                        {name}
+                      </span>
+                      <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-none font-bold">
+                        {jurisdiction}
+                      </span>
+                    </div>
+                    <div className="font-mono text-xs truncate text-[#F1F5F9]">{addr}</div>
+                    <div className="text-[11px] text-[#94A3B8] mt-2 flex items-center gap-1">
+                      <KeyRound className="h-3 w-3 text-[#00D6B4]" />
+                      <span>{isSelected ? 'Active Guardian' : 'Click to activate for voting'}</span>
+                    </div>
                   </div>
-                  <div className="font-mono text-xs truncate">{guardian}</div>
-                  <div className="text-[11px] text-[#94A3B8] mt-2 flex items-center gap-1">
-                    <KeyRound className="h-3 w-3 text-[#00D6B4]" />
-                    <span>Click to activate for voting</span>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -324,7 +348,7 @@ export default function GovernancePage() {
             disabled={loading}
             className="btn btn-sm w-full bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none font-bold rounded-xl h-10"
           >
-            Submit Proposal with Active Guardian ({selectedGuardian ? `${selectedGuardian.slice(0, 8)}...` : 'None'})
+            Submit Proposal with Active Guardian ({typeof selectedGuardian === 'string' && selectedGuardian ? `${selectedGuardian.slice(0, 8)}...` : 'None'})
           </button>
         </div>
 
