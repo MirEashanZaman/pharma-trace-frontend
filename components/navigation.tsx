@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { ShieldCheck, Layers, Search, CheckCircle2, LogIn, LogOut, User, Server, RefreshCw, BookOpen, Flame, Network, Lock, Scale, Vote, Menu } from 'lucide-react';
 import { getStoredUser, logoutUser, UserProfile } from '@/lib/api';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 export function Navigation({
   walletAddress,
@@ -103,10 +105,10 @@ export function Navigation({
 
         <div className="flex items-center space-x-2 shrink-0">
           {walletAddress && (
-            <div className="badge badge-sm bg-[#00D6B4]/15 border border-[#00D6B4]/40 text-[#00D6B4] font-mono gap-1 py-1.5 px-2 text-[10px] hidden 2xl:flex shrink-0">
+            <Badge variant="teal" size="sm" className="hidden 2xl:flex shrink-0 gap-1 py-1 px-2 font-mono">
               <CheckCircle2 className="h-3 w-3 text-[#00D6B4]" />
               <span>{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
-            </div>
+            </Badge>
           )}
 
           {user ? (
@@ -126,24 +128,25 @@ export function Navigation({
                 </span>
               </div>
 
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
                 onClick={handleLogout}
                 title="Sign Out"
-                className="btn btn-xs sm:btn-sm btn-ghost hover:bg-rose-500/20 text-[#94A3B8] hover:text-rose-400 border border-[#304257] rounded-xl px-2.5 transition shrink-0 flex items-center gap-1.5"
+                className="hover:bg-rose-500/20 text-[#94A3B8] hover:text-rose-400 border border-[#304257] rounded-xl px-2.5 transition shrink-0 flex items-center gap-1.5"
               >
                 <LogOut className="h-3.5 w-3.5 shrink-0" />
                 <span className="text-xs font-bold">Sign Out</span>
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="flex items-center gap-2 shrink-0">
-              <Link
-                href="/login"
-                className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold shadow-sm flex items-center gap-1.5 shrink-0"
-              >
-                <LogIn className="h-4 w-4" />
-                <span>Enterprise Sign In</span>
-              </Link>
+              <Button asChild size="sm" className="bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold shadow-sm shrink-0">
+                <Link href="/login" className="flex items-center gap-1.5">
+                  <LogIn className="h-4 w-4" />
+                  <span>Enterprise Sign In</span>
+                </Link>
+              </Button>
             </div>
           )}
 
