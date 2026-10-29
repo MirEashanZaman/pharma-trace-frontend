@@ -39,6 +39,10 @@ export interface UserProfile {
   fullName?: string;
   walletAddress?: string;
   organization?: string;
+  isDisabled?: boolean;
+  warningCount?: number;
+  warningReason?: string;
+  warningIssuedAt?: string;
 }
 
 export interface AuthResponse {
@@ -192,6 +196,31 @@ export const updateProfile = async (data: UpdateProfilePayload): Promise<UserPro
     localStorage.setItem('pharma_user', JSON.stringify(res.data));
     window.dispatchEvent(new Event('pharma_profile_updated'));
   }
+  return res.data;
+};
+
+export const fetchUsers = async (): Promise<UserProfile[]> => {
+  const res = await api.get('/auth/users');
+  return res.data;
+};
+
+export const warnUser = async (id: number, reason: string): Promise<UserProfile> => {
+  const res = await api.post(`/auth/users/${id}/warn`, { reason });
+  return res.data;
+};
+
+export const clearUserWarnings = async (id: number): Promise<UserProfile> => {
+  const res = await api.post(`/auth/users/${id}/clear-warnings`);
+  return res.data;
+};
+
+export const toggleDisableUser = async (id: number, disabled: boolean, reason?: string): Promise<UserProfile> => {
+  const res = await api.put(`/auth/users/${id}/disable`, { disabled, reason });
+  return res.data;
+};
+
+export const deleteUser = async (id: number): Promise<{ deleted: boolean; id: number }> => {
+  const res = await api.delete(`/auth/users/${id}`);
   return res.data;
 };
 
