@@ -390,6 +390,7 @@ export default function EscrowPage() {
                   type="text"
                   value={serialNumber}
                   onChange={(e) => setSerialNumber(e.target.value)}
+                  placeholder="Enter your drug serial number"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -401,6 +402,7 @@ export default function EscrowPage() {
                     type="text"
                     value={sellerAddress}
                     onChange={(e) => setSellerAddress(e.target.value)}
+                    placeholder="Enter your seller wallet address (0x...)"
                     className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                 </div>
@@ -410,6 +412,7 @@ export default function EscrowPage() {
                     type="text"
                     value={buyerAddress}
                     onChange={(e) => setBuyerAddress(e.target.value)}
+                    placeholder="Enter your buyer wallet address (0x...)"
                     className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                 </div>
@@ -422,6 +425,7 @@ export default function EscrowPage() {
                     type="number"
                     value={amountEth}
                     onChange={(e) => setAmountEth(e.target.value)}
+                    placeholder="Enter your escrow amount (ETH)"
                     className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                 </div>
@@ -431,6 +435,7 @@ export default function EscrowPage() {
                     type="number"
                     value={minTemp}
                     onChange={(e) => setMinTemp(e.target.value)}
+                    placeholder="Enter your min temp (°C)"
                     className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                 </div>
@@ -440,6 +445,7 @@ export default function EscrowPage() {
                     type="number"
                     value={maxTemp}
                     onChange={(e) => setMaxTemp(e.target.value)}
+                    placeholder="Enter your max temp (°C)"
                     className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                 </div>
@@ -451,6 +457,7 @@ export default function EscrowPage() {
                   type="number"
                   value={timeoutSeconds}
                   onChange={(e) => setTimeoutSeconds(e.target.value)}
+                  placeholder="Enter your delivery timeout in seconds"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -476,7 +483,7 @@ export default function EscrowPage() {
             <div className="flex gap-2">
               <input
                 type="text"
-                placeholder="Escrow Order ID (0x...)"
+                placeholder="Enter your escrow order ID (0x...)"
                 value={searchOrderId}
                 onChange={(e) => setSearchOrderId(e.target.value)}
                 className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
