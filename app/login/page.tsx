@@ -85,7 +85,7 @@ const DEMO_PERSONAS: StakeholderPersona[] = [
   },
   {
     role: 'CUSTOMER',
-    name: 'John Patient',
+    name: 'MirEashan Zaman',
     org: 'Public Consumer / Patient',
     email: 'customer@pharma.com',
     icon: User,
