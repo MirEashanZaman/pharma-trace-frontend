@@ -236,22 +236,25 @@ export default function VerifyPage() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 mb-10 items-stretch">
-          <form onSubmit={handleVerify} className="relative flex-1 flex items-center">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8] pointer-events-none" />
-            <input
-              type="text"
-              value={hashInput}
-              onChange={(e) => setHashInput(e.target.value)}
-              placeholder="Enter batch serial (e.g. SN-2026-AMOX500) or attestation hash (0x...)"
-              className="w-full h-12 bg-[#243247] border border-[#304257] rounded-xl pl-12 pr-36 text-sm text-[#F1F5F9] font-mono shadow-sm placeholder:text-[#94A3B8]/60 focus:border-[#00D6B4] focus:ring-1 focus:ring-[#00D6B4] focus:outline-none transition"
-            />
+        <div className="flex flex-col lg:flex-row gap-3 mb-10 items-stretch">
+          <form onSubmit={handleVerify} className="relative flex-1 flex flex-col sm:flex-row gap-2.5">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8] pointer-events-none" />
+              <input
+                type="text"
+                value={hashInput}
+                onChange={(e) => setHashInput(e.target.value)}
+                placeholder="Enter batch serial (e.g. SN-2026-AMOX500) or attestation hash"
+                className="w-full h-12 bg-[#172638] border border-[#304257] rounded-xl pl-12 pr-4 text-sm text-[#F1F5F9] font-mono shadow-sm placeholder:text-[#94A3B8]/60 focus:border-[#00D6B4] focus:ring-1 focus:ring-[#00D6B4] focus:outline-none transition"
+              />
+            </div>
             <Button
               type="submit"
               disabled={loading}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 px-5 bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] rounded-lg font-bold text-xs tracking-wider flex items-center justify-center shadow-sm"
+              className="h-12 px-6 bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] rounded-xl font-bold text-xs tracking-wider flex items-center justify-center gap-2 shadow-sm shrink-0 border-0 transition"
             >
-              {loading ? 'Verifying...' : 'Verify Hash'}
+              <CheckCircle2 className="h-4 w-4" />
+              <span>{loading ? 'Verifying...' : 'Verify Hash'}</span>
             </Button>
           </form>
 
@@ -259,9 +262,10 @@ export default function VerifyPage() {
             type="button"
             onClick={() => setShowScanner(true)}
             variant="secondary"
-            className="h-12 px-5 rounded-xl text-xs font-bold tracking-wider flex items-center justify-center gap-2 shadow-sm shrink-0 border-[#304257] hover:border-[#00D6B4] hover:bg-[#243247] transition"
+            className="h-12 px-5 rounded-xl text-xs font-bold tracking-wider flex items-center justify-center gap-2 shadow-sm shrink-0 border border-[#304257] hover:border-[#00D6B4] bg-[#243247] hover:bg-[#1E2E44] text-[#F1F5F9] transition"
           >
-            <Camera className="h-4 w-4" /> Scan Camera QR
+            <Camera className="h-4 w-4 text-[#00D6B4]" />
+            <span>Scan Camera QR</span>
           </Button>
         </div>
 
