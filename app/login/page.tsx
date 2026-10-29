@@ -443,11 +443,11 @@ export default function LoginPage() {
                         placeholder="Enter your new password"
                         className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-10 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                       />
-                      <KeyRound className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
+                      <KeyRound className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                       <button
                         type="button"
                         onClick={() => setShowResetPassword(!showResetPassword)}
-                        className="absolute right-3 top-2.5 text-[#94A3B8] hover:text-[#00D6B4] p-1"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#00D6B4] p-1 rounded-md"
                         title={showResetPassword ? 'Hide password' : 'Show password'}
                       >
                         {showResetPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -551,11 +551,11 @@ export default function LoginPage() {
                       placeholder="Enter your password"
                       className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-10 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                     />
-                    <KeyRound className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
+                    <KeyRound className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-2.5 text-[#94A3B8] hover:text-[#00D6B4] p-1"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#00D6B4] p-1 rounded-md"
                       title={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
