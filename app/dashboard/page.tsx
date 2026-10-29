@@ -1632,7 +1632,7 @@ export default function DashboardPage() {
                             type="text"
                             value={doctorSig}
                             onChange={(e) => setDoctorSig(e.target.value)}
-                            placeholder="0x..."
+                            placeholder="Enter your doctor prescription signature (0x...)"
                             className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] font-mono"
                             required
                           />
@@ -1645,7 +1645,7 @@ export default function DashboardPage() {
                             type="text"
                             value={pharmacistSig}
                             onChange={(e) => setPharmacistSig(e.target.value)}
-                            placeholder="0x..."
+                            placeholder="Enter your pharmacist approval signature (0x...)"
                             className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] font-mono"
                             required
                           />
@@ -1880,7 +1880,7 @@ export default function DashboardPage() {
                               type="text"
                               value={simLocation}
                               onChange={(e) => setSimLocation(e.target.value)}
-                              placeholder="e.g. Apex Reefer Van #408"
+                              placeholder="Enter your simulated waypoint location"
                               className="input input-sm input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
                             />
                           </div>
@@ -2225,7 +2225,7 @@ export default function DashboardPage() {
                     type="text"
                     value={userSearchTerm}
                     onChange={(e) => setUserSearchTerm(e.target.value)}
-                    placeholder="Search by name, email, or company..."
+                    placeholder="Enter your search query (name, email, or organization)..."
                     className="w-full h-10 bg-[#172638] border border-[#304257] rounded-xl pl-9 pr-3 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4]"
                   />
                   <Search className="h-4 w-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -2439,7 +2439,7 @@ export default function DashboardPage() {
                   rows={3}
                   value={warningReasonInput}
                   onChange={(e) => setWarningReasonInput(e.target.value)}
-                  placeholder="Specify violation (e.g. Temperature excursion during custody transit, failed inspection documentation)..."
+                  placeholder="Enter your warning reason (e.g. Temperature excursion during custody transit, failed inspection documentation)..."
                   className="w-full bg-[#0B1220] border border-[#304257] rounded-xl p-3 text-xs text-[#F1F5F9] focus:outline-none focus:border-amber-400"
                 />
               </div>
@@ -2552,7 +2552,7 @@ export default function DashboardPage() {
                 <textarea
                   value={recallReason}
                   onChange={(e) => setRecallReason(e.target.value)}
-                  placeholder="Specify critical findings (e.g. Temperature excursion > 14°C, seal tampering, contamination)"
+                  placeholder="Enter your recall justification findings (e.g. Temperature excursion > 14°C, seal tampering, contamination)"
                   className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] h-20"
                   required
                 />
@@ -2564,7 +2564,7 @@ export default function DashboardPage() {
                   type="text"
                   value={recallDirective}
                   onChange={(e) => setRecallDirective(e.target.value)}
-                  placeholder="e.g. FDA-DIRECTIVE-2026-09"
+                  placeholder="Enter your official directive reference number (e.g. FDA-DIRECTIVE-2026-09)"
                   className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
                   required
                 />
