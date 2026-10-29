@@ -3,7 +3,13 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { loginUser, registerUser, web3LoginUser } from '@/lib/api';
+import {
+  loginUser,
+  registerUser,
+  web3LoginUser,
+  forgotPassword,
+  resetPassword,
+} from '@/lib/api';
 import { connectMetaMask, signAttestationMessage } from '@/lib/web3';
 import {
   ShieldCheck,
@@ -19,6 +25,10 @@ import {
   Lock,
   Search,
   User,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  RotateCcw,
 } from 'lucide-react';
 
 interface StakeholderPersona {
@@ -98,6 +108,10 @@ const DEMO_PERSONAS: StakeholderPersona[] = [
 export default function LoginPage() {
   const router = useRouter();
   const [isRegister, setIsRegister] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -105,10 +119,18 @@ export default function LoginPage() {
   const [organization, setOrganization] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const [forgotStep, setForgotStep] = useState<1 | 2>(1);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotOtp, setForgotOtp] = useState('');
+  const [forgotNewPassword, setForgotNewPassword] = useState('');
+  const [previewOtp, setPreviewOtp] = useState('');
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
     setLoading(true);
 
     try {
@@ -133,6 +155,7 @@ export default function LoginPage() {
 
   const handlePersonaLogin = async (persona: StakeholderPersona) => {
     setError('');
+    setSuccessMessage('');
     setLoading(true);
     try {
       await loginUser({
@@ -149,6 +172,7 @@ export default function LoginPage() {
 
   const handleWeb3Login = async () => {
     setError('');
+    setSuccessMessage('');
     setLoading(true);
     try {
       const address = await connectMetaMask();
@@ -183,6 +207,53 @@ export default function LoginPage() {
     }
   };
 
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMessage('');
+    setLoading(true);
+
+    try {
+      const res = await forgotPassword(forgotEmail);
+      setSuccessMessage(res.message || 'OTP verification code dispatched via mailer.');
+      if (res.previewOtp) {
+        setPreviewOtp(res.previewOtp);
+      }
+      setForgotStep(2);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to dispatch verification code. Please check email address.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMessage('');
+    setLoading(true);
+
+    try {
+      const res = await resetPassword({
+        email: forgotEmail,
+        otp: forgotOtp,
+        newPassword: forgotNewPassword,
+      });
+      setSuccessMessage(res.message || 'Password reset successfully. Please sign in with your new password.');
+      setIsForgotPassword(false);
+      setForgotStep(1);
+      setForgotOtp('');
+      setForgotNewPassword('');
+      setPreviewOtp('');
+      setPassword('');
+      setEmail(forgotEmail);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to reset password. Please check OTP code.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0B1220] text-[#F1F5F9] flex flex-col justify-center items-center px-4 py-12 font-sans">
       <div className="w-full max-w-4xl space-y-8">
@@ -191,10 +262,16 @@ export default function LoginPage() {
             <ShieldCheck className="h-7 w-7" />
           </div>
           <h2 className="text-3xl font-black tracking-tight text-[#F1F5F9]">
-            {isRegister ? 'Register Enterprise Facility' : 'Enterprise Supply Chain Sign In'}
+            {isForgotPassword
+              ? 'Recover Enterprise Credentials'
+              : isRegister
+              ? 'Register Enterprise Facility'
+              : 'Enterprise Supply Chain Sign In'}
           </h2>
           <p className="text-sm text-[#94A3B8] max-w-lg mx-auto">
-            PharmaTrace-ES enforces strict role-based access control (RBAC). Only certified pharmaceutical stakeholders log in to record events and sign on-chain attestations.
+            {isForgotPassword
+              ? 'SHA-256 authenticated one-time verification codes sent via mailer for secure credential recovery.'
+              : 'PharmaTrace-ES enforces strict role-based access control (RBAC). Certified stakeholders log in to record events and sign on-chain attestations.'}
           </p>
         </div>
 
@@ -241,7 +318,14 @@ export default function LoginPage() {
           </div>
         )}
 
-        {!isRegister && (
+        {successMessage && (
+          <div className="p-3 bg-[#A3E635]/20 border border-[#A3E635]/40 rounded-xl text-xs font-semibold text-[#A3E635] flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            <span>{successMessage}</span>
+          </div>
+        )}
+
+        {!isRegister && !isForgotPassword && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">
@@ -284,139 +368,279 @@ export default function LoginPage() {
         )}
 
         <div className="card bg-[#243247] border border-[#304257] rounded-2xl p-6 shadow-sm space-y-5 max-w-md mx-auto w-full">
-          <div className="text-center">
-            <h3 className="text-sm font-bold text-[#F1F5F9]">
-              {isRegister ? 'Register Custom Organization' : 'Or Custom Credentials Login'}
-            </h3>
-            <p className="text-[11px] text-[#94A3B8]">
-              {isRegister ? 'Create an authorized supply chain account' : 'Sign in with your email or Web3 wallet'}
-            </p>
-          </div>
+          {isForgotPassword ? (
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="text-sm font-bold text-[#F1F5F9]">
+                  {forgotStep === 1 ? 'Reset Account Password' : 'Enter One-Time Password (OTP)'}
+                </h3>
+                <p className="text-[11px] text-[#94A3B8] mt-1">
+                  {forgotStep === 1
+                    ? 'Enter your registered email address to receive a 6-digit OTP code.'
+                    : `Enter the 6-digit code sent to ${forgotEmail} and your new password.`}
+                </p>
+              </div>
 
-          <form onSubmit={handleEmailAuth} className="space-y-4">
-            {isRegister && (
-              <div>
-                <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Full Name</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    required
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Dr. Arthur Bell"
-                    className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
-                  />
-                  <UserCheck className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
+              {previewOtp && (
+                <div className="p-3 bg-[#00D6B4]/15 border border-[#00D6B4]/40 rounded-xl text-xs font-mono text-[#00D6B4] flex items-center justify-between">
+                  <span>Demo Verification Code:</span>
+                  <span className="font-bold text-sm tracking-widest bg-[#0B1220] px-2 py-0.5 rounded-lg border border-[#00D6B4]/30">
+                    {previewOtp}
+                  </span>
                 </div>
-              </div>
-            )}
+              )}
 
-            <div>
-              <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Email Address</label>
-              <div className="relative">
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@pharma.com"
-                  className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
-                />
-                <Mail className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
-              </div>
-            </div>
+              {forgotStep === 1 ? (
+                <form onSubmit={handleSendOtp} className="space-y-4">
+                  <div>
+                    <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Registered Email Address</label>
+                    <div className="relative">
+                      <input
+                        type="email"
+                        required
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        placeholder="e.g. manufacturer@pharma.com"
+                        className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                      />
+                      <Mail className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
+                    </div>
+                  </div>
 
-            <div>
-              <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Password</label>
-              <div className="relative">
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
-                />
-                <KeyRound className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
-              </div>
-            </div>
-
-            {isRegister && (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Supply Chain Role</label>
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="select select-bordered w-full bg-[#172638] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-3 rounded-xl font-bold text-xs tracking-wider transition shadow-sm flex items-center justify-center gap-1.5"
                   >
-                    <option value="MANUFACTURER">MANUFACTURER</option>
-                    <option value="DISTRIBUTOR">DISTRIBUTOR</option>
-                    <option value="PHARMACY">PHARMACY</option>
-                    <option value="REGULATOR">REGULATOR</option>
-                    <option value="ADMIN">ADMIN</option>
-                    <option value="CUSTOMER">CUSTOMER</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Organization</label>
-                  <input
-                    type="text"
-                    value={organization}
-                    onChange={(e) => setOrganization(e.target.value)}
-                    placeholder="e.g. Roche Labs"
-                    className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
-                  />
-                </div>
+                    {loading ? 'Dispatching OTP...' : 'Send Verification OTP'}
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleResetPassword} className="space-y-4">
+                  <div>
+                    <label className="text-xs text-[#94A3B8] font-semibold block mb-1">6-Digit Verification Code</label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={6}
+                      value={forgotOtp}
+                      onChange={(e) => setForgotOtp(e.target.value.replace(/\D/g, ''))}
+                      placeholder="123456"
+                      className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2 text-center font-mono text-base tracking-widest text-[#00D6B4] focus:border-[#00D6B4]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-[#94A3B8] font-semibold block mb-1">New Password</label>
+                    <div className="relative">
+                      <input
+                        type={showResetPassword ? 'text' : 'password'}
+                        required
+                        minLength={6}
+                        value={forgotNewPassword}
+                        onChange={(e) => setForgotNewPassword(e.target.value)}
+                        placeholder="Enter your new password"
+                        className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-10 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                      />
+                      <KeyRound className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
+                      <button
+                        type="button"
+                        onClick={() => setShowResetPassword(!showResetPassword)}
+                        className="absolute right-3 top-2.5 text-[#94A3B8] hover:text-[#00D6B4] p-1"
+                        title={showResetPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showResetPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-3 rounded-xl font-bold text-xs tracking-wider transition shadow-sm flex items-center justify-center gap-1.5"
+                  >
+                    {loading ? 'Verifying...' : 'Verify OTP & Reset Password'}
+                    <CheckCircle2 className="h-4 w-4" />
+                  </button>
+                </form>
+              )}
+
+              <div className="text-center pt-2 border-t border-[#304257]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsForgotPassword(false);
+                    setForgotStep(1);
+                    setError('');
+                  }}
+                  className="text-xs text-[#00D6B4] font-bold hover:underline flex items-center justify-center gap-1.5 mx-auto"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" /> Return to Sign In
+                </button>
               </div>
-            )}
+            </div>
+          ) : (
+            <>
+              <div className="text-center">
+                <h3 className="text-sm font-bold text-[#F1F5F9]">
+                  {isRegister ? 'Register Custom Organization' : 'Or Custom Credentials Login'}
+                </h3>
+                <p className="text-[11px] text-[#94A3B8]">
+                  {isRegister ? 'Create an authorized supply chain account' : 'Sign in with your email or Web3 wallet'}
+                </p>
+              </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-3 rounded-xl font-bold text-xs tracking-wider transition shadow-sm flex items-center justify-center gap-1.5"
-            >
-              {loading ? 'Processing...' : isRegister ? 'Register Facility' : 'Sign In With Email'}
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </form>
+              <form onSubmit={handleEmailAuth} className="space-y-4">
+                {isRegister && (
+                  <div>
+                    <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Full Name</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        required
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="e.g. Dr. Arthur Bell"
+                        className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                      />
+                      <UserCheck className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
+                    </div>
+                  </div>
+                )}
 
-          <div className="divider text-[10px] uppercase tracking-wider text-[#94A3B8] font-bold before:bg-[#304257] after:bg-[#304257]">
-            Or Authenticate with Web3
-          </div>
+                <div>
+                  <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Email Address</label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="name@pharma.com"
+                      className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                    />
+                    <Mail className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
+                  </div>
+                </div>
 
-          <button
-            type="button"
-            onClick={handleWeb3Login}
-            disabled={loading}
-            className="btn btn-outline border-[#304257] hover:bg-[#172638] hover:border-[#00D6B4] text-[#F1F5F9] w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2"
-          >
-            <Wallet className="h-4 w-4 text-[#00D6B4]" /> Connect MetaMask Signature
-          </button>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs text-[#94A3B8] font-semibold block">Password</label>
+                    {!isRegister && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsForgotPassword(true);
+                          setForgotEmail(email);
+                          setError('');
+                          setSuccessMessage('');
+                        }}
+                        className="text-[11px] text-[#00D6B4] hover:underline font-semibold"
+                      >
+                        Forgot Password?
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-10 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                    />
+                    <KeyRound className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-2.5 text-[#94A3B8] hover:text-[#00D6B4] p-1"
+                      title={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
 
-          <div className="text-center text-xs text-[#94A3B8] pt-2 border-t border-[#304257]">
-            {isRegister ? (
-              <span>
-                Already registered?{' '}
+                {isRegister && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Supply Chain Role</label>
+                      <select
+                        value={role}
+                        onChange={(e) => setRole(e.target.value)}
+                        className="select select-bordered w-full bg-[#172638] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                      >
+                        <option value="MANUFACTURER">MANUFACTURER</option>
+                        <option value="DISTRIBUTOR">DISTRIBUTOR</option>
+                        <option value="PHARMACY">PHARMACY</option>
+                        <option value="REGULATOR">REGULATOR</option>
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="CUSTOMER">CUSTOMER</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Organization</label>
+                      <input
+                        type="text"
+                        value={organization}
+                        onChange={(e) => setOrganization(e.target.value)}
+                        placeholder="e.g. Roche Labs"
+                        className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <button
-                  onClick={() => setIsRegister(false)}
-                  className="text-[#00D6B4] font-bold hover:underline"
+                  type="submit"
+                  disabled={loading}
+                  className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-3 rounded-xl font-bold text-xs tracking-wider transition shadow-sm flex items-center justify-center gap-1.5"
                 >
-                  Return to Sign In
+                  {loading ? 'Processing...' : isRegister ? 'Register Facility' : 'Sign In With Email'}
+                  <ArrowRight className="h-4 w-4" />
                 </button>
-              </span>
-            ) : (
-              <span>
-                New pharmaceutical participant?{' '}
-                <button
-                  onClick={() => setIsRegister(true)}
-                  className="text-[#00D6B4] font-bold hover:underline"
-                >
-                  Register Organization
-                </button>
-              </span>
-            )}
-          </div>
+              </form>
+
+              <div className="divider text-[10px] uppercase tracking-wider text-[#94A3B8] font-bold before:bg-[#304257] after:bg-[#304257]">
+                Or Authenticate with Web3
+              </div>
+
+              <button
+                type="button"
+                onClick={handleWeb3Login}
+                disabled={loading}
+                className="btn btn-outline border-[#304257] hover:bg-[#172638] hover:border-[#00D6B4] text-[#F1F5F9] w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2"
+              >
+                <Wallet className="h-4 w-4 text-[#00D6B4]" /> Connect MetaMask Signature
+              </button>
+
+              <div className="text-center text-xs text-[#94A3B8] pt-2 border-t border-[#304257]">
+                {isRegister ? (
+                  <span>
+                    Already registered?{' '}
+                    <button
+                      onClick={() => setIsRegister(false)}
+                      className="text-[#00D6B4] font-bold hover:underline"
+                    >
+                      Return to Sign In
+                    </button>
+                  </span>
+                ) : (
+                  <span>
+                    New pharmaceutical participant?{' '}
+                    <button
+                      onClick={() => setIsRegister(true)}
+                      className="text-[#00D6B4] font-bold hover:underline"
+                    >
+                      Register Organization
+                    </button>
+                  </span>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
