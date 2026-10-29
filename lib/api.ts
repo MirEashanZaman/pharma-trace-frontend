@@ -155,6 +155,21 @@ export const web3LoginUser = async (data: {
   return res.data;
 };
 
+export const forgotPassword = async (email: string): Promise<{ success: boolean; message: string; previewOtp?: string }> => {
+  const res = await api.post('/auth/forgot-password', { email });
+  return res.data;
+};
+
+export const verifyOtp = async (email: string, otp: string): Promise<{ success: boolean; message: string }> => {
+  const res = await api.post('/auth/verify-otp', { email, otp });
+  return res.data;
+};
+
+export const resetPassword = async (data: { email: string; otp: string; newPassword: string }): Promise<{ success: boolean; message: string }> => {
+  const res = await api.post('/auth/reset-password', data);
+  return res.data;
+};
+
 export const fetchProfile = async (): Promise<UserProfile> => {
   const res = await api.get('/auth/profile');
   if (res.data && typeof window !== 'undefined') {
