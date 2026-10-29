@@ -77,7 +77,7 @@
     @apply rounded-2xl border border-[#304257] bg-[#243247] shadow-sm;
   }
   .input {
-    @apply h-9 rounded-xl border border-[#304257] bg-[#172638] px-3 py-1 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4];
+    @apply min-h-[2.5rem] rounded-xl border border-[#304257] bg-[#172638] px-3 py-2 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4];
   }
   .input-sm {
     @apply h-8 rounded-xl px-2.5 text-xs;
