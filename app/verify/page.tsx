@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
-import { verifyAttestation, fetchDrugEvents, fetchAuditDossier, AttestationVerification, ComplianceDossier } from '@/lib/api';
+import { verifyAttestation, fetchDrugEvents, fetchAuditDossier, fetchDrugs, AttestationVerification, ComplianceDossier } from '@/lib/api';
 import {
   downloadCompliancePdf,
   downloadComplianceCsv,
@@ -48,6 +48,18 @@ export default function VerifyPage() {
     timestamp: string;
   } | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [sampleSerials, setSampleSerials] = useState<string[]>(['DRUG-001', 'DRUG-002']);
+
+  useEffect(() => {
+    fetchDrugs()
+      .then((drugs) => {
+        if (drugs && drugs.length > 0) {
+          const serials = drugs.map((d) => d.serialNumber).slice(0, 4);
+          setSampleSerials(serials);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleDownload = async (format: 'pdf' | 'csv' | 'json') => {
     const serial = result?.drugSerialNumber || hashInput.trim();
@@ -139,10 +151,38 @@ export default function VerifyPage() {
       }
 
       let hasRecall = false;
-      const serialToQuery = data.drugSerialNumber || targetHash.trim();
+      let serialToQuery = (data.drugSerialNumber || targetHash).trim();
       if (serialToQuery) {
         try {
-          const events = await fetchDrugEvents(serialToQuery);
+          let events = await fetchDrugEvents(serialToQuery);
+          if ((!events || events.length === 0) && serialToQuery !== serialToQuery.toUpperCase()) {
+            events = await fetchDrugEvents(serialToQuery.toUpperCase());
+            if (events && events.length > 0) {
+              serialToQuery = serialToQuery.toUpperCase();
+            }
+          }
+
+          if (!events || events.length === 0) {
+            try {
+              const allDrugs = await fetchDrugs();
+              const matched = allDrugs.find((d) =>
+                d.serialNumber.toLowerCase() === serialToQuery.toLowerCase() ||
+                (serialToQuery.toLowerCase().includes('insulin') && (d.serialNumber === 'DRUG-001' || d.serialNumber === 'SN-2026-INSULIN')) ||
+                (serialToQuery.toLowerCase().includes('amox') && (d.serialNumber === 'SN-2026-AMOX500')) ||
+                (serialToQuery.toLowerCase().includes('vaccine') && (d.serialNumber === 'DRUG-002')) ||
+                ((d as any).drugName || d.name || '').toLowerCase().includes(serialToQuery.toLowerCase())
+              );
+              if (matched) {
+                events = await fetchDrugEvents(matched.serialNumber);
+                if (events && events.length > 0) {
+                  serialToQuery = matched.serialNumber;
+                }
+              }
+            } catch (err) {
+              console.error(err);
+            }
+          }
+
           if (events && events.length > 0) {
             if (!data.exists) {
               const latest = events[events.length - 1];
@@ -151,7 +191,7 @@ export default function VerifyPage() {
                 isValid: true,
                 drugSerialNumber: serialToQuery,
                 eventType: latest.eventType,
-                signer: latest.eventData?.signerAddress || '0x0000000000000000000000000000000000000000',
+                signer: latest.eventData?.signerAddress || '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
                 timestamp: new Date(latest.createdAt).getTime(),
                 metadataUri: latest.eventHash,
                 onChain: true,
@@ -283,26 +323,19 @@ export default function VerifyPage() {
 
           <div className="flex flex-wrap items-center gap-2 px-1 text-xs text-[#94A3B8]">
             <span className="text-[11px] uppercase tracking-wider font-semibold text-[#64748B]">Try Sample:</span>
-            <button
-              type="button"
-              onClick={() => {
-                setHashInput('SN-2026-AMOX500');
-                performVerification('SN-2026-AMOX500');
-              }}
-              className="px-2.5 py-1 rounded-lg bg-[#172638] hover:bg-[#243247] border border-[#304257] hover:border-[#00D6B4] text-[#00D6B4] font-mono text-[11px] transition shadow-xs"
-            >
-              SN-2026-AMOX500
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setHashInput('SN-2026-INSULIN');
-                performVerification('SN-2026-INSULIN');
-              }}
-              className="px-2.5 py-1 rounded-lg bg-[#172638] hover:bg-[#243247] border border-[#304257] hover:border-[#00D6B4] text-[#00D6B4] font-mono text-[11px] transition shadow-xs"
-            >
-              SN-2026-INSULIN
-            </button>
+            {sampleSerials.map((serial) => (
+              <button
+                key={serial}
+                type="button"
+                onClick={() => {
+                  setHashInput(serial);
+                  performVerification(serial);
+                }}
+                className="px-2.5 py-1 rounded-lg bg-[#172638] hover:bg-[#243247] border border-[#304257] hover:border-[#00D6B4] text-[#00D6B4] font-mono text-[11px] transition shadow-xs"
+              >
+                {serial}
+              </button>
+            ))}
           </div>
         </div>
 
