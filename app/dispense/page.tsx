@@ -171,7 +171,7 @@ export default function DispensePage() {
                     type="text"
                     value={inputGtin}
                     onChange={(e) => setInputGtin(e.target.value)}
-                    placeholder="00844514000015"
+                    placeholder="Enter your GS1 GTIN (e.g. 00844514000015)"
                     className="w-full bg-[#0B1220] border border-[#243247] rounded-xl px-3.5 py-2.5 text-sm font-mono text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4]"
                   />
                 </div>
@@ -184,7 +184,7 @@ export default function DispensePage() {
                     type="text"
                     value={inputSerial}
                     onChange={(e) => setInputSerial(e.target.value)}
-                    placeholder="SN-TWIN-9901"
+                    placeholder="Enter your serial number (e.g. SN-TWIN-9901)"
                     className="w-full bg-[#0B1220] border border-[#243247] rounded-xl px-3.5 py-2.5 text-sm font-mono text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4]"
                   />
                 </div>
