@@ -186,7 +186,6 @@ export interface UpdateProfilePayload {
   fullName?: string;
   organization?: string;
   walletAddress?: string;
-  role?: string;
   password?: string;
 }
 
