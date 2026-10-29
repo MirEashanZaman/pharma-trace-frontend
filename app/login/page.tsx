@@ -115,7 +115,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [role, setRole] = useState('ADMIN');
+  const [role, setRole] = useState('MANUFACTURER');
   const [organization, setOrganization] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -400,7 +400,7 @@ export default function LoginPage() {
                         required
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
-                        placeholder="e.g. manufacturer@pharma.com"
+                        placeholder="Enter your registered email address"
                         className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                       />
                       <Mail className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
@@ -426,7 +426,7 @@ export default function LoginPage() {
                       maxLength={6}
                       value={forgotOtp}
                       onChange={(e) => setForgotOtp(e.target.value.replace(/\D/g, ''))}
-                      placeholder="123456"
+                      placeholder="Enter your 6-digit verification code"
                       className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2 text-center font-mono text-base tracking-widest text-[#00D6B4] focus:border-[#00D6B4]"
                     />
                   </div>
@@ -501,7 +501,7 @@ export default function LoginPage() {
                         required
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        placeholder="e.g. Dr. Arthur Bell"
+                        placeholder="Enter your full name"
                         className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                       />
                       <UserCheck className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
@@ -517,7 +517,7 @@ export default function LoginPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="name@pharma.com"
+                      placeholder="Enter your email address"
                       className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                     />
                     <Mail className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
@@ -576,7 +576,6 @@ export default function LoginPage() {
                         <option value="DISTRIBUTOR">DISTRIBUTOR</option>
                         <option value="PHARMACY">PHARMACY</option>
                         <option value="REGULATOR">REGULATOR</option>
-                        <option value="ADMIN">ADMIN</option>
                         <option value="CUSTOMER">CUSTOMER</option>
                       </select>
                     </div>
@@ -586,7 +585,7 @@ export default function LoginPage() {
                         type="text"
                         value={organization}
                         onChange={(e) => setOrganization(e.target.value)}
-                        placeholder="e.g. Roche Labs"
+                        placeholder="Enter your organization name"
                         className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
                       />
                     </div>
