@@ -178,6 +178,23 @@ export const fetchProfile = async (): Promise<UserProfile> => {
   return res.data;
 };
 
+export interface UpdateProfilePayload {
+  fullName?: string;
+  organization?: string;
+  walletAddress?: string;
+  role?: string;
+  password?: string;
+}
+
+export const updateProfile = async (data: UpdateProfilePayload): Promise<UserProfile> => {
+  const res = await api.put('/auth/profile', data);
+  if (res.data && typeof window !== 'undefined') {
+    localStorage.setItem('pharma_user', JSON.stringify(res.data));
+    window.dispatchEvent(new Event('pharma_profile_updated'));
+  }
+  return res.data;
+};
+
 export const getStoredUser = (): UserProfile | null => {
   if (typeof window !== 'undefined') {
     const raw = localStorage.getItem('pharma_user');
