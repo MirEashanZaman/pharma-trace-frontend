@@ -4,15 +4,138 @@
 
 @import 'leaflet/dist/leaflet.css';
 
-:root {
-  --background: #0B1220;
-  --foreground: #F1F5F9;
+@layer base {
+  :root {
+    --background: 222 47% 8%;
+    --foreground: 210 40% 96%;
+    --card: 217 33% 21%;
+    --card-foreground: 210 40% 96%;
+    --popover: 213 42% 15%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 170 100% 42%;
+    --primary-foreground: 222 47% 8%;
+    --secondary: 217 33% 21%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 213 42% 15%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 212 29% 26%;
+    --accent-foreground: 170 100% 42%;
+    --destructive: 0 91% 71%;
+    --destructive-foreground: 222 47% 8%;
+    --border: 212 29% 26%;
+    --input: 212 29% 26%;
+    --ring: 170 100% 42%;
+    --radius: 0.75rem;
+  }
 }
 
-body {
-  color: #F1F5F9;
-  background-color: #0B1220;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center font-bold transition-all rounded-xl cursor-pointer disabled:opacity-50 disabled:pointer-events-none select-none;
+  }
+  .btn-xs {
+    @apply h-7 px-2 text-[10px] rounded-lg;
+  }
+  .btn-sm {
+    @apply h-8 px-3 text-xs rounded-xl;
+  }
+  .btn-ghost {
+    @apply bg-transparent hover:bg-[#172638] text-[#94A3B8] hover:text-[#F1F5F9];
+  }
+  .btn-outline {
+    @apply border border-[#304257] bg-transparent text-[#F1F5F9] hover:bg-[#172638] hover:border-[#00D6B4];
+  }
+  .btn-circle {
+    @apply rounded-full p-0 flex items-center justify-center aspect-square;
+  }
+  .btn-square {
+    @apply rounded-xl p-0 flex items-center justify-center aspect-square;
+  }
+  .badge {
+    @apply inline-flex items-center font-semibold rounded-lg border;
+  }
+  .badge-xs {
+    @apply text-[9px] px-1.5 py-0.5;
+  }
+  .badge-sm {
+    @apply text-[10px] px-2 py-0.5;
+  }
+  .badge-lg {
+    @apply text-xs px-3 py-1;
+  }
+  .card {
+    @apply rounded-2xl border border-[#304257] bg-[#243247] shadow-sm;
+  }
+  .input {
+    @apply h-9 rounded-xl border border-[#304257] bg-[#172638] px-3 py-1 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4];
+  }
+  .input-sm {
+    @apply h-8 rounded-xl px-2.5 text-xs;
+  }
+  .input-bordered {
+    @apply border border-[#304257];
+  }
+  .select {
+    @apply h-9 rounded-xl border border-[#304257] bg-[#172638] px-3 py-1 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4];
+  }
+  .select-xs {
+    @apply h-7 rounded-xl px-2 text-[10px];
+  }
+  .select-sm {
+    @apply h-8 rounded-xl px-2.5 text-xs;
+  }
+  .select-bordered {
+    @apply border border-[#304257];
+  }
+  .alert {
+    @apply relative w-full rounded-xl border border-[#304257] p-3 text-xs;
+  }
+  .alert-error {
+    @apply bg-[#F87171] text-[#0B1220] border-none font-bold;
+  }
+  .join {
+    @apply inline-flex items-center;
+  }
+  .join-item {
+    border-radius: 0;
+  }
+  .join-item:first-child {
+    border-top-left-radius: 0.75rem;
+    border-bottom-left-radius: 0.75rem;
+  }
+  .join-item:last-child {
+    border-top-right-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+  }
+  .divider {
+    @apply flex items-center my-4 before:flex-1 before:h-px after:flex-1 after:h-px before:bg-[#304257] after:bg-[#304257] text-[#94A3B8];
+  }
+  .dropdown {
+    @apply relative inline-block;
+  }
+  .dropdown-end .dropdown-content {
+    @apply right-0;
+  }
+  .dropdown-content {
+    @apply absolute hidden group-hover:block;
+  }
+  .dropdown:focus-within .dropdown-content,
+  .dropdown:hover .dropdown-content {
+    @apply block;
+  }
+  .menu {
+    @apply flex flex-col;
+  }
 }
 
 .dark-map-tiles {
