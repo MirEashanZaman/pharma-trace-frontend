@@ -297,7 +297,7 @@ export default function VerifyPage() {
                   type="text"
                   value={hashInput}
                   onChange={(e) => setHashInput(e.target.value)}
-                  placeholder="Enter batch serial (e.g. SN-2026-AMOX500) or attestation hash"
+                  placeholder="Enter your drug serial number (e.g. SN-2026-AMOX500) or attestation hash"
                   className="w-full h-12 bg-[#172638] border border-[#304257] rounded-xl pl-12 pr-10 text-sm text-[#F1F5F9] font-mono shadow-sm placeholder:text-[#94A3B8]/60 focus:border-[#00D6B4] focus:ring-1 focus:ring-[#00D6B4] focus:outline-none transition"
                 />
                 {hashInput && (
