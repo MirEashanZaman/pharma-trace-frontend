@@ -25,6 +25,7 @@ import {
   FileJson,
   Award,
   Network,
+  X,
 } from 'lucide-react';
 import { Navigation } from '@/components/navigation';
 import { connectMetaMask } from '@/lib/web3';
@@ -236,37 +237,73 @@ export default function VerifyPage() {
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-3 mb-10 items-stretch">
-          <form onSubmit={handleVerify} className="relative flex-1 flex flex-col sm:flex-row gap-2.5">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8] pointer-events-none" />
-              <input
-                type="text"
-                value={hashInput}
-                onChange={(e) => setHashInput(e.target.value)}
-                placeholder="Enter batch serial (e.g. SN-2026-AMOX500) or attestation hash"
-                className="w-full h-12 bg-[#172638] border border-[#304257] rounded-xl pl-12 pr-4 text-sm text-[#F1F5F9] font-mono shadow-sm placeholder:text-[#94A3B8]/60 focus:border-[#00D6B4] focus:ring-1 focus:ring-[#00D6B4] focus:outline-none transition"
-              />
-            </div>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="h-12 px-6 bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] rounded-xl font-bold text-xs tracking-wider flex items-center justify-center gap-2 shadow-sm shrink-0 border-0 transition"
-            >
-              <CheckCircle2 className="h-4 w-4" />
-              <span>{loading ? 'Verifying...' : 'Verify Hash'}</span>
-            </Button>
-          </form>
+        <div className="mb-10 space-y-2.5">
+          <div className="flex flex-col lg:flex-row gap-3 items-stretch">
+            <form onSubmit={handleVerify} className="relative flex-1 flex flex-col sm:flex-row gap-2.5">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8] pointer-events-none" />
+                <input
+                  type="text"
+                  value={hashInput}
+                  onChange={(e) => setHashInput(e.target.value)}
+                  placeholder="Enter batch serial (e.g. SN-2026-AMOX500) or attestation hash"
+                  className="w-full h-12 bg-[#172638] border border-[#304257] rounded-xl pl-12 pr-10 text-sm text-[#F1F5F9] font-mono shadow-sm placeholder:text-[#94A3B8]/60 focus:border-[#00D6B4] focus:ring-1 focus:ring-[#00D6B4] focus:outline-none transition"
+                />
+                {hashInput && (
+                  <button
+                    type="button"
+                    onClick={() => setHashInput('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#F1F5F9] p-1 rounded-md transition"
+                    aria-label="Clear search input"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="h-12 px-6 bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] rounded-xl font-bold text-xs tracking-wider flex items-center justify-center gap-2 shadow-sm shrink-0 border-0 transition"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                <span>{loading ? 'Verifying...' : 'Verify Hash'}</span>
+              </Button>
+            </form>
 
-          <Button
-            type="button"
-            onClick={() => setShowScanner(true)}
-            variant="secondary"
-            className="h-12 px-5 rounded-xl text-xs font-bold tracking-wider flex items-center justify-center gap-2 shadow-sm shrink-0 border border-[#304257] hover:border-[#00D6B4] bg-[#243247] hover:bg-[#1E2E44] text-[#F1F5F9] transition"
-          >
-            <Camera className="h-4 w-4 text-[#00D6B4]" />
-            <span>Scan Camera QR</span>
-          </Button>
+            <Button
+              type="button"
+              onClick={() => setShowScanner(true)}
+              variant="secondary"
+              className="h-12 px-5 rounded-xl text-xs font-bold tracking-wider flex items-center justify-center gap-2 shadow-sm shrink-0 border border-[#304257] hover:border-[#00D6B4] bg-[#243247] hover:bg-[#1E2E44] text-[#F1F5F9] transition"
+            >
+              <Camera className="h-4 w-4 text-[#00D6B4]" />
+              <span>Scan Camera QR</span>
+            </Button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 px-1 text-xs text-[#94A3B8]">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-[#64748B]">Try Sample:</span>
+            <button
+              type="button"
+              onClick={() => {
+                setHashInput('SN-2026-AMOX500');
+                performVerification('SN-2026-AMOX500');
+              }}
+              className="px-2.5 py-1 rounded-lg bg-[#172638] hover:bg-[#243247] border border-[#304257] hover:border-[#00D6B4] text-[#00D6B4] font-mono text-[11px] transition shadow-xs"
+            >
+              SN-2026-AMOX500
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setHashInput('SN-2026-INSULIN');
+                performVerification('SN-2026-INSULIN');
+              }}
+              className="px-2.5 py-1 rounded-lg bg-[#172638] hover:bg-[#243247] border border-[#304257] hover:border-[#00D6B4] text-[#00D6B4] font-mono text-[11px] transition shadow-xs"
+            >
+              SN-2026-INSULIN
+            </button>
+          </div>
         </div>
 
         {showScanner && (
