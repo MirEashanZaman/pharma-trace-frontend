@@ -29,6 +29,8 @@ import {
 import { Navigation } from '@/components/navigation';
 import { connectMetaMask } from '@/lib/web3';
 import { CameraQrScanner } from '@/components/qr-scanner';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 export default function VerifyPage() {
   const [hashInput, setHashInput] = useState('');
@@ -221,8 +223,10 @@ export default function VerifyPage() {
 
       <main className="flex-1 max-w-4xl mx-auto px-4 py-12 w-full">
         <div className="text-center space-y-3 mb-10">
-          <div className="badge badge-lg bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-semibold uppercase tracking-wider py-3 px-4">
-            Public Proof Explorer
+          <div className="inline-flex items-center justify-center">
+            <Badge variant="teal" size="lg" className="uppercase tracking-wider px-3.5 py-1 text-[11px] font-bold">
+              Public Proof Explorer
+            </Badge>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#F1F5F9]">
             Verify Attestation & Drug Custody
@@ -232,32 +236,33 @@ export default function VerifyPage() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 mb-10">
-          <form onSubmit={handleVerify} className="relative flex-1">
+        <div className="flex flex-col sm:flex-row gap-3 mb-10 items-stretch">
+          <form onSubmit={handleVerify} className="relative flex-1 flex items-center">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#94A3B8] pointer-events-none" />
             <input
               type="text"
               value={hashInput}
               onChange={(e) => setHashInput(e.target.value)}
               placeholder="Enter batch serial (e.g. SN-2026-AMOX500) or attestation hash (0x...)"
-              className="input input-bordered w-full bg-[#243247] border-[#304257] rounded-xl px-5 py-4 pl-12 text-sm text-[#F1F5F9] font-mono shadow-sm focus:border-[#00D6B4] focus:outline-none"
+              className="w-full h-12 bg-[#243247] border border-[#304257] rounded-xl pl-12 pr-36 text-sm text-[#F1F5F9] font-mono shadow-sm placeholder:text-[#94A3B8]/60 focus:border-[#00D6B4] focus:ring-1 focus:ring-[#00D6B4] focus:outline-none transition"
             />
-            <Search className="absolute left-4 top-4 h-5 w-5 text-[#94A3B8]" />
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-lg absolute right-2.5 top-2.5 px-5 font-bold text-xs tracking-wider"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 px-5 bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] rounded-lg font-bold text-xs tracking-wider flex items-center justify-center shadow-sm"
             >
               {loading ? 'Verifying...' : 'Verify Hash'}
-            </button>
+            </Button>
           </form>
 
-          <button
+          <Button
             type="button"
             onClick={() => setShowScanner(true)}
-            className="btn bg-[#172638] hover:bg-[#243247] text-[#00D6B4] border border-[#304257] hover:border-[#00D6B4] rounded-xl px-5 py-3 font-bold text-xs tracking-wider flex items-center justify-center gap-2 shadow-sm shrink-0"
+            variant="secondary"
+            className="h-12 px-5 rounded-xl text-xs font-bold tracking-wider flex items-center justify-center gap-2 shadow-sm shrink-0 border-[#304257] hover:border-[#00D6B4] hover:bg-[#243247] transition"
           >
             <Camera className="h-4 w-4" /> Scan Camera QR
-          </button>
+          </Button>
         </div>
 
         {showScanner && (
@@ -399,37 +404,46 @@ export default function VerifyPage() {
                       Download verified GxP audit package for medical records or regulatory inspection
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
                       type="button"
+                      size="xs"
                       disabled={downloading}
                       onClick={() => handleDownload('pdf')}
-                      className="btn btn-xs bg-[#00D6B4] hover:bg-[#00D6B4]/80 text-[#0B1220] font-bold border-none rounded-lg flex items-center gap-1.5"
+                      className="bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] font-bold rounded-lg flex items-center gap-1.5"
                     >
                       <FileText className="h-3.5 w-3.5" /> Download Dossier (PDF)
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
+                      size="xs"
+                      variant="secondary"
                       disabled={downloading}
                       onClick={() => handleDownload('csv')}
-                      className="btn btn-xs bg-[#172638] hover:bg-[#1E2E44] text-[#F1F5F9] border-[#304257] rounded-lg font-bold flex items-center gap-1.5"
+                      className="rounded-lg font-bold flex items-center gap-1.5 text-[#F1F5F9] border-[#304257] hover:bg-[#1E2E44]"
                     >
                       <FileSpreadsheet className="h-3.5 w-3.5 text-[#00D6B4]" /> CSV Ledger
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
+                      size="xs"
+                      variant="secondary"
                       disabled={downloading}
                       onClick={() => handleDownload('json')}
-                      className="btn btn-xs bg-[#172638] hover:bg-[#1E2E44] text-[#F1F5F9] border-[#304257] rounded-lg font-bold flex items-center gap-1.5"
+                      className="rounded-lg font-bold flex items-center gap-1.5 text-[#F1F5F9] border-[#304257] hover:bg-[#1E2E44]"
                     >
                       <FileJson className="h-3.5 w-3.5 text-[#00D6B4]" /> JSON Package
-                    </button>
-                    <NextLink
-                      href="/provenance"
-                      className="btn btn-xs bg-[#172638] hover:bg-[#1E2E44] text-[#00D6B4] border border-[#00D6B4]/40 rounded-lg font-bold flex items-center gap-1.5"
+                    </Button>
+                    <Button
+                      asChild
+                      size="xs"
+                      variant="secondary"
+                      className="rounded-lg font-bold flex items-center gap-1.5 text-[#00D6B4] border-[#00D6B4]/40 hover:bg-[#1E2E44]"
                     >
-                      <Network className="h-3.5 w-3.5" /> Provenance DAG
-                    </NextLink>
+                      <NextLink href="/provenance">
+                        <Network className="h-3.5 w-3.5" /> Provenance DAG
+                      </NextLink>
+                    </Button>
                   </div>
                 </div>
               </div>
