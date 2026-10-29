@@ -345,7 +345,7 @@ export default function StakingPage() {
                     type="number"
                     value={depositAmount}
                     onChange={(e) => setDepositAmount(e.target.value)}
-                    placeholder="Amount USDC"
+                    placeholder="Enter your deposit stake amount (USDC)"
                     className="input input-sm w-full bg-[#172638] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                   <button
@@ -367,7 +367,7 @@ export default function StakingPage() {
                     type="number"
                     value={unstakeAmount}
                     onChange={(e) => setUnstakeAmount(e.target.value)}
-                    placeholder="Amount USDC"
+                    placeholder="Enter your withdrawal amount (USDC)"
                     className="input input-sm w-full bg-[#172638] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                   <button
