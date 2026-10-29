@@ -67,6 +67,7 @@ import {
   Award,
   Camera,
   Network,
+  UserCog,
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { QRCodeSVG } from 'qrcode.react';
@@ -594,12 +595,19 @@ export default function DashboardPage() {
                 Key: {currentUser.walletAddress.slice(0, 8)}...{currentUser.walletAddress.slice(-6)}
               </div>
             )}
+            <Link
+              href="/profile"
+              className="btn btn-xs w-full bg-[#00D6B4]/15 hover:bg-[#00D6B4]/25 text-[#00D6B4] border border-[#00D6B4]/30 rounded-lg font-bold mt-2 flex items-center justify-center gap-1.5"
+            >
+              <UserCog className="h-3.5 w-3.5" />
+              <span>Edit Profile Details</span>
+            </Link>
             <button
               onClick={() => {
                 logoutUser();
                 router.push('/login');
               }}
-              className="btn btn-xs w-full bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 rounded-lg font-bold mt-2"
+              className="btn btn-xs w-full bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 rounded-lg font-bold mt-1.5"
             >
               Sign Out / Switch Stakeholder
             </button>
