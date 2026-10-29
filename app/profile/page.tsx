@@ -184,6 +184,16 @@ export default function ProfilePage() {
           </CardHeader>
 
           <CardContent className="pt-6">
+            {currentUser?.warningCount ? (
+              <div className="mb-6 p-4 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-xs space-y-1">
+                <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-300">
+                  <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0" />
+                  <span>Administrative Warning Active ({currentUser.warningCount} Issued)</span>
+                </div>
+                <div>{currentUser.warningReason || 'Account compliance review notice'}</div>
+              </div>
+            ) : null}
+
             {successMessage && (
               <div className="mb-6 p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2.5">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
