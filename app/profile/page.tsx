@@ -103,13 +103,11 @@ export default function ProfilePage() {
       const payload: {
         fullName?: string;
         organization?: string;
-        role?: string;
         walletAddress?: string;
         password?: string;
       } = {
         fullName: fullName.trim(),
         organization: organization.trim(),
-        role,
         walletAddress: walletAddress.trim(),
       };
 
@@ -244,7 +242,7 @@ export default function ProfilePage() {
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Mir Eashan Zaman"
+                    placeholder="Enter your full name"
                     className="w-full h-11 bg-[#0B1220] border border-[#304257] rounded-xl px-4 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4] transition"
                   />
                 </div>
@@ -258,7 +256,7 @@ export default function ProfilePage() {
                     type="text"
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
-                    placeholder="e.g. BioGenix International Ltd"
+                    placeholder="Enter your organization name"
                     className="w-full h-11 bg-[#0B1220] border border-[#304257] rounded-xl px-4 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4] transition"
                   />
                 </div>
@@ -266,22 +264,25 @@ export default function ProfilePage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#F1F5F9] flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-[#00D6B4]" />
-                    <span>Supply Chain Role</span>
-                  </label>
-                  <select
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-[#F1F5F9] flex items-center gap-2">
+                      <ShieldCheck className="h-4 w-4 text-[#00D6B4]" />
+                      <span>Supply Chain Role</span>
+                    </label>
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-[#94A3B8] bg-[#0B1220] px-2 py-0.5 rounded border border-[#304257]">
+                      <Lock className="h-3 w-3 text-[#00D6B4]" /> Fixed Role
+                    </span>
+                  </div>
+                  <input
+                    type="text"
                     value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="w-full h-11 bg-[#0B1220] border border-[#304257] rounded-xl px-4 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4] transition cursor-pointer"
-                  >
-                    <option value="MANUFACTURER">MANUFACTURER</option>
-                    <option value="DISTRIBUTOR">DISTRIBUTOR</option>
-                    <option value="PHARMACY">PHARMACY</option>
-                    <option value="REGULATOR">REGULATOR</option>
-                    <option value="CUSTOMER">CUSTOMER</option>
-                    <option value="ADMIN">ADMIN</option>
-                  </select>
+                    disabled
+                    readOnly
+                    className="w-full h-11 bg-[#172638]/70 border border-[#304257] rounded-xl px-4 text-xs font-bold text-[#00D6B4] cursor-not-allowed opacity-90 select-none uppercase tracking-wider"
+                  />
+                  <p className="text-[11px] text-[#94A3B8]">
+                    Your role is fixed upon registration and cannot be modified.
+                  </p>
                 </div>
 
                 <div className="space-y-1.5">
@@ -302,7 +303,7 @@ export default function ProfilePage() {
                     type="text"
                     value={walletAddress}
                     onChange={(e) => setWalletAddress(e.target.value)}
-                    placeholder="0x..."
+                    placeholder="Enter your wallet address (0x...)"
                     className="w-full h-11 bg-[#0B1220] border border-[#304257] rounded-xl px-4 text-xs font-mono text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4] transition"
                   />
                 </div>
@@ -328,7 +329,7 @@ export default function ProfilePage() {
                         value={newPassword}
                         minLength={6}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="Min. 6 characters"
+                        placeholder="Enter your new password (min. 6 characters)"
                         className="w-full h-11 bg-[#172638] border border-[#304257] rounded-xl pl-4 pr-10 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4] transition"
                       />
                       <button
@@ -350,7 +351,7 @@ export default function ProfilePage() {
                         value={confirmPassword}
                         minLength={6}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="Re-type new password"
+                        placeholder="Enter your password confirmation"
                         className="w-full h-11 bg-[#172638] border border-[#304257] rounded-xl pl-4 pr-10 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4] transition"
                       />
                       <button
