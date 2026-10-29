@@ -864,7 +864,7 @@ export function ProvenanceDagVisualizer({
 
               <g
                 transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}
-                transition="transform 0.05s ease-out"
+                style={{ transition: 'transform 0.05s ease-out' }}
               >
                 <g id="dag-edge-paths">
                   {activeEdges.map((edge) => {
