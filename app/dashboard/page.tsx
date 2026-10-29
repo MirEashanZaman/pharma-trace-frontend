@@ -439,6 +439,15 @@ export default function DashboardPage() {
 
   const handleWarnUser = async (id: number) => {
     if (!warningReasonInput.trim()) return;
+    const target = allUsers.find((u) => u.id === id);
+    if (target?.role === 'ADMIN') {
+      setAdminFeedback({
+        type: 'error',
+        message: 'Administrators cannot issue warnings to other administrator accounts.',
+      });
+      setSelectedUserForWarning(null);
+      return;
+    }
     setAdminActionLoading(true);
     setAdminFeedback(null);
     try {
@@ -458,6 +467,14 @@ export default function DashboardPage() {
   };
 
   const handleClearWarnings = async (id: number) => {
+    const target = allUsers.find((u) => u.id === id);
+    if (target?.role === 'ADMIN') {
+      setAdminFeedback({
+        type: 'error',
+        message: 'Administrators cannot modify warnings for administrator accounts.',
+      });
+      return;
+    }
     setAdminActionLoading(true);
     setAdminFeedback(null);
     try {
@@ -475,6 +492,14 @@ export default function DashboardPage() {
   };
 
   const handleToggleDisable = async (id: number, currentDisabled: boolean) => {
+    const target = allUsers.find((u) => u.id === id);
+    if (target?.role === 'ADMIN') {
+      setAdminFeedback({
+        type: 'error',
+        message: 'Administrators cannot disable other administrator accounts.',
+      });
+      return;
+    }
     setAdminActionLoading(true);
     setAdminFeedback(null);
     try {
@@ -495,6 +520,14 @@ export default function DashboardPage() {
   };
 
   const handleDeleteUser = async (id: number, targetName: string) => {
+    const target = allUsers.find((u) => u.id === id);
+    if (target?.role === 'ADMIN') {
+      setAdminFeedback({
+        type: 'error',
+        message: 'Administrators cannot delete other administrator accounts.',
+      });
+      return;
+    }
     if (!window.confirm(`Are you sure you want to permanently delete account for ${targetName}?`)) {
       return;
     }
