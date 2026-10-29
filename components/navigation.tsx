@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { ShieldCheck, Layers, Search, CheckCircle2, LogIn, LogOut, User, Server, RefreshCw, BookOpen, Flame, Network, Lock, Scale, Vote, Menu } from 'lucide-react';
+import { ShieldCheck, Layers, Search, CheckCircle2, LogIn, LogOut, User, Server, RefreshCw, BookOpen, Flame, Network, Lock, Scale, Vote, Menu, UserCog } from 'lucide-react';
 import { getStoredUser, logoutUser, UserProfile } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,14 @@ export function Navigation({
     } else {
       setUser(getStoredUser());
     }
+
+    const handleProfileUpdate = () => {
+      setUser(getStoredUser());
+    };
+    window.addEventListener('pharma_profile_updated', handleProfileUpdate);
+    return () => {
+      window.removeEventListener('pharma_profile_updated', handleProfileUpdate);
+    };
   }, [propUser]);
 
   const handleLogout = () => {
@@ -113,8 +121,12 @@ export function Navigation({
 
           {user ? (
             <div className="flex items-center gap-2 shrink-0">
-              <div className="flex items-center gap-2 bg-[#172638] px-2.5 py-1.5 rounded-xl border border-[#304257] shrink-0">
-                <User className="h-3.5 w-3.5 text-[#00D6B4] shrink-0" />
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 bg-[#172638] hover:bg-[#243247] px-2.5 py-1.5 rounded-xl border border-[#304257] hover:border-[#00D6B4]/50 transition shrink-0 group cursor-pointer"
+                title="Edit Profile"
+              >
+                <User className="h-3.5 w-3.5 text-[#00D6B4] shrink-0 group-hover:scale-110 transition-transform" />
                 <div className="flex flex-col text-left">
                   <span className="text-[11px] font-bold text-[#F1F5F9] leading-tight truncate max-w-[100px] 2xl:max-w-[130px]">
                     {user.fullName || user.email}
@@ -126,7 +138,20 @@ export function Navigation({
                 <span className={`badge badge-xs font-bold uppercase border ml-1 shrink-0 text-[9px] py-0.5 px-1.5 ${getRoleBadgeColor(user.role)}`}>
                   {user.role}
                 </span>
-              </div>
+              </Link>
+
+              <Button
+                asChild
+                variant="ghost"
+                size="xs"
+                className="text-[#94A3B8] hover:text-[#00D6B4] hover:bg-[#172638] border border-[#304257] rounded-xl px-2.5 transition shrink-0 hidden sm:flex items-center gap-1.5"
+                title="Edit Profile & Credentials"
+              >
+                <Link href="/profile">
+                  <UserCog className="h-3.5 w-3.5 shrink-0" />
+                  <span className="text-xs font-bold">Profile</span>
+                </Link>
+              </Button>
 
               <Button
                 variant="ghost"
@@ -155,6 +180,17 @@ export function Navigation({
               <Menu className="h-4 w-4" />
             </label>
             <ul tabIndex={0} className="dropdown-content z-[100] menu p-2 shadow-xl bg-[#172638] border border-[#304257] rounded-2xl w-48 text-xs space-y-1 mt-2">
+              {user && (
+                <li>
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-2 rounded-lg py-2 text-[#94A3B8] hover:text-[#00D6B4] font-bold"
+                  >
+                    <UserCog className="h-4 w-4" />
+                    <span>Edit Profile</span>
+                  </Link>
+                </li>
+              )}
               {navLinks.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
