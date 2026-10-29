@@ -1,6 +1,6 @@
 # PharmaTrace-ES: Web3 Enterprise Frontend Application
 
-A responsive Next.js 14 (App Router) + Tailwind CSS and DaisyUI frontend interface implementing the Midnight Navy / Neon Teal design system (`#0B1220`, `#00D6B4`, `#243247`, `#172638`) for pharmaceutical supply chain traceability, decentralized escrow, carrier staking, and regulatory timelock governance.
+A responsive Next.js 14 (App Router) + Tailwind CSS and shadcn/ui frontend interface implementing the Midnight Navy / Neon Teal design system (`#0B1220`, `#00D6B4`, `#243247`, `#172638`) for pharmaceutical supply chain traceability, decentralized escrow, carrier staking, and regulatory timelock governance.
 
 ---
 
@@ -54,15 +54,27 @@ pharma-trace-frontend/
 │   ├── dashboard/page.tsx             # Interactive Batch, Saga & Attestation Dashboard
 │   ├── verify/page.tsx                # Public Consumer & Hospital Verification Page
 │   ├── login/page.tsx                 # Web3 MetaMask & Enterprise JWT Authentication
-│   ├── globals.css                    # Tailwind CSS & DaisyUI Stylesheet
+│   ├── globals.css                    # Tailwind CSS & shadcn/ui Stylesheet
 │   ├── layout.tsx                     # App Root Layout
 │   └── page.tsx                       # Hero Landing Page
 ├── components/
 │   ├── navigation.tsx                 # Responsive Header with Enterprise Role Badges
-│   └── provenance-dag.tsx             # Interactive SVG Provenance DAG Visualizer
+│   ├── provenance-dag.tsx             # Interactive SVG Provenance DAG Visualizer
+│   └── ui/                            # shadcn/ui Accessible Component Library
+│       ├── alert.tsx                  # Accessible Alert Primitive
+│       ├── badge.tsx                  # Neon Teal & Status Badges
+│       ├── button.tsx                 # Accessible Button Primitive
+│       ├── card.tsx                   # Panel Card & Content Containers
+│       ├── dialog.tsx                 # Accessible Modal Dialog
+│       ├── dropdown-menu.tsx          # Accessible Dropdown Menu
+│       ├── input.tsx                  # Styled Form Input
+│       ├── table.tsx                  # Tabular Data Grid
+│       └── tabs.tsx                   # Accessible Tab Navigation
 ├── lib/
 │   ├── api.ts                         # Axios Web3 Client SDK for Backend API (Port 3500)
+│   ├── utils.ts                       # Class Name Merger Utility (clsx + tailwind-merge)
 │   └── web3.ts                        # Ethers.js Wallet Connection & EIP-191 Signer
+├── components.json                    # shadcn/ui Configuration
 ├── tailwind.config.ts                 # Midnight Navy & Neon Teal Design Tokens
 ├── package.json
 └── tsconfig.json
