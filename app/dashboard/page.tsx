@@ -16,6 +16,11 @@ import {
   logoutUser,
   simulateIotTelemetry,
   fetchAuditDossier,
+  fetchUsers,
+  warnUser,
+  clearUserWarnings,
+  toggleDisableUser,
+  deleteUser,
   Drug,
   DrugEvent,
   UserProfile,
@@ -69,6 +74,12 @@ import {
   Camera,
   Network,
   UserCog,
+  Users,
+  UserX,
+  Ban,
+  Trash2,
+  Search,
+  AlertTriangle,
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { QRCodeSVG } from 'qrcode.react';
@@ -91,7 +102,14 @@ export default function DashboardPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [wallet, setWallet] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'simulation' | 'transit-map' | 'provenance' | 'attestations' | 'github'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'simulation' | 'transit-map' | 'provenance' | 'attestations' | 'github' | 'users'>('overview');
+  const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [userRoleFilter, setUserRoleFilter] = useState('ALL');
+  const [selectedUserForWarning, setSelectedUserForWarning] = useState<UserProfile | null>(null);
+  const [warningReasonInput, setWarningReasonInput] = useState('');
+  const [adminActionLoading, setAdminActionLoading] = useState(false);
+  const [adminFeedback, setAdminFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const [drugs, setDrugs] = useState<Drug[]>([]);
   const [selectedSerial, setSelectedSerial] = useState<string>('');
@@ -404,6 +422,98 @@ export default function DashboardPage() {
     }
   };
 
+  const loadUsersList = async () => {
+    try {
+      const data = await fetchUsers();
+      setAllUsers(data);
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'users' && currentUser?.role === 'ADMIN') {
+      loadUsersList();
+    }
+  }, [activeTab, currentUser]);
+
+  const handleWarnUser = async (id: number) => {
+    if (!warningReasonInput.trim()) return;
+    setAdminActionLoading(true);
+    setAdminFeedback(null);
+    try {
+      await warnUser(id, warningReasonInput.trim());
+      setAdminFeedback({ type: 'success', message: 'Regulatory compliance warning issued successfully.' });
+      setSelectedUserForWarning(null);
+      setWarningReasonInput('');
+      await loadUsersList();
+    } catch (err: any) {
+      setAdminFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to issue warning to user.',
+      });
+    } finally {
+      setAdminActionLoading(false);
+    }
+  };
+
+  const handleClearWarnings = async (id: number) => {
+    setAdminActionLoading(true);
+    setAdminFeedback(null);
+    try {
+      await clearUserWarnings(id);
+      setAdminFeedback({ type: 'success', message: 'User compliance warnings cleared successfully.' });
+      await loadUsersList();
+    } catch (err: any) {
+      setAdminFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to clear user warnings.',
+      });
+    } finally {
+      setAdminActionLoading(false);
+    }
+  };
+
+  const handleToggleDisable = async (id: number, currentDisabled: boolean) => {
+    setAdminActionLoading(true);
+    setAdminFeedback(null);
+    try {
+      await toggleDisableUser(id, !currentDisabled);
+      setAdminFeedback({
+        type: 'success',
+        message: !currentDisabled ? 'Account temporarily disabled.' : 'Account access restored successfully.',
+      });
+      await loadUsersList();
+    } catch (err: any) {
+      setAdminFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to update account status.',
+      });
+    } finally {
+      setAdminActionLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (id: number, targetName: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete account for ${targetName}?`)) {
+      return;
+    }
+    setAdminActionLoading(true);
+    setAdminFeedback(null);
+    try {
+      await deleteUser(id);
+      setAdminFeedback({ type: 'success', message: 'Account permanently purged from ledger system.' });
+      await loadUsersList();
+    } catch (err: any) {
+      setAdminFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to delete user account.',
+      });
+    } finally {
+      setAdminActionLoading(false);
+    }
+  };
+
   const setDefaultEventForRole = (role: string) => {
     if (role === 'MANUFACTURER') setSelectedEventType('MANUFACTURED');
     else if (role === 'DISTRIBUTOR') setSelectedEventType('SHIPPED');
@@ -709,6 +819,18 @@ export default function DashboardPage() {
                 <GitPullRequest className="h-4 w-4" /> GitHub & Audit Claims
               </button>
             )}
+            {currentRole === 'ADMIN' && (
+              <button
+                onClick={() => setActiveTab('users')}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                  activeTab === 'users'
+                    ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                    : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+                }`}
+              >
+                <Users className="h-4 w-4" /> Stakeholder Moderation
+              </button>
+            )}
 
             <div className="pt-2 border-t border-[#304257]">
               <button
@@ -723,6 +845,22 @@ export default function DashboardPage() {
         </aside>
 
         <main className="flex-1 space-y-6">
+          {currentUser?.warningCount ? (
+            <div className="p-4 rounded-xl bg-amber-500/15 border-2 border-amber-500/40 text-amber-200 space-y-1">
+              <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-300">
+                <AlertOctagon className="h-4 w-4 text-amber-400 shrink-0" />
+                <span>Administrative Compliance Warning Issued ({currentUser.warningCount} Active)</span>
+              </div>
+              <div className="text-xs">
+                {currentUser.warningReason || 'Account flagged for operational compliance review.'}
+              </div>
+              {currentUser.warningIssuedAt && (
+                <div className="text-[10px] text-amber-400/80">
+                  Notice Issued: {new Date(currentUser.warningIssuedAt).toUTCString()}
+                </div>
+              )}
+            </div>
+          ) : null}
           {activeTab === 'overview' && (
             <div className="space-y-6">
               <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
@@ -1977,8 +2115,340 @@ export default function DashboardPage() {
           {activeTab === 'provenance' && (
             <ProvenanceDagVisualizer initialBatch={selectedSerial || 'SN-2026-AMOX500'} />
           )}
+
+          {activeTab === 'users' && currentUser?.role === 'ADMIN' && (
+            <div className="space-y-6">
+              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-[#00D6B4]/15 border border-[#00D6B4]/30 flex items-center justify-center text-[#00D6B4]">
+                      <Users className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-[#F1F5F9]">
+                        Stakeholder Moderation & Account Governance
+                      </h2>
+                      <p className="text-xs text-[#94A3B8]">
+                        Supervise participants, issue compliance warnings, temporarily disable access, or delete rogue accounts. Administrator accounts are protected and immune from disciplinary action.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={loadUsersList}
+                    disabled={adminActionLoading}
+                    className="btn btn-xs bg-[#172638] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-lg px-3 py-1.5 font-bold flex items-center gap-1.5"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${adminActionLoading ? 'animate-spin' : ''}`} />
+                    <span>Refresh</span>
+                  </button>
+                </div>
+              </div>
+
+              {adminFeedback && (
+                <div
+                  className={`p-4 rounded-xl border text-xs font-bold flex items-center gap-2.5 ${
+                    adminFeedback.type === 'success'
+                      ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                      : 'bg-rose-500/15 border-rose-500/40 text-rose-300'
+                  }`}
+                >
+                  {adminFeedback.type === 'success' ? (
+                    <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0" />
+                  ) : (
+                    <AlertOctagon className="h-4 w-4 text-rose-400 shrink-0" />
+                  )}
+                  <span>{adminFeedback.message}</span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4">
+                  <div className="text-[10px] uppercase font-bold text-[#94A3B8]">Total Stakeholders</div>
+                  <div className="text-2xl font-black text-[#F1F5F9] mt-1">{allUsers.length}</div>
+                </div>
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4">
+                  <div className="text-[10px] uppercase font-bold text-[#94A3B8]">Active Accounts</div>
+                  <div className="text-2xl font-black text-[#A3E635] mt-1">
+                    {allUsers.filter((u) => !u.isDisabled).length}
+                  </div>
+                </div>
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4">
+                  <div className="text-[10px] uppercase font-bold text-[#94A3B8]">Suspended / Disabled</div>
+                  <div className="text-2xl font-black text-rose-400 mt-1">
+                    {allUsers.filter((u) => u.isDisabled).length}
+                  </div>
+                </div>
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4">
+                  <div className="text-[10px] uppercase font-bold text-[#94A3B8]">Active Warnings</div>
+                  <div className="text-2xl font-black text-amber-400 mt-1">
+                    {allUsers.filter((u) => (u.warningCount || 0) > 0).length}
+                  </div>
+                </div>
+              </div>
+
+              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4 flex flex-col sm:flex-row gap-3 items-center justify-between">
+                <div className="relative w-full sm:w-72">
+                  <input
+                    type="text"
+                    value={userSearchTerm}
+                    onChange={(e) => setUserSearchTerm(e.target.value)}
+                    placeholder="Search by name, email, or company..."
+                    className="w-full h-10 bg-[#172638] border border-[#304257] rounded-xl pl-9 pr-3 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4]"
+                  />
+                  <Search className="h-4 w-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <span className="text-xs text-[#94A3B8] font-bold">Filter Role:</span>
+                  <select
+                    value={userRoleFilter}
+                    onChange={(e) => setUserRoleFilter(e.target.value)}
+                    className="h-10 bg-[#172638] border border-[#304257] rounded-xl px-3 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4] cursor-pointer"
+                  >
+                    <option value="ALL">ALL ROLES</option>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="MANUFACTURER">MANUFACTURER</option>
+                    <option value="DISTRIBUTOR">DISTRIBUTOR</option>
+                    <option value="PHARMACY">PHARMACY</option>
+                    <option value="REGULATOR">REGULATOR</option>
+                    <option value="CUSTOMER">CUSTOMER</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="table w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-[#304257] bg-[#172638] text-[#94A3B8] uppercase text-[10px] tracking-wider font-bold">
+                        <th className="py-3.5 px-4">Participant</th>
+                        <th className="py-3.5 px-4">Role</th>
+                        <th className="py-3.5 px-4">Status</th>
+                        <th className="py-3.5 px-4">Warnings</th>
+                        <th className="py-3.5 px-4 text-right">Moderation Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#304257]">
+                      {allUsers
+                        .filter((u) => {
+                          const matchesRole = userRoleFilter === 'ALL' || u.role === userRoleFilter;
+                          const q = userSearchTerm.toLowerCase();
+                          const matchesSearch =
+                            !q ||
+                            (u.fullName && u.fullName.toLowerCase().includes(q)) ||
+                            u.email.toLowerCase().includes(q) ||
+                            (u.organization && u.organization.toLowerCase().includes(q));
+                          return matchesRole && matchesSearch;
+                        })
+                        .map((u) => {
+                          const isAdmin = u.role === 'ADMIN';
+                          return (
+                            <tr key={u.id} className="hover:bg-[#1E2E44]/50 transition">
+                              <td className="py-3.5 px-4">
+                                <div className="font-bold text-[#F1F5F9]">{u.fullName || 'No Name'}</div>
+                                <div className="text-[11px] text-[#94A3B8] font-mono flex items-center gap-1.5 mt-0.5">
+                                  <span>{u.email}</span>
+                                </div>
+                                <div className="text-[10px] text-[#94A3B8]/80">{u.organization || 'General Participant'}</div>
+                              </td>
+
+                              <td className="py-3.5 px-4">
+                                <span className="badge badge-xs font-bold uppercase border py-0.5 px-2 bg-[#00D6B4]/15 border-[#00D6B4]/30 text-[#00D6B4]">
+                                  {u.role}
+                                </span>
+                              </td>
+
+                              <td className="py-3.5 px-4">
+                                {isAdmin ? (
+                                  <span className="badge badge-xs font-bold border py-0.5 px-2 bg-purple-500/15 border-purple-500/30 text-purple-300 flex items-center gap-1 w-fit">
+                                    <Lock className="h-3 w-3" /> Protected Admin
+                                  </span>
+                                ) : u.isDisabled ? (
+                                  <span className="badge badge-xs font-bold border py-0.5 px-2 bg-rose-500/20 border-rose-500/40 text-rose-300 flex items-center gap-1 w-fit">
+                                    <Ban className="h-3 w-3" /> Disabled
+                                  </span>
+                                ) : (
+                                  <span className="badge badge-xs font-bold border py-0.5 px-2 bg-emerald-500/20 border-emerald-500/30 text-emerald-300 flex items-center gap-1 w-fit">
+                                    <CheckCircle className="h-3 w-3" /> Active
+                                  </span>
+                                )}
+                              </td>
+
+                              <td className="py-3.5 px-4">
+                                {isAdmin ? (
+                                  <span className="text-[11px] text-[#94A3B8] font-mono">Immune</span>
+                                ) : (u.warningCount || 0) > 0 ? (
+                                  <div className="space-y-0.5">
+                                    <span className="badge badge-xs font-bold border py-0.5 px-2 bg-amber-500/20 border-amber-500/40 text-amber-300">
+                                      {u.warningCount} Active Warning(s)
+                                    </span>
+                                    {u.warningReason && (
+                                      <div className="text-[10px] text-[#94A3B8] max-w-[180px] truncate" title={u.warningReason}>
+                                        {u.warningReason}
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-[11px] text-[#94A3B8]">Clean (0)</span>
+                                )}
+                              </td>
+
+                              <td className="py-3.5 px-4 text-right">
+                                {isAdmin ? (
+                                  <div className="inline-flex items-center gap-1 text-[10px] text-purple-300/80 font-bold bg-[#172638] px-2.5 py-1 rounded-lg border border-[#304257]">
+                                    <ShieldCheck className="h-3.5 w-3.5 text-purple-400" />
+                                    <span>Protected Admin Account</span>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <button
+                                      type="button"
+                                      disabled={adminActionLoading}
+                                      onClick={() => {
+                                        setSelectedUserForWarning(u);
+                                        setWarningReasonInput('');
+                                      }}
+                                      title="Issue Warning"
+                                      className="btn btn-xs bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 rounded-lg font-bold flex items-center gap-1"
+                                    >
+                                      <AlertTriangle className="h-3 w-3" />
+                                      <span>Warn</span>
+                                    </button>
+
+                                    {(u.warningCount || 0) > 0 && (
+                                      <button
+                                        type="button"
+                                        disabled={adminActionLoading}
+                                        onClick={() => handleClearWarnings(u.id)}
+                                        title="Clear Warnings"
+                                        className="btn btn-xs bg-[#172638] hover:bg-[#304257] text-[#94A3B8] hover:text-[#00D6B4] border border-[#304257] rounded-lg font-bold"
+                                      >
+                                        Clear
+                                      </button>
+                                    )}
+
+                                    <button
+                                      type="button"
+                                      disabled={adminActionLoading}
+                                      onClick={() => handleToggleDisable(u.id, Boolean(u.isDisabled))}
+                                      title={u.isDisabled ? 'Restore Account Access' : 'Temporarily Disable Account'}
+                                      className={`btn btn-xs rounded-lg font-bold flex items-center gap-1 ${
+                                        u.isDisabled
+                                          ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40'
+                                          : 'bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30'
+                                      }`}
+                                    >
+                                      {u.isDisabled ? <CheckCircle className="h-3 w-3" /> : <Ban className="h-3 w-3" />}
+                                      <span>{u.isDisabled ? 'Enable' : 'Disable'}</span>
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      disabled={adminActionLoading}
+                                      onClick={() => handleDeleteUser(u.id, u.fullName || u.email)}
+                                      title="Delete Account"
+                                      className="btn btn-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/40 rounded-lg font-bold flex items-center gap-1"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                      <span>Delete</span>
+                                    </button>
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
+
+      {selectedUserForWarning && (
+        <div className="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="card bg-[#172638] border border-amber-500/50 shadow-2xl rounded-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+              <div className="flex items-center gap-2 text-amber-400 font-black text-sm uppercase tracking-wider">
+                <AlertTriangle className="h-5 w-5 text-amber-400" /> Issue Compliance Warning
+              </div>
+              <button
+                onClick={() => setSelectedUserForWarning(null)}
+                className="btn btn-sm btn-ghost btn-circle text-[#94A3B8] hover:text-[#F1F5F9]"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-[#94A3B8]">
+              Target Stakeholder:{' '}
+              <strong className="text-[#F1F5F9]">
+                {selectedUserForWarning.fullName || selectedUserForWarning.email}
+              </strong>{' '}
+              ({selectedUserForWarning.role})
+            </p>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleWarnUser(selectedUserForWarning.id);
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                  Reason for Warning
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={warningReasonInput}
+                  onChange={(e) => setWarningReasonInput(e.target.value)}
+                  placeholder="Specify violation (e.g. Temperature excursion during custody transit, failed inspection documentation)..."
+                  className="w-full bg-[#0B1220] border border-[#304257] rounded-xl p-3 text-xs text-[#F1F5F9] focus:outline-none focus:border-amber-400"
+                />
+              </div>
+
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  'Cold chain temperature excursion violation',
+                  'Incomplete GxP electronic batch records',
+                  'Suspicious custody transfer attempt',
+                  'Regulatory non-compliance notice',
+                ].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setWarningReasonInput(preset)}
+                    className="btn btn-xs bg-[#0B1220] hover:bg-[#243247] text-[#94A3B8] hover:text-[#F1F5F9] border border-[#304257] rounded-lg text-[10px]"
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#304257]">
+                <button
+                  type="button"
+                  onClick={() => setSelectedUserForWarning(null)}
+                  className="btn btn-sm btn-ghost text-[#94A3B8] rounded-xl font-bold text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={adminActionLoading}
+                  className="btn btn-sm bg-amber-500 hover:bg-amber-600 text-[#0B1220] rounded-xl font-bold text-xs"
+                >
+                  {adminActionLoading ? 'Issuing...' : 'Issue Warning'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {showRecallModal && (
         <div className="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
