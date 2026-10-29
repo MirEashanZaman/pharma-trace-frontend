@@ -305,6 +305,7 @@ export default function GovernancePage() {
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Enter your proposal directive description"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -315,6 +316,7 @@ export default function GovernancePage() {
                   type="text"
                   value={targetAddress}
                   onChange={(e) => setTargetAddress(e.target.value)}
+                  placeholder="Enter your target contract address (0x...)"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -327,6 +329,7 @@ export default function GovernancePage() {
                   type="text"
                   value={callDataHex}
                   onChange={(e) => setCallDataHex(e.target.value)}
+                  placeholder="Enter your calldata payload (0x...)"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -337,6 +340,7 @@ export default function GovernancePage() {
                   type="number"
                   value={delaySeconds}
                   onChange={(e) => setDelaySeconds(e.target.value)}
+                  placeholder="Enter your timelock delay in seconds"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
