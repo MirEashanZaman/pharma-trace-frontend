@@ -26,6 +26,10 @@ import {
   fetchInvitations,
   createInvitation,
   revokeInvitation,
+  bulkCreateDrugs,
+  submitQcRelease,
+  dispatchBatch,
+  quarantineBatch,
   SystemAuditLog,
   SystemHealth,
   EnterpriseInvitation,
@@ -94,6 +98,9 @@ import {
   Key,
   Copy,
   Check,
+  Printer,
+  Package,
+  FlaskConical,
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { QRCodeSVG } from 'qrcode.react';
@@ -146,6 +153,44 @@ export default function DashboardPage() {
   const [newName, setNewName] = useState('');
   const [newManufacturer, setNewManufacturer] = useState('');
   const [newBatch, setNewBatch] = useState('');
+  const [newDosage, setNewDosage] = useState('Oral Capsule');
+  const [newStrength, setNewStrength] = useState('500 mg');
+  const [newExpiry, setNewExpiry] = useState('');
+  const [newApiSupplier, setNewApiSupplier] = useState('');
+  const [newRawLot, setNewRawLot] = useState('');
+
+  const [mfgView, setMfgView] = useState<'single' | 'bulk' | 'qc' | 'dispatch' | 'quarantine'>('single');
+  const [bulkName, setBulkName] = useState('');
+  const [bulkManufacturer, setBulkManufacturer] = useState('Novartis Global');
+  const [bulkBatch, setBulkBatch] = useState('');
+  const [bulkExpiry, setBulkExpiry] = useState('');
+  const [bulkQuantity, setBulkQuantity] = useState(10);
+  const [bulkDosage, setBulkDosage] = useState('Oral Capsule');
+  const [bulkStrength, setBulkStrength] = useState('500 mg');
+  const [bulkApiSupplier, setBulkApiSupplier] = useState('Lonza Fine Chemicals');
+  const [bulkApiCas, setBulkApiCas] = useState('61336-70-7');
+  const [bulkRawLot, setBulkRawLot] = useState('RM-LOT-8821');
+  const [bulkResultSerials, setBulkResultSerials] = useState<string[]>([]);
+  const [showMultiQrModal, setShowMultiQrModal] = useState(false);
+
+  const [selectedDrugForQc, setSelectedDrugForQc] = useState<Drug | null>(null);
+  const [qcPurity, setQcPurity] = useState(99.85);
+  const [qcPh, setQcPh] = useState(7.20);
+  const [qcEndotoxin, setQcEndotoxin] = useState('< 0.1 EU/mL');
+  const [qcDisposition, setQcDisposition] = useState<'QC_PASSED' | 'FAILED_QC'>('QC_PASSED');
+  const [qcLoading, setQcLoading] = useState(false);
+
+  const [selectedDrugForDispatch, setSelectedDrugForDispatch] = useState<Drug | null>(null);
+  const [dispatchCarrier, setDispatchCarrier] = useState('DHL Healthcare Logistics');
+  const [dispatchSeal, setDispatchSeal] = useState('SEAL-NOV-9942');
+  const [dispatchReefer, setDispatchReefer] = useState('Apex Reefer Van #408');
+  const [dispatchTemp, setDispatchTemp] = useState(4.2);
+  const [dispatchLoading, setDispatchLoading] = useState(false);
+
+  const [mfgQuarantineBatch, setMfgQuarantineBatch] = useState('');
+  const [mfgQuarantineReason, setMfgQuarantineReason] = useState('Retained factory sample stability deviation');
+  const [mfgQuarantineLoading, setMfgQuarantineLoading] = useState(false);
+  const [mfgFeedback, setMfgFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [selectedEventType, setSelectedEventType] = useState('MANUFACTURED');
   const [temperature, setTemperature] = useState('22.5');
   const [humidity, setHumidity] = useState('45');
@@ -761,16 +806,142 @@ export default function DashboardPage() {
         name: newName,
         manufacturer: newManufacturer || currentUser?.organization || 'Global Pharma Labs',
         batchNumber: newBatch || 'BATCH-001',
+        dosageForm: newDosage,
+        strength: newStrength,
+        apiSupplier: newApiSupplier,
+        rawMaterialLot: newRawLot,
         manufactureDate: new Date().toISOString(),
-        expiryDate: new Date(Date.now() + 31536000000).toISOString(),
+        expiryDate: newExpiry || new Date(Date.now() + 31536000000).toISOString(),
       });
       setNewSerial('');
       setNewName('');
+      setNewApiSupplier('');
+      setNewRawLot('');
+      setMfgFeedback({
+        type: 'success',
+        message: `Medicine batch ${newSerial} registered and placed into LAB_QUARANTINE.`,
+      });
       await loadDrugs();
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      setMfgFeedback({
+        type: 'error',
+        message: e.response?.data?.message || 'Failed to register drug.',
+      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleBulkCreateDrugs = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bulkName || !bulkBatch) return;
+    setLoading(true);
+    setMfgFeedback(null);
+    try {
+      const created = await bulkCreateDrugs({
+        name: bulkName,
+        manufacturer: bulkManufacturer || currentUser?.organization || 'Novartis Global',
+        batchNumber: bulkBatch,
+        quantity: Number(bulkQuantity) || 10,
+        dosageForm: bulkDosage,
+        strength: bulkStrength,
+        expiryDate: bulkExpiry || new Date(Date.now() + 31536000000).toISOString(),
+        apiSupplier: bulkApiSupplier,
+        apiCasNumber: bulkApiCas,
+        rawMaterialLot: bulkRawLot,
+      });
+      setBulkResultSerials(created.map((d) => d.serialNumber));
+      setShowMultiQrModal(true);
+      setMfgFeedback({
+        type: 'success',
+        message: `Successfully minted ${created.length} serialized units for batch ${bulkBatch}. Status: LAB_QUARANTINE.`,
+      });
+      await loadDrugs();
+    } catch (err: any) {
+      setMfgFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to bulk-serialize drugs.',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitQcRelease = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDrugForQc) return;
+    setQcLoading(true);
+    setMfgFeedback(null);
+    try {
+      const updated = await submitQcRelease(selectedDrugForQc.serialNumber, {
+        purityPercentage: Number(qcPurity),
+        phLevel: Number(qcPh),
+        endotoxinLimit: qcEndotoxin,
+        disposition: qcDisposition,
+        signedBy: currentUser?.fullName || currentUser?.email || 'Novartis QA Lead',
+      });
+      setMfgFeedback({
+        type: 'success',
+        message: `Quality Control certification recorded for ${updated.serialNumber}. Disposition: ${updated.qcStatus}. CoA Hash: ${updated.qcCertHash?.slice(0, 16)}...`,
+      });
+      setSelectedDrugForQc(null);
+      await loadDrugs();
+    } catch (err: any) {
+      setMfgFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to submit QC release.',
+      });
+    } finally {
+      setQcLoading(false);
+    }
+  };
+
+  const handleDispatchBatch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDrugForDispatch) return;
+    setDispatchLoading(true);
+    setMfgFeedback(null);
+    try {
+      const updated = await dispatchBatch(selectedDrugForDispatch.serialNumber, {
+        carrierName: dispatchCarrier,
+        sealNumber: dispatchSeal,
+      });
+      setMfgFeedback({
+        type: 'success',
+        message: `Outbound dispatch manifest verified for ${updated.serialNumber}. Custody released to ${dispatchCarrier} (Seal: ${dispatchSeal}).`,
+      });
+      setSelectedDrugForDispatch(null);
+      await loadDrugs();
+    } catch (err: any) {
+      setMfgFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to dispatch batch.',
+      });
+    } finally {
+      setDispatchLoading(false);
+    }
+  };
+
+  const handleQuarantineBatch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mfgQuarantineBatch.trim()) return;
+    setMfgQuarantineLoading(true);
+    setMfgFeedback(null);
+    try {
+      const res = await quarantineBatch(mfgQuarantineBatch.trim(), mfgQuarantineReason);
+      setMfgFeedback({
+        type: 'success',
+        message: `Emergency factory quarantine executed: ${res.quarantinedCount} units in batch ${res.batchNumber} quarantined.`,
+      });
+      setMfgQuarantineBatch('');
+      await loadDrugs();
+    } catch (err: any) {
+      setMfgFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to quarantine batch.',
+      });
+    } finally {
+      setMfgQuarantineLoading(false);
     }
   };
 
@@ -1517,47 +1688,518 @@ export default function DashboardPage() {
           {activeTab === 'drugs' && (
             <div className="space-y-6">
               {(currentRole === 'ADMIN' || currentRole === 'MANUFACTURER') ? (
-                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6">
-                  <h3 className="text-base font-bold text-[#F1F5F9] mb-4 flex items-center gap-2">
-                    <PlusCircle className="h-5 w-5 text-[#00D6B4]" /> Add Drug / Register Medicine
-                  </h3>
-                  <form onSubmit={handleCreateDrug} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      placeholder="Enter your serial number"
-                      value={newSerial}
-                      onChange={(e) => setNewSerial(e.target.value)}
-                      className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Enter your drug name"
-                      value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
-                      className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Enter your manufacturer"
-                      value={newManufacturer}
-                      onChange={(e) => setNewManufacturer(e.target.value)}
-                      className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Enter your batch number"
-                      value={newBatch}
-                      onChange={(e) => setNewBatch(e.target.value)}
-                      className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2.5 text-sm text-[#F1F5F9] focus:border-[#00D6B4]"
-                    />
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none sm:col-span-2 py-3 rounded-xl font-bold text-sm transition shadow-sm"
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-[#00D6B4]/15 border border-[#00D6B4]/30 flex items-center justify-center text-[#00D6B4]">
+                        <Building className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-[#F1F5F9]">
+                          Pharmaceutical Plant Operations & Batch Serialization Suite
+                        </h3>
+                        <p className="text-xs text-[#94A3B8]">
+                          FDA 21 CFR Part 211 & EU GMP Annex 1 compliant serialization, lab assay certification, and dispatch execution.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setMfgView('single')}
+                        className={`btn btn-xs rounded-lg font-bold transition flex items-center gap-1.5 ${
+                          mfgView === 'single'
+                            ? 'bg-[#00D6B4] text-[#0B1220] border-none'
+                            : 'bg-[#172638] text-[#94A3B8] hover:text-[#F1F5F9] border border-[#304257]'
+                        }`}
+                      >
+                        <PlusCircle className="h-3.5 w-3.5" />
+                        <span>Single Batch</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMfgView('bulk')}
+                        className={`btn btn-xs rounded-lg font-bold transition flex items-center gap-1.5 ${
+                          mfgView === 'bulk'
+                            ? 'bg-[#00D6B4] text-[#0B1220] border-none'
+                            : 'bg-[#172638] text-[#94A3B8] hover:text-[#F1F5F9] border border-[#304257]'
+                        }`}
+                      >
+                        <Package className="h-3.5 w-3.5" />
+                        <span>Bulk GS1 Minting</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMfgView('qc')}
+                        className={`btn btn-xs rounded-lg font-bold transition flex items-center gap-1.5 ${
+                          mfgView === 'qc'
+                            ? 'bg-[#00D6B4] text-[#0B1220] border-none'
+                            : 'bg-[#172638] text-[#94A3B8] hover:text-[#F1F5F9] border border-[#304257]'
+                        }`}
+                      >
+                        <FlaskConical className="h-3.5 w-3.5" />
+                        <span>QC Lab Release</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMfgView('dispatch')}
+                        className={`btn btn-xs rounded-lg font-bold transition flex items-center gap-1.5 ${
+                          mfgView === 'dispatch'
+                            ? 'bg-[#00D6B4] text-[#0B1220] border-none'
+                            : 'bg-[#172638] text-[#94A3B8] hover:text-[#F1F5F9] border border-[#304257]'
+                        }`}
+                      >
+                        <Truck className="h-3.5 w-3.5" />
+                        <span>Fleet Dispatch Dock</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMfgView('quarantine')}
+                        className={`btn btn-xs rounded-lg font-bold transition flex items-center gap-1.5 ${
+                          mfgView === 'quarantine'
+                            ? 'bg-rose-500 text-white border-none'
+                            : 'bg-[#172638] text-[#94A3B8] hover:text-rose-300 border border-[#304257]'
+                        }`}
+                      >
+                        <AlertOctagon className="h-3.5 w-3.5" />
+                        <span>Plant Quarantine</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {mfgFeedback && (
+                    <div
+                      className={`p-3 rounded-xl border text-xs font-bold flex items-center gap-2 ${
+                        mfgFeedback.type === 'success'
+                          ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                          : 'bg-rose-500/15 border-rose-500/40 text-rose-300'
+                      }`}
                     >
-                      {loading ? 'Registering...' : 'Register Medicine Batch'}
-                    </button>
-                  </form>
+                      {mfgFeedback.type === 'success' ? (
+                        <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0" />
+                      ) : (
+                        <AlertOctagon className="h-4 w-4 text-rose-400 shrink-0" />
+                      )}
+                      <span>{mfgFeedback.message}</span>
+                    </div>
+                  )}
+
+                  {mfgView === 'single' && (
+                    <form onSubmit={handleCreateDrug} className="space-y-4 pt-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Drug Serial Number</label>
+                          <input
+                            type="text"
+                            placeholder="SN-2026-AMOX500"
+                            value={newSerial}
+                            onChange={(e) => setNewSerial(e.target.value)}
+                            required
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Formulation Name</label>
+                          <input
+                            type="text"
+                            placeholder="Amoxicillin 500mg Capsule"
+                            value={newName}
+                            onChange={(e) => setNewName(e.target.value)}
+                            required
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Batch / Lot Identifier</label>
+                          <input
+                            type="text"
+                            placeholder="BATCH-2026-A1"
+                            value={newBatch}
+                            onChange={(e) => setNewBatch(e.target.value)}
+                            required
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Dosage Form</label>
+                          <select
+                            value={newDosage}
+                            onChange={(e) => setNewDosage(e.target.value)}
+                            className="select select-bordered w-full bg-[#172638] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          >
+                            <option value="Oral Capsule">Oral Capsule</option>
+                            <option value="Injectable Solution">Injectable Solution</option>
+                            <option value="Oral Tablet">Oral Tablet</option>
+                            <option value="Lyophilized Vial">Lyophilized Vial</option>
+                            <option value="Transdermal Patch">Transdermal Patch</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Strength / Potency</label>
+                          <input
+                            type="text"
+                            placeholder="500 mg"
+                            value={newStrength}
+                            onChange={(e) => setNewStrength(e.target.value)}
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">API Supplier (Upstream)</label>
+                          <input
+                            type="text"
+                            placeholder="Lonza Fine Chemicals"
+                            value={newApiSupplier}
+                            onChange={(e) => setNewApiSupplier(e.target.value)}
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Raw Material Lot #</label>
+                          <input
+                            type="text"
+                            placeholder="RM-LOT-8821"
+                            value={newRawLot}
+                            onChange={(e) => setNewRawLot(e.target.value)}
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-2.5 rounded-xl font-bold text-xs tracking-wider transition shadow-sm flex items-center justify-center gap-1.5"
+                      >
+                        <PlusCircle className="h-4 w-4" />
+                        {loading ? 'Registering...' : 'Register Batch (Place in LAB_QUARANTINE)'}
+                      </button>
+                    </form>
+                  )}
+
+                  {mfgView === 'bulk' && (
+                    <form onSubmit={handleBulkCreateDrugs} className="space-y-4 pt-2">
+                      <div className="p-3 bg-[#172638] border border-[#00D6B4]/30 rounded-xl flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 text-[#00D6B4]">
+                          <Package className="h-4 w-4" />
+                          <span className="font-bold">High-Throughput GS1 Serialization Line</span>
+                        </div>
+                        <span className="text-[11px] text-[#94A3B8] font-mono">Syntax: (01)GTIN(21)SN(17)EXP(10)LOT</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Formulation Name</label>
+                          <input
+                            type="text"
+                            placeholder="Recombinant Insulin 100IU/ml"
+                            value={bulkName}
+                            onChange={(e) => setBulkName(e.target.value)}
+                            required
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Batch / Master Lot Number</label>
+                          <input
+                            type="text"
+                            placeholder="BATCH-2026-INS9"
+                            value={bulkBatch}
+                            onChange={(e) => setBulkBatch(e.target.value)}
+                            required
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Serialization Quantity</label>
+                          <select
+                            value={bulkQuantity}
+                            onChange={(e) => setBulkQuantity(Number(e.target.value))}
+                            className="select select-bordered w-full bg-[#172638] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          >
+                            <option value={5}>5 Serialized Units</option>
+                            <option value={10}>10 Serialized Units</option>
+                            <option value={25}>25 Serialized Units</option>
+                            <option value={50}>50 Serialized Units</option>
+                            <option value={100}>100 Serialized Units</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Dosage Form</label>
+                          <input
+                            type="text"
+                            value={bulkDosage}
+                            onChange={(e) => setBulkDosage(e.target.value)}
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Strength</label>
+                          <input
+                            type="text"
+                            value={bulkStrength}
+                            onChange={(e) => setBulkStrength(e.target.value)}
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Active Ingredient (API) Supplier</label>
+                          <input
+                            type="text"
+                            value={bulkApiSupplier}
+                            onChange={(e) => setBulkApiSupplier(e.target.value)}
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Raw Material Lot #</label>
+                          <input
+                            type="text"
+                            value={bulkRawLot}
+                            onChange={(e) => setBulkRawLot(e.target.value)}
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-2.5 rounded-xl font-bold text-xs tracking-wider transition shadow-sm flex items-center justify-center gap-1.5"
+                      >
+                        <Package className="h-4 w-4" />
+                        {loading ? 'Minting Serialization Line...' : `Mint ${bulkQuantity} Serialized Units & Generate Label Sheet`}
+                      </button>
+                    </form>
+                  )}
+
+                  {mfgView === 'qc' && (
+                    <form onSubmit={handleSubmitQcRelease} className="space-y-4 pt-2">
+                      <div className="p-3 bg-[#172638] border border-amber-500/40 rounded-xl flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 text-amber-300">
+                          <FlaskConical className="h-4 w-4" />
+                          <span className="font-bold">Laboratory Assay Gate & Certificate of Analysis (CoA) Release</span>
+                        </div>
+                        <span className="text-[11px] text-[#94A3B8]">GMP 21 CFR 211.165 Mandatory Attestation</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Target Batch for QC Certification</label>
+                          <select
+                            value={selectedDrugForQc?.serialNumber || ''}
+                            onChange={(e) => {
+                              const target = drugs.find((d) => d.serialNumber === e.target.value);
+                              setSelectedDrugForQc(target || null);
+                            }}
+                            required
+                            className="select select-bordered w-full bg-[#172638] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          >
+                            <option value="">Select a batch in Lab Quarantine...</option>
+                            {drugs.map((d) => (
+                              <option key={d.id} value={d.serialNumber}>
+                                {d.serialNumber} - {d.name} ({d.qcStatus || 'IN_PRODUCTION'})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Lab Disposition Decision</label>
+                          <select
+                            value={qcDisposition}
+                            onChange={(e) => setQcDisposition(e.target.value as any)}
+                            className="select select-bordered w-full bg-[#172638] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          >
+                            <option value="QC_PASSED">QC_PASSED (Release for Outbound Transit)</option>
+                            <option value="FAILED_QC">FAILED_QC (Reject & Lock from Dispatch)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Active Ingredient (API) Purity %</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={qcPurity}
+                            onChange={(e) => setQcPurity(Number(e.target.value))}
+                            required
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Dissolution pH Level</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={qcPh}
+                            onChange={(e) => setQcPh(Number(e.target.value))}
+                            required
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Sterility & Endotoxin Assay Limit</label>
+                          <input
+                            type="text"
+                            value={qcEndotoxin}
+                            onChange={(e) => setQcEndotoxin(e.target.value)}
+                            required
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={qcLoading || !selectedDrugForQc}
+                        className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-2.5 rounded-xl font-bold text-xs tracking-wider transition shadow-sm flex items-center justify-center gap-1.5"
+                      >
+                        <FlaskConical className="h-4 w-4" />
+                        {qcLoading ? 'Anchoring CoA Hash...' : 'Sign Certificate of Analysis (CoA) & Release Batch'}
+                      </button>
+                    </form>
+                  )}
+
+                  {mfgView === 'dispatch' && (
+                    <form onSubmit={handleDispatchBatch} className="space-y-4 pt-2">
+                      <div className="p-3 bg-[#172638] border border-blue-500/40 rounded-xl flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 text-blue-300">
+                          <Truck className="h-4 w-4" />
+                          <span className="font-bold">Outbound Shipping Dock & Carrier Custody Transfer</span>
+                        </div>
+                        <span className="text-[11px] text-[#94A3B8]">Cold-Chain Logistics Handshake</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Certified Batch for Dispatch</label>
+                          <select
+                            value={selectedDrugForDispatch?.serialNumber || ''}
+                            onChange={(e) => {
+                              const target = drugs.find((d) => d.serialNumber === e.target.value);
+                              setSelectedDrugForDispatch(target || null);
+                            }}
+                            required
+                            className="select select-bordered w-full bg-[#172638] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          >
+                            <option value="">Select a QC-Released Batch...</option>
+                            {drugs
+                              .filter((d) => d.qcStatus === 'RELEASED_FOR_TRANSIT')
+                              .map((d) => (
+                                <option key={d.id} value={d.serialNumber}>
+                                  {d.serialNumber} - {d.name} (Batch: {d.batchNumber})
+                                </option>
+                              ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Authorized Logistics Fleet Carrier</label>
+                          <input
+                            type="text"
+                            value={dispatchCarrier}
+                            onChange={(e) => setDispatchCarrier(e.target.value)}
+                            required
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Packaging Security Seal #</label>
+                          <input
+                            type="text"
+                            value={dispatchSeal}
+                            onChange={(e) => setDispatchSeal(e.target.value)}
+                            required
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Reefer Unit Identifier</label>
+                          <input
+                            type="text"
+                            value={dispatchReefer}
+                            onChange={(e) => setDispatchReefer(e.target.value)}
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Dock Pre-Cool Temp (°C)</label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={dispatchTemp}
+                            onChange={(e) => setDispatchTemp(Number(e.target.value))}
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={dispatchLoading || !selectedDrugForDispatch}
+                        className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-2.5 rounded-xl font-bold text-xs tracking-wider transition shadow-sm flex items-center justify-center gap-1.5"
+                      >
+                        <Truck className="h-4 w-4" />
+                        {dispatchLoading ? 'Verifying Dispatch...' : 'Sign Dispatch Manifest & Transfer Custody to Carrier'}
+                      </button>
+                    </form>
+                  )}
+
+                  {mfgView === 'quarantine' && (
+                    <form onSubmit={handleQuarantineBatch} className="space-y-4 pt-2">
+                      <div className="p-3 bg-rose-500/10 border border-rose-500/40 rounded-xl flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 text-rose-300">
+                          <AlertOctagon className="h-4 w-4" />
+                          <span className="font-bold">Emergency Factory Batch Quarantine & Containment</span>
+                        </div>
+                        <span className="text-[11px] text-rose-400 font-mono">Immediate Global Lockout</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Target Batch Number</label>
+                          <input
+                            type="text"
+                            placeholder="BATCH-2026-A1"
+                            value={mfgQuarantineBatch}
+                            onChange={(e) => setMfgQuarantineBatch(e.target.value)}
+                            required
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-rose-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Quality Deviation Reason</label>
+                          <input
+                            type="text"
+                            value={mfgQuarantineReason}
+                            onChange={(e) => setMfgQuarantineReason(e.target.value)}
+                            required
+                            className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-rose-400"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={mfgQuarantineLoading}
+                        className="btn bg-rose-600 hover:bg-rose-700 text-white border-none w-full py-2.5 rounded-xl font-bold text-xs tracking-wider transition shadow-sm flex items-center justify-center gap-1.5"
+                      >
+                        <AlertOctagon className="h-4 w-4" />
+                        {mfgQuarantineLoading ? 'Executing Quarantine...' : 'Initiate Immediate Batch Quarantine Across Network'}
+                      </button>
+                    </form>
+                  )}
                 </div>
               ) : (
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4 flex flex-row items-center justify-between">
@@ -1576,14 +2218,14 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2 space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-bold text-[#F1F5F9]">Registered Drugs & Batches</h4>
+                    <h4 className="text-sm font-bold text-[#F1F5F9]">Registered Drugs & Batches ({drugs.length})</h4>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => setShowScanner(true)}
                         className="btn btn-xs bg-[#172638] hover:bg-[#1E2E44] text-[#00D6B4] border border-[#00D6B4]/40 rounded-lg font-bold flex items-center gap-1.5"
                       >
-                        <Camera className="h-3.5 w-3.5 text-[#00D6B4]" /> Scan Physical Package
+                        <Camera className="h-3.5 w-3.5 text-[#00D6B4]" /> Scan Package QR
                       </button>
                       {(currentRole === 'REGULATOR' || currentRole === 'MANUFACTURER' || currentRole === 'ADMIN') && (
                         <button
@@ -1593,30 +2235,95 @@ export default function DashboardPage() {
                           }}
                           className="btn btn-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 rounded-lg font-bold flex items-center gap-1.5"
                         >
-                          <AlertOctagon className="h-3.5 w-3.5 text-rose-400" /> Emergency Recall / Quarantine
+                          <AlertOctagon className="h-3.5 w-3.5 text-rose-400" /> Emergency Recall
                         </button>
                       )}
                     </div>
                   </div>
+
                   <div className="grid grid-cols-1 gap-3">
                     {drugs.map((d) => (
                       <div
                         key={d.id}
                         onClick={() => setSelectedSerial(d.serialNumber)}
-                        className={`card bg-[#243247] p-4 rounded-xl border cursor-pointer transition flex flex-row items-center justify-between shadow-sm ${
+                        className={`card bg-[#243247] p-4 rounded-xl border cursor-pointer transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm ${
                           selectedSerial === d.serialNumber
                             ? 'border-[#00D6B4] ring-1 ring-[#00D6B4]'
                             : 'border-[#304257] hover:border-slate-500'
                         }`}
                       >
-                        <div>
-                          <span className="badge badge-sm bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-mono font-bold block mb-1">
-                            {d.serialNumber}
-                          </span>
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="badge badge-sm bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-mono font-bold">
+                              {d.serialNumber}
+                            </span>
+                            <span
+                              className={`badge badge-xs font-bold py-1 px-2 border-none ${
+                                d.qcStatus === 'RELEASED_FOR_TRANSIT'
+                                  ? 'bg-emerald-500/20 text-emerald-300'
+                                  : d.qcStatus === 'FAILED_QC'
+                                  ? 'bg-rose-500/20 text-rose-300'
+                                  : d.qcStatus === 'QUARANTINED' || d.isRecalled
+                                  ? 'bg-rose-600/30 text-rose-400'
+                                  : 'bg-amber-500/20 text-amber-300'
+                              }`}
+                            >
+                              {d.isRecalled ? 'QUARANTINED' : d.qcStatus || 'IN_PRODUCTION'}
+                            </span>
+                            {d.dosageForm && (
+                              <span className="text-[10px] text-[#94A3B8] font-mono">
+                                {d.dosageForm} ({d.strength || 'Standard'})
+                              </span>
+                            )}
+                          </div>
                           <h5 className="font-bold text-[#F1F5F9] text-base">{d.name}</h5>
-                          <span className="text-xs text-[#94A3B8]">{d.manufacturer} - {d.batchNumber}</span>
+                          <div className="text-xs text-[#94A3B8]">
+                            <span>{d.manufacturer}</span>
+                            <span className="mx-1.5">•</span>
+                            <span className="font-mono text-[#F1F5F9]">{d.batchNumber}</span>
+                            {d.carrierName && (
+                              <>
+                                <span className="mx-1.5">•</span>
+                                <span className="text-[#00D6B4] font-medium">In Transit via {d.carrierName}</span>
+                              </>
+                            )}
+                          </div>
+                          {d.qcPurityPercentage && (
+                            <div className="text-[10px] text-[#00D6B4] font-mono pt-0.5">
+                              Purity: {d.qcPurityPercentage}% | pH: {d.qcPhLevel} | Endotoxin: {d.qcEndotoxinLimit}
+                            </div>
+                          )}
                         </div>
-                        <ArrowRight className="h-5 w-5 text-[#94A3B8]" />
+
+                        <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                          {d.qcStatus === 'LAB_QUARANTINE' && (currentRole === 'MANUFACTURER' || currentRole === 'ADMIN') && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedDrugForQc(d);
+                                setMfgView('qc');
+                              }}
+                              className="btn btn-xs bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 rounded-lg font-bold"
+                            >
+                              Release QC
+                            </button>
+                          )}
+                          {d.qcStatus === 'RELEASED_FOR_TRANSIT' && !d.carrierName && (currentRole === 'MANUFACTURER' || currentRole === 'ADMIN') && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedDrugForDispatch(d);
+                                setMfgView('dispatch');
+                              }}
+                              className="btn btn-xs bg-[#00D6B4]/15 hover:bg-[#00D6B4]/25 text-[#00D6B4] border border-[#00D6B4]/30 rounded-lg font-bold"
+                            >
+                              Dispatch
+                            </button>
+                          )}
+                          <ArrowRight className="h-5 w-5 text-[#94A3B8]" />
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1625,7 +2332,7 @@ export default function DashboardPage() {
                 {selectedSerial && (
                   <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 flex flex-col items-center justify-center text-center space-y-4">
                     <div className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">
-                      Physical Verification QR
+                      GS1 2D DataMatrix Package QR
                     </div>
                     <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-inner">
                       <QRCodeSVG
@@ -1636,19 +2343,39 @@ export default function DashboardPage() {
                         level={"H"}
                       />
                     </div>
-                    <div className="text-xs font-mono font-bold text-[#F1F5F9]">
-                      {selectedSerial}
+                    <div className="space-y-1 w-full text-left bg-[#172638] p-3 rounded-xl border border-[#304257] text-xs">
+                      <div className="text-[#94A3B8] font-bold text-[10px] uppercase">Batch Specifications</div>
+                      <div className="font-mono text-[#00D6B4] font-bold">{selectedSerial}</div>
+                      {drugs.find((d) => d.serialNumber === selectedSerial)?.apiSupplier && (
+                        <div className="text-[#94A3B8] text-[11px]">
+                          API Supplier: <span className="text-[#F1F5F9] font-medium">{drugs.find((d) => d.serialNumber === selectedSerial)?.apiSupplier}</span>
+                        </div>
+                      )}
+                      {drugs.find((d) => d.serialNumber === selectedSerial)?.rawMaterialLot && (
+                        <div className="text-[#94A3B8] text-[11px]">
+                          Raw Material Lot: <span className="text-[#F1F5F9] font-mono">{drugs.find((d) => d.serialNumber === selectedSerial)?.rawMaterialLot}</span>
+                        </div>
+                      )}
+                      {drugs.find((d) => d.serialNumber === selectedSerial)?.qcCertHash && (
+                        <div className="text-[#94A3B8] text-[11px] truncate">
+                          CoA Hash: <span className="text-slate-300 font-mono text-[10px]">{drugs.find((d) => d.serialNumber === selectedSerial)?.qcCertHash?.slice(0, 20)}...</span>
+                        </div>
+                      )}
                     </div>
                     <button
                       onClick={() => {
                         const doc = new jsPDF();
+                        const target = drugs.find((d) => d.serialNumber === selectedSerial);
                         doc.setFontSize(18);
                         doc.text("PharmaTrace-ES Authenticity Certificate", 14, 22);
                         doc.setFontSize(11);
                         doc.text(`Drug Serial: ${selectedSerial}`, 14, 35);
-                        doc.text(`Timestamp: ${new Date().toUTCString()}`, 14, 43);
-                        doc.text(`Tamper Proof Status: 100% Verified`, 14, 51);
-                        doc.text(`Saga Lifecycle State: Validated`, 14, 59);
+                        doc.text(`Product Name: ${target?.name || ''}`, 14, 43);
+                        doc.text(`Batch/Lot: ${target?.batchNumber || ''}`, 14, 51);
+                        doc.text(`QC Status: ${target?.qcStatus || 'RELEASED'}`, 14, 59);
+                        doc.text(`API Purity Assay: ${target?.qcPurityPercentage ? `${target.qcPurityPercentage}%` : 'Certified Compliant'}`, 14, 67);
+                        doc.text(`Timestamp: ${new Date().toUTCString()}`, 14, 75);
+                        doc.text(`Tamper Proof Status: 100% Verified`, 14, 83);
                         doc.save(`PharmaTrace-Certificate-${selectedSerial}.pdf`);
                       }}
                       className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl text-xs font-bold w-full flex items-center justify-center gap-2"
@@ -3150,6 +3877,65 @@ export default function DashboardPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showMultiQrModal && (
+        <div className="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="card bg-[#172638] border border-[#00D6B4]/50 shadow-2xl rounded-2xl max-w-2xl w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+              <div className="flex items-center gap-2 text-[#00D6B4] font-bold text-sm">
+                <Printer className="h-5 w-5" /> Serialized Packaging Label Sheet (GS1 DataMatrix)
+              </div>
+              <button
+                onClick={() => setShowMultiQrModal(false)}
+                className="btn btn-sm btn-ghost btn-circle text-[#94A3B8] hover:text-[#F1F5F9]"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-[#94A3B8]">
+              Ready for high-speed factory carton labeling and packaging line application. Each label encodes unique unit traceability.
+            </p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 bg-[#0B1220] rounded-xl border border-[#304257]">
+              {bulkResultSerials.map((sn) => (
+                <div key={sn} className="p-3 bg-white rounded-lg flex flex-col items-center justify-center text-center text-[#0B1220]">
+                  <QRCodeSVG
+                    value={`https://pharmatrace.io/verify/${sn}`}
+                    size={90}
+                    bgColor={"#ffffff"}
+                    fgColor={"#0B1220"}
+                    level={"M"}
+                  />
+                  <div className="text-[10px] font-mono font-bold mt-1 text-[#0B1220]">{sn}</div>
+                  <div className="text-[9px] text-slate-600 font-sans">{bulkName || 'Medicine Formulation'}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowMultiQrModal(false)}
+                className="btn btn-sm btn-ghost text-[#94A3B8] text-xs"
+              >
+                Close Sheet
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.print();
+                  }
+                }}
+                className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs px-4 flex items-center gap-1.5"
+              >
+                <Printer className="h-4 w-4" /> Print Label Sheet
+              </button>
+            </div>
           </div>
         </div>
       )}
