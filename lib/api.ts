@@ -243,6 +243,7 @@ export const getStoredUser = (): UserProfile | null => {
 
 export const logoutUser = () => {
   if (typeof window !== 'undefined') {
+    api.post('/auth/logout').catch(() => {});
     localStorage.removeItem('pharma_access_token');
     localStorage.removeItem('pharma_user');
   }
@@ -490,6 +491,84 @@ export const getBundlerMempool = async () => {
   const res = await api.get('/blockchain/aa/mempool');
   return res.data;
 };
+
+export interface SystemAuditLog {
+  id: string;
+  timestamp: string;
+  method: string;
+  endpoint: string;
+  statusCode: number;
+  durationMs: number;
+  callerId: string;
+  callerRole: string;
+  clientIp: string;
+  status: 'SUCCESS' | 'ERROR';
+  errorMessage?: string;
+  hash: string;
+}
+
+export const fetchSystemAuditLogs = async (params?: {
+  limit?: number;
+  role?: string;
+  method?: string;
+}): Promise<SystemAuditLog[]> => {
+  const res = await api.get('/compliance/live-audit', { params });
+  return res.data;
+};
+
+export interface SystemHealth {
+  status: string;
+  timestamp: string;
+  uptimeSeconds: number;
+  services: {
+    database: { status: string; latencyMs: number };
+    redis: { status: string };
+    blockchain: { status: string; blockNumber?: number | null };
+  };
+  system: {
+    nodeVersion: string;
+    heapUsedMb: number;
+    heapTotalMb: number;
+    rssMb: number;
+  };
+}
+
+export const fetchSystemHealth = async (): Promise<SystemHealth> => {
+  const res = await api.get('/health');
+  return res.data;
+};
+
+export interface EnterpriseInvitation {
+  id: number;
+  token: string;
+  organizationName: string;
+  assignedRole: string;
+  recipientEmail?: string;
+  isClaimed: boolean;
+  claimedByEmail?: string;
+  expiresAt: string;
+  createdAt: string;
+}
+
+export const fetchInvitations = async (): Promise<EnterpriseInvitation[]> => {
+  const res = await api.get('/auth/invitations');
+  return res.data;
+};
+
+export const createInvitation = async (data: {
+  organizationName: string;
+  assignedRole: string;
+  recipientEmail?: string;
+}): Promise<EnterpriseInvitation> => {
+  const res = await api.post('/auth/invitations', data);
+  return res.data;
+};
+
+export const revokeInvitation = async (id: number): Promise<{ revoked: boolean }> => {
+  const res = await api.delete(`/auth/invitations/${id}`);
+  return res.data;
+};
+
 
 
 
