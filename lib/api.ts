@@ -107,6 +107,24 @@ export interface Drug {
   destroyedAt?: string;
   returnReason?: string;
   returnedToDistributorAt?: string;
+  recallClass?: string;
+  recallDirectiveRef?: string;
+  recallAuthority?: string;
+  recallReason?: string;
+  recallIssuedAt?: string;
+  regulatoryInvestigationDocket?: string;
+  regulatoryInvestigationStatus?: string;
+  regulatoryForensicNotes?: string;
+  regulatoryAssayFinding?: string;
+  inspectionObservationRef?: string;
+  inspectionDisposition?: string;
+  inspectionCitation?: string;
+  inspectedInspectorBadge?: string;
+  inspectedFacility?: string;
+  adeReportId?: string;
+  adeSeverity?: string;
+  adeReactionDetails?: string;
+  adeReportedAt?: string;
   createdAt: string;
 }
 
@@ -800,6 +818,92 @@ export const pharmacyRetireDrug = async (
 
 export const fetchPharmacyInventorySummary = async (): Promise<PharmacyInventorySummary> => {
   const res = await api.get('/drugs/pharmacy/inventory-summary');
+  return res.data;
+};
+
+export interface AlcoaPrinciple {
+  score: number;
+  description: string;
+}
+
+export interface AlcoaAnalysisResult {
+  framework: string;
+  evaluatedAt: string;
+  compositeScore: number;
+  status: string;
+  principles: {
+    attributable: AlcoaPrinciple;
+    legible: AlcoaPrinciple;
+    contemporaneous: AlcoaPrinciple;
+    original: AlcoaPrinciple;
+    accurate: AlcoaPrinciple;
+  };
+  totalDrugsEvaluated: number;
+  totalAuditEventsEvaluated: number;
+  certificationHash: string;
+}
+
+export interface RecallReconciliationResult {
+  target: string;
+  recallClass: string;
+  directiveRef: string;
+  authority: string;
+  totalLotUnits: number;
+  containedCount: number;
+  containmentPercentage: number;
+  status: string;
+  issuedAt: string;
+}
+
+export const regulatorIssueFacilityInspection = async (data: {
+  facility: string;
+  citation: string;
+  disposition: 'NAI' | 'VAI' | 'OAI';
+  observationRef: string;
+  inspectorBadge: string;
+  notes?: string;
+  batchNumber?: string;
+}): Promise<any> => {
+  const res = await api.post('/drugs/regulatory/facility-inspection', data);
+  return res.data;
+};
+
+export const regulatorEnforceRecall = async (data: {
+  target: string;
+  isBatch: boolean;
+  recallClass: 'CLASS_I' | 'CLASS_II' | 'CLASS_III';
+  directiveRef: string;
+  authority: string;
+  reason: string;
+}): Promise<RecallReconciliationResult> => {
+  const res = await api.post('/drugs/regulatory/enforce-recall', data);
+  return res.data;
+};
+
+export const regulatorSubmitAdeReport = async (data: {
+  serialNumber: string;
+  adeReportId?: string;
+  severity: 'LIFE_THREATENING' | 'HOSPITALIZATION' | 'DISABILITY' | 'MILD';
+  reactionDetails: string;
+  reporterRole: string;
+}): Promise<any> => {
+  const res = await api.post('/drugs/regulatory/medwatch-ade', data);
+  return res.data;
+};
+
+export const regulatorUpdateInvestigationDocket = async (data: {
+  serialNumber: string;
+  docketNumber: string;
+  disposition: 'SEIZED_CONFIRMED_COUNTERFEIT' | 'CLEARED_LEGITIMATE' | 'UNDER_INVESTIGATION';
+  assayFindings: string;
+  forensicNotes?: string;
+}): Promise<Drug> => {
+  const res = await api.post('/drugs/regulatory/investigation-docket', data);
+  return res.data;
+};
+
+export const fetchRegulatorAlcoaAnalysis = async (): Promise<AlcoaAnalysisResult> => {
+  const res = await api.get('/drugs/regulatory/alcoa-analysis');
   return res.data;
 };
 
