@@ -21,6 +21,14 @@ import {
   clearUserWarnings,
   toggleDisableUser,
   deleteUser,
+  fetchSystemAuditLogs,
+  fetchSystemHealth,
+  fetchInvitations,
+  createInvitation,
+  revokeInvitation,
+  SystemAuditLog,
+  SystemHealth,
+  EnterpriseInvitation,
   Drug,
   DrugEvent,
   UserProfile,
@@ -80,6 +88,12 @@ import {
   Trash2,
   Search,
   AlertTriangle,
+  Server,
+  Cpu,
+  Database,
+  Key,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { QRCodeSVG } from 'qrcode.react';
@@ -110,6 +124,19 @@ export default function DashboardPage() {
   const [warningReasonInput, setWarningReasonInput] = useState('');
   const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [adminFeedback, setAdminFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [adminSubTab, setAdminSubTab] = useState<'stakeholders' | 'audit' | 'invitations' | 'health'>('stakeholders');
+  const [systemAuditLogs, setSystemAuditLogs] = useState<SystemAuditLog[]>([]);
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [auditRoleFilter, setAuditRoleFilter] = useState('ALL');
+  const [auditMethodFilter, setAuditMethodFilter] = useState('ALL');
+  const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
+  const [healthLoading, setHealthLoading] = useState(false);
+  const [invitations, setInvitations] = useState<EnterpriseInvitation[]>([]);
+  const [invitationLoading, setInvitationLoading] = useState(false);
+  const [newOrgName, setNewOrgName] = useState('');
+  const [newOrgRole, setNewOrgRole] = useState('MANUFACTURER');
+  const [newRecipientEmail, setNewRecipientEmail] = useState('');
+  const [copiedToken, setCopiedToken] = useState<string | null>(null);
 
   const [drugs, setDrugs] = useState<Drug[]>([]);
   const [selectedSerial, setSelectedSerial] = useState<string>('');
@@ -431,11 +458,107 @@ export default function DashboardPage() {
     }
   };
 
+  const loadAuditLogs = async () => {
+    setAuditLoading(true);
+    try {
+      const logs = await fetchSystemAuditLogs({
+        limit: 50,
+        role: auditRoleFilter === 'ALL' ? undefined : auditRoleFilter,
+        method: auditMethodFilter === 'ALL' ? undefined : auditMethodFilter,
+      });
+      setSystemAuditLogs(logs);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setAuditLoading(false);
+    }
+  };
+
+  const loadHealthWatchdog = async () => {
+    setHealthLoading(true);
+    try {
+      const health = await fetchSystemHealth();
+      setSystemHealth(health);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setHealthLoading(false);
+    }
+  };
+
+  const loadInvitationsList = async () => {
+    setInvitationLoading(true);
+    try {
+      const list = await fetchInvitations();
+      setInvitations(list);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setInvitationLoading(false);
+    }
+  };
+
+  const handleCreateInvitation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newOrgName.trim()) return;
+    try {
+      const inv = await createInvitation({
+        organizationName: newOrgName.trim(),
+        assignedRole: newOrgRole,
+        recipientEmail: newRecipientEmail.trim() || undefined,
+      });
+      setInvitations((prev) => [inv, ...prev]);
+      setNewOrgName('');
+      setNewRecipientEmail('');
+      setAdminFeedback({
+        type: 'success',
+        message: `Enterprise invitation created for ${inv.organizationName}. Token: ${inv.token}`,
+      });
+    } catch (err: any) {
+      setAdminFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to create invitation.',
+      });
+    }
+  };
+
+  const handleRevokeInvitation = async (id: number) => {
+    try {
+      await revokeInvitation(id);
+      setInvitations((prev) => prev.filter((i) => i.id !== id));
+      setAdminFeedback({
+        type: 'success',
+        message: 'Enterprise invitation token successfully revoked.',
+      });
+    } catch (err: any) {
+      setAdminFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to revoke invitation.',
+      });
+    }
+  };
+
+  const handleCopyToken = (token: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(token);
+      setCopiedToken(token);
+      setTimeout(() => setCopiedToken(null), 2500);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === 'users' && currentUser?.role === 'ADMIN') {
-      loadUsersList();
+      if (adminSubTab === 'stakeholders') {
+        loadUsersList();
+      } else if (adminSubTab === 'audit') {
+        loadAuditLogs();
+      } else if (adminSubTab === 'invitations') {
+        loadInvitationsList();
+      } else if (adminSubTab === 'health') {
+        loadHealthWatchdog();
+      }
     }
-  }, [activeTab, currentUser]);
+  }, [activeTab, currentUser, adminSubTab, auditRoleFilter, auditMethodFilter]);
 
   const handleWarnUser = async (id: number) => {
     if (!warningReasonInput.trim()) return;
@@ -861,7 +984,7 @@ export default function DashboardPage() {
                     : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
                 }`}
               >
-                <Users className="h-4 w-4" /> Stakeholder Moderation
+                <Shield className="h-4 w-4" /> Admin Governance Console
               </button>
             )}
 
@@ -2151,28 +2274,84 @@ export default function DashboardPage() {
 
           {activeTab === 'users' && currentUser?.role === 'ADMIN' && (
             <div className="space-y-6">
-              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-3">
-                <div className="flex items-center justify-between">
+              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-xl bg-[#00D6B4]/15 border border-[#00D6B4]/30 flex items-center justify-center text-[#00D6B4]">
-                      <Users className="h-5 w-5" />
+                      <Shield className="h-5 w-5" />
                     </div>
                     <div>
                       <h2 className="text-xl font-bold text-[#F1F5F9]">
-                        Stakeholder Moderation & Account Governance
+                        Enterprise Governance & Telemetry Console
                       </h2>
                       <p className="text-xs text-[#94A3B8]">
-                        Supervise participants, issue compliance warnings, temporarily disable access, or delete rogue accounts. Administrator accounts are protected and immune from disciplinary action.
+                        Supervise participants, monitor live cryptographic audit logs, provision organization invitation tokens, and observe health status.
                       </p>
                     </div>
                   </div>
                   <button
-                    onClick={loadUsersList}
-                    disabled={adminActionLoading}
-                    className="btn btn-xs bg-[#172638] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-lg px-3 py-1.5 font-bold flex items-center gap-1.5"
+                    onClick={() => {
+                      if (adminSubTab === 'stakeholders') loadUsersList();
+                      else if (adminSubTab === 'audit') loadAuditLogs();
+                      else if (adminSubTab === 'invitations') loadInvitationsList();
+                      else if (adminSubTab === 'health') loadHealthWatchdog();
+                    }}
+                    disabled={adminActionLoading || auditLoading || invitationLoading || healthLoading}
+                    className="btn btn-xs bg-[#172638] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-lg px-3 py-1.5 font-bold flex items-center gap-1.5 self-start sm:self-auto"
                   >
-                    <RefreshCw className={`h-3.5 w-3.5 ${adminActionLoading ? 'animate-spin' : ''}`} />
-                    <span>Refresh</span>
+                    <RefreshCw className={`h-3.5 w-3.5 ${adminActionLoading || auditLoading || invitationLoading || healthLoading ? 'animate-spin' : ''}`} />
+                    <span>Refresh Active View</span>
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#304257]">
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab('stakeholders')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                      adminSubTab === 'stakeholders'
+                        ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm'
+                        : 'bg-[#172638] text-[#94A3B8] hover:text-[#F1F5F9] border border-[#304257]'
+                    }`}
+                  >
+                    <Users className="h-3.5 w-3.5" />
+                    <span>Stakeholder Moderation</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab('audit')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                      adminSubTab === 'audit'
+                        ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm'
+                        : 'bg-[#172638] text-[#94A3B8] hover:text-[#F1F5F9] border border-[#304257]'
+                    }`}
+                  >
+                    <Activity className="h-3.5 w-3.5" />
+                    <span>Live Audit Explorer</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab('invitations')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                      adminSubTab === 'invitations'
+                        ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm'
+                        : 'bg-[#172638] text-[#94A3B8] hover:text-[#F1F5F9] border border-[#304257]'
+                    }`}
+                  >
+                    <Key className="h-3.5 w-3.5" />
+                    <span>Enterprise Invitations</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab('health')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                      adminSubTab === 'health'
+                        ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm'
+                        : 'bg-[#172638] text-[#94A3B8] hover:text-[#F1F5F9] border border-[#304257]'
+                    }`}
+                  >
+                    <Server className="h-3.5 w-3.5" />
+                    <span>Multi-Service Watchdog</span>
                   </button>
                 </div>
               </div>
@@ -2194,7 +2373,9 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {adminSubTab === 'stakeholders' && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4">
                   <div className="text-[10px] uppercase font-bold text-[#94A3B8]">Total Stakeholders</div>
                   <div className="text-2xl font-black text-[#F1F5F9] mt-1">{allUsers.length}</div>
@@ -2395,6 +2576,387 @@ export default function DashboardPage() {
                   </table>
                 </div>
               </div>
+            </div>
+          )}
+
+          {adminSubTab === 'audit' && (
+            <div className="space-y-6">
+              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4 flex flex-col sm:flex-row gap-3 items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-[#94A3B8] font-bold">Filter Role:</span>
+                  <select
+                    value={auditRoleFilter}
+                    onChange={(e) => setAuditRoleFilter(e.target.value)}
+                    className="h-9 bg-[#172638] border border-[#304257] rounded-xl px-3 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4]"
+                  >
+                    <option value="ALL">ALL ROLES</option>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="MANUFACTURER">MANUFACTURER</option>
+                    <option value="DISTRIBUTOR">DISTRIBUTOR</option>
+                    <option value="PHARMACY">PHARMACY</option>
+                    <option value="REGULATOR">REGULATOR</option>
+                    <option value="CUSTOMER">CUSTOMER</option>
+                    <option value="ANONYMOUS">ANONYMOUS</option>
+                  </select>
+
+                  <span className="text-xs text-[#94A3B8] font-bold ml-2">Method:</span>
+                  <select
+                    value={auditMethodFilter}
+                    onChange={(e) => setAuditMethodFilter(e.target.value)}
+                    className="h-9 bg-[#172638] border border-[#304257] rounded-xl px-3 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4]"
+                  >
+                    <option value="ALL">ALL METHODS</option>
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                  </select>
+                </div>
+
+                <div className="text-xs text-[#00D6B4] font-mono">
+                  {systemAuditLogs.length} Records in Ring Buffer
+                </div>
+              </div>
+
+              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="table w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-[#304257] bg-[#172638] text-[#94A3B8] uppercase text-[10px] tracking-wider font-bold">
+                        <th className="py-3 px-4">Timestamp</th>
+                        <th className="py-3 px-4">Method & Route</th>
+                        <th className="py-3 px-4">Status</th>
+                        <th className="py-3 px-4">Caller Identity</th>
+                        <th className="py-3 px-4">Latency</th>
+                        <th className="py-3 px-4">SHA-256 Record Hash</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#304257]">
+                      {systemAuditLogs.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-8 text-center text-xs text-[#94A3B8]">
+                            No audit events matching active filters.
+                          </td>
+                        </tr>
+                      ) : (
+                        systemAuditLogs.map((log) => (
+                          <tr key={log.id} className="hover:bg-[#172638]/50 transition">
+                            <td className="py-3 px-4 text-[#94A3B8] font-mono text-[11px] whitespace-nowrap">
+                              {new Date(log.timestamp).toLocaleTimeString()}
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`badge badge-xs font-mono font-bold px-2 py-1 border-none ${
+                                    log.method === 'GET'
+                                      ? 'bg-blue-500/20 text-blue-300'
+                                      : log.method === 'POST'
+                                      ? 'bg-[#00D6B4]/20 text-[#00D6B4]'
+                                      : log.method === 'PUT'
+                                      ? 'bg-amber-500/20 text-amber-300'
+                                      : 'bg-rose-500/20 text-rose-300'
+                                  }`}
+                                >
+                                  {log.method}
+                                </span>
+                                <span className="font-mono text-xs text-[#F1F5F9]">{log.endpoint}</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span
+                                className={`badge badge-xs font-mono font-bold px-2 py-1 border-none ${
+                                  log.statusCode < 400
+                                    ? 'bg-emerald-500/20 text-emerald-300'
+                                    : 'bg-rose-500/20 text-rose-300'
+                                }`}
+                              >
+                                {log.statusCode}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="font-bold text-[#F1F5F9]">{log.callerRole}</div>
+                              <div className="text-[10px] text-[#94A3B8] font-mono">
+                                {log.callerId || log.clientIp}
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 font-mono text-xs text-[#F1F5F9]">
+                              {log.durationMs}ms
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-mono text-[10px] text-slate-400 truncate max-w-[120px]">
+                                  {log.hash}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyToken(log.hash)}
+                                  className="p-1 rounded hover:bg-[#304257] text-[#94A3B8] hover:text-[#00D6B4]"
+                                  title="Copy record hash"
+                                >
+                                  {copiedToken === log.hash ? (
+                                    <Check className="h-3 w-3 text-emerald-400" />
+                                  ) : (
+                                    <Copy className="h-3 w-3" />
+                                  )}
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {adminSubTab === 'invitations' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
+                <div className="flex items-center gap-2 text-sm font-bold text-[#F1F5F9]">
+                  <Key className="h-4 w-4 text-[#00D6B4]" /> Provision Organization Invitation
+                </div>
+                <p className="text-xs text-[#94A3B8]">
+                  Issue a cryptographic invitation token for a new supply chain partner. The recipient role will be locked to this authorization.
+                </p>
+
+                <form onSubmit={handleCreateInvitation} className="space-y-3 pt-2">
+                  <div>
+                    <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Organization Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={newOrgName}
+                      onChange={(e) => setNewOrgName(e.target.value)}
+                      placeholder="Enter organization name"
+                      className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Authorized Role</label>
+                    <select
+                      value={newOrgRole}
+                      onChange={(e) => setNewOrgRole(e.target.value)}
+                      className="select select-bordered w-full bg-[#172638] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                    >
+                      <option value="MANUFACTURER">MANUFACTURER</option>
+                      <option value="DISTRIBUTOR">DISTRIBUTOR</option>
+                      <option value="PHARMACY">PHARMACY</option>
+                      <option value="REGULATOR">REGULATOR</option>
+                      <option value="CUSTOMER">CUSTOMER</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Recipient Email (Optional)</label>
+                    <input
+                      type="email"
+                      value={newRecipientEmail}
+                      onChange={(e) => setNewRecipientEmail(e.target.value)}
+                      placeholder="recipient@enterprise.com"
+                      className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={invitationLoading}
+                    className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-2.5 rounded-xl font-bold text-xs tracking-wider transition shadow-sm flex items-center justify-center gap-1.5 mt-2"
+                  >
+                    <Key className="h-4 w-4" /> Generate Invitation Token
+                  </button>
+                </form>
+              </div>
+
+              <div className="lg:col-span-2 card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl overflow-hidden">
+                <div className="p-4 border-b border-[#304257] flex items-center justify-between">
+                  <div className="text-xs font-bold text-[#F1F5F9]">
+                    Active & Historical Invitations ({invitations.length})
+                  </div>
+                  <button
+                    type="button"
+                    onClick={loadInvitationsList}
+                    className="btn btn-xs bg-[#172638] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-lg"
+                  >
+                    Refresh List
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="table w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-[#304257] bg-[#172638] text-[#94A3B8] uppercase text-[10px] tracking-wider font-bold">
+                        <th className="py-3 px-4">Organization</th>
+                        <th className="py-3 px-4">Role</th>
+                        <th className="py-3 px-4">Invitation Token</th>
+                        <th className="py-3 px-4">Status</th>
+                        <th className="py-3 px-4 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#304257]">
+                      {invitations.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="py-8 text-center text-xs text-[#94A3B8]">
+                            No invitations created yet. Use the provisioning form to generate an invitation.
+                          </td>
+                        </tr>
+                      ) : (
+                        invitations.map((inv) => (
+                          <tr key={inv.id} className="hover:bg-[#172638]/50 transition">
+                            <td className="py-3 px-4">
+                              <div className="font-bold text-[#F1F5F9]">{inv.organizationName}</div>
+                              {inv.recipientEmail && (
+                                <div className="text-[10px] text-[#94A3B8] font-mono">{inv.recipientEmail}</div>
+                              )}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="badge badge-xs font-bold py-1.5 px-2 bg-[#00D6B4]/15 text-[#00D6B4] border-none">
+                                {inv.assignedRole}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-1.5 bg-[#172638] px-2 py-1 rounded-lg border border-[#304257] w-fit">
+                                <span className="font-mono text-[11px] text-[#00D6B4] select-all">
+                                  {inv.token}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyToken(inv.token)}
+                                  className="text-[#94A3B8] hover:text-[#00D6B4] p-0.5"
+                                  title="Copy invitation token"
+                                >
+                                  {copiedToken === inv.token ? (
+                                    <Check className="h-3 w-3 text-emerald-400" />
+                                  ) : (
+                                    <Copy className="h-3 w-3" />
+                                  )}
+                                </button>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              {inv.isClaimed ? (
+                                <span className="badge badge-xs bg-slate-700 text-slate-300 border-none font-bold py-1.5 px-2">
+                                  Claimed ({inv.claimedByEmail})
+                                </span>
+                              ) : (
+                                <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-none font-bold py-1.5 px-2">
+                                  Pending Claim
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              {!inv.isClaimed && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRevokeInvitation(inv.id)}
+                                  className="btn btn-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/40 rounded-lg font-bold"
+                                >
+                                  Revoke
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {adminSubTab === 'health' && (
+            <div className="space-y-6">
+              <div className="p-4 rounded-2xl bg-[#172638] border border-[#00D6B4]/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-[#00D6B4]/15 text-[#00D6B4] flex items-center justify-center shrink-0">
+                    <Server className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-[#F1F5F9] flex items-center gap-2">
+                      <span>Multi-Service Telemetry Watchdog Status:</span>
+                      <span
+                        className={`badge badge-xs font-bold border-none ${
+                          systemHealth?.status === 'OK'
+                            ? 'bg-[#00D6B4] text-[#0B1220]'
+                            : 'bg-rose-500 text-white'
+                        }`}
+                      >
+                        {systemHealth?.status || 'PROBING'}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-[#94A3B8] mt-0.5">
+                      Uptime: {systemHealth?.uptimeSeconds ? `${Math.floor(systemHealth.uptimeSeconds / 3600)}h ${Math.floor((systemHealth.uptimeSeconds % 3600) / 60)}m ${systemHealth.uptimeSeconds % 60}s` : 'Calculating...'}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={loadHealthWatchdog}
+                  disabled={healthLoading}
+                  className="btn btn-xs bg-[#00D6B4] text-[#0B1220] hover:bg-[#00b89a] border-none rounded-lg px-3 py-1 font-bold"
+                >
+                  Probe Multi-Service Health
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4 space-y-2">
+                  <div className="flex items-center justify-between text-[#94A3B8]">
+                    <span className="text-[10px] uppercase font-bold tracking-wider">PostgreSQL Database</span>
+                    <Database className="h-4 w-4 text-[#00D6B4]" />
+                  </div>
+                  <div className="text-xl font-black text-[#F1F5F9]">
+                    {systemHealth?.services?.database?.status || 'UNKNOWN'}
+                  </div>
+                  <div className="text-xs text-[#94A3B8]">
+                    Latency: <span className="font-mono text-[#00D6B4] font-bold">{systemHealth?.services?.database?.latencyMs ?? 0}ms</span>
+                  </div>
+                </div>
+
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4 space-y-2">
+                  <div className="flex items-center justify-between text-[#94A3B8]">
+                    <span className="text-[10px] uppercase font-bold tracking-wider">Redis Session Store</span>
+                    <Cpu className="h-4 w-4 text-[#00D6B4]" />
+                  </div>
+                  <div className="text-xl font-black text-[#A3E635]">
+                    {systemHealth?.services?.redis?.status || 'UNKNOWN'}
+                  </div>
+                  <div className="text-xs text-[#94A3B8]">
+                    Blacklist & Active Revocation
+                  </div>
+                </div>
+
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4 space-y-2">
+                  <div className="flex items-center justify-between text-[#94A3B8]">
+                    <span className="text-[10px] uppercase font-bold tracking-wider">Blockchain EVM Node</span>
+                    <Layers className="h-4 w-4 text-[#00D6B4]" />
+                  </div>
+                  <div className="text-xl font-black text-[#F1F5F9]">
+                    {systemHealth?.services?.blockchain?.status || 'UNKNOWN'}
+                  </div>
+                  <div className="text-xs text-[#94A3B8]">
+                    Height: <span className="font-mono text-[#00D6B4] font-bold">#{systemHealth?.services?.blockchain?.blockNumber ?? 'N/A'}</span>
+                  </div>
+                </div>
+
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4 space-y-2">
+                  <div className="flex items-center justify-between text-[#94A3B8]">
+                    <span className="text-[10px] uppercase font-bold tracking-wider">V8 Heap & Memory</span>
+                    <Server className="h-4 w-4 text-[#00D6B4]" />
+                  </div>
+                  <div className="text-xl font-black text-[#F1F5F9]">
+                    {systemHealth?.system?.heapUsedMb ?? 0} MB
+                  </div>
+                  <div className="text-xs text-[#94A3B8]">
+                    Total: {systemHealth?.system?.heapTotalMb ?? 0} MB (RSS: {systemHealth?.system?.rssMb ?? 0} MB)
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
             </div>
           )}
         </main>
