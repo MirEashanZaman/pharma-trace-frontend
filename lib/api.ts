@@ -328,6 +328,11 @@ export const fetchDrugs = async (): Promise<Drug[]> => {
   return res.data;
 };
 
+export const fetchDrugBySerialNumber = async (serialNumber: string): Promise<Drug> => {
+  const res = await api.get(`/drugs/${serialNumber}`);
+  return res.data;
+};
+
 export const fetchDrugEvents = async (serialNumber: string): Promise<DrugEvent[]> => {
   const res = await api.get(`/drug-events/${serialNumber}`);
   return res.data;
