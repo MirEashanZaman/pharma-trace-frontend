@@ -74,6 +74,20 @@ export interface Drug {
   carrierName?: string;
   sealNumber?: string;
   isRecalled?: boolean;
+  currentCustodian?: string;
+  custodyLocation?: string;
+  inboundInspectionStatus?: string;
+  inboundInspectionTemp?: number;
+  inboundInspectionNotes?: string;
+  inboundInspectedBy?: string;
+  inboundInspectedAt?: string;
+  assignedVehicleId?: string;
+  storageZone?: string;
+  targetPharmacy?: string;
+  outboundManifestId?: string;
+  deliveryProofSignature?: string;
+  deliveryProofReceivedBy?: string;
+  deliveryProofDeliveredAt?: string;
   createdAt: string;
 }
 
@@ -631,6 +645,84 @@ export const quarantineBatch = async (
   reason?: string,
 ): Promise<{ batchNumber: string; quarantinedCount: number; reason: string }> => {
   const res = await api.post(`/drugs/batch/${batchNumber}/quarantine`, { reason });
+  return res.data;
+};
+
+export interface FleetVehicle {
+  vehicleId: string;
+  driverName: string;
+  model: string;
+  route: string;
+  status: string;
+  currentLocation: string;
+  currentTemp: number;
+  currentHumidity: number;
+  batteryLevel: number;
+  compressorStatus: string;
+  targetTempRange: string;
+  assignedBatches: string[];
+  hasExcursion: boolean;
+  lastPing: string;
+}
+
+export const receiveInboundDrug = async (
+  serialNumber: string,
+  data: {
+    inspectionDisposition: 'ACCEPTED' | 'REJECTED';
+    sealVerified: boolean;
+    receivingTemp: number;
+    notes?: string;
+    inspectedBy: string;
+    location: string;
+    storageZone?: string;
+  },
+): Promise<Drug> => {
+  const res = await api.post(`/drugs/${serialNumber}/inbound-receive`, data);
+  return res.data;
+};
+
+export const assignFleetVehicle = async (
+  serialNumber: string,
+  data: {
+    vehicleId: string;
+    driverName: string;
+    routeDestination: string;
+    targetPharmacy?: string;
+  },
+): Promise<Drug> => {
+  const res = await api.post(`/drugs/${serialNumber}/assign-fleet`, data);
+  return res.data;
+};
+
+export const fetchFleetOverview = async (): Promise<FleetVehicle[]> => {
+  const res = await api.get('/drugs/fleet/overview');
+  return res.data;
+};
+
+export const createPharmacyManifest = async (data: {
+  manifestId?: string;
+  pharmacyName: string;
+  pharmacyAddress: string;
+  serialNumbers: string[];
+  vehicleId: string;
+  driverName: string;
+  departureSeal: string;
+}): Promise<any> => {
+  const res = await api.post('/drugs/manifests/pharmacy-dispatch', data);
+  return res.data;
+};
+
+export const confirmPharmacyDelivery = async (
+  serialNumber: string,
+  data: {
+    pharmacistName: string;
+    pharmacistLicense: string;
+    deliveryTemp: number;
+    signatureHash?: string;
+    notes?: string;
+  },
+): Promise<Drug> => {
+  const res = await api.post(`/drugs/${serialNumber}/confirm-delivery`, data);
   return res.data;
 };
 
