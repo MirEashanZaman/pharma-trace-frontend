@@ -35,6 +35,11 @@ import {
   fetchFleetOverview,
   createPharmacyManifest,
   confirmPharmacyDelivery,
+  pharmacyReceiveDrug,
+  pharmacyDispenseDrug,
+  pharmacyRetireDrug,
+  fetchPharmacyInventorySummary,
+  PharmacyInventorySummary,
   FleetVehicle,
   SystemAuditLog,
   SystemHealth,
@@ -129,7 +134,7 @@ export default function DashboardPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [wallet, setWallet] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'simulation' | 'transit-map' | 'provenance' | 'attestations' | 'github' | 'users' | 'logistics'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'simulation' | 'transit-map' | 'provenance' | 'attestations' | 'github' | 'users' | 'logistics' | 'pharmacy'>('overview');
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   const [userSearchTerm, setUserSearchTerm] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('ALL');
@@ -230,6 +235,37 @@ export default function DashboardPage() {
   const [podLoading, setPodLoading] = useState(false);
 
   const [distributorFeedback, setDistributorFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const [pharmacySubTab, setPharmacySubTab] = useState<'inbound' | 'dispensary' | 'dispense' | 'returns' | 'recalls'>('inbound');
+  const [pharmacySummary, setPharmacySummary] = useState<PharmacyInventorySummary | null>(null);
+
+  const [rxInboundSerial, setRxInboundSerial] = useState('');
+  const [rxInboundTemp, setRxInboundTemp] = useState(4.2);
+  const [rxInboundLocation, setRxInboundLocation] = useState('FRIDGE_VACCINE_1');
+  const [rxInboundPharmacist, setRxInboundPharmacist] = useState('Dr. Sarah Lin, PharmD');
+  const [rxInboundLicense, setRxInboundLicense] = useState('RPH-NY-448190');
+  const [rxInboundNotes, setRxInboundNotes] = useState('Inbound shipment verified against e-BoL. 3Ts continuous pedigree validated.');
+  const [rxInboundLoading, setRxInboundLoading] = useState(false);
+
+  const [rxDispenseSerial, setRxDispenseSerial] = useState('');
+  const [rxPrescriptionNumber, setRxPrescriptionNumber] = useState('RX-2026-984421');
+  const [rxDoctorName, setRxDoctorName] = useState('Dr. Robert Chen, MD');
+  const [rxPatientToken, setRxPatientToken] = useState('PT-HASH-8831');
+  const [rxDispenseNotes, setRxDispenseNotes] = useState('Dispensed with standard patient counselling and GxP cold-pack container.');
+  const [rxDispenseLoading, setRxDispenseLoading] = useState(false);
+
+  const [rxRetireSerial, setRxRetireSerial] = useState('');
+  const [rxRetireAction, setRxRetireAction] = useState<'DESTROY' | 'RETURN'>('DESTROY');
+  const [rxDestructionReason, setRxDestructionReason] = useState('Expired on dispensary shelf - beyond 30 days past shelf limit');
+  const [rxDestructionCert, setRxDestructionCert] = useState('CERT-INCIN-8891');
+  const [rxDestructionWitness, setRxDestructionWitness] = useState('Dr. Sarah Lin, PharmD');
+  const [rxRetireLoading, setRxRetireLoading] = useState(false);
+
+  const [rxAlertSerial, setRxAlertSerial] = useState('');
+  const [rxAlertNotes, setRxAlertNotes] = useState('Altered 2D DataMatrix code and missing tamper-evident foil seal');
+  const [rxAlertLoading, setRxAlertLoading] = useState(false);
+
+  const [pharmacyFeedback, setPharmacyFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [selectedEventType, setSelectedEventType] = useState('MANUFACTURED');
   const [temperature, setTemperature] = useState('22.5');
   const [humidity, setHumidity] = useState('45');
@@ -648,6 +684,12 @@ export default function DashboardPage() {
   useEffect(() => {
     if (activeTab === 'logistics') {
       loadFleetOverview();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 'pharmacy') {
+      loadPharmacySummary();
     }
   }, [activeTab]);
 
@@ -1136,6 +1178,133 @@ export default function DashboardPage() {
     return Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
   };
 
+  const loadPharmacySummary = async () => {
+    try {
+      const summary = await fetchPharmacyInventorySummary();
+      setPharmacySummary(summary);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handlePharmacyReceiveInbound = async (disposition: 'ACCEPTED' | 'REJECTED') => {
+    if (!rxInboundSerial) return;
+    setRxInboundLoading(true);
+    setPharmacyFeedback(null);
+    try {
+      const updated = await pharmacyReceiveDrug(rxInboundSerial, {
+        disposition,
+        receivingTemp: Number(rxInboundTemp),
+        storageLocation: rxInboundLocation,
+        pharmacistName: rxInboundPharmacist,
+        pharmacistLicense: rxInboundLicense,
+        notes: rxInboundNotes,
+        pharmacyName: currentUser?.organization || 'St. Jude Central Pharmacy',
+      });
+      setPharmacyFeedback({
+        type: 'success',
+        message: disposition === 'ACCEPTED'
+          ? `Consignment ${updated.serialNumber} ACCEPTED into dispensary ${rxInboundLocation}. 3Ts chain-of-custody anchored.`
+          : `Consignment ${updated.serialNumber} REJECTED at dockside due to temperature/seal excursion. Unit quarantined.`,
+      });
+      await loadDrugs();
+      await loadPharmacySummary();
+    } catch (err: any) {
+      setPharmacyFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to record pharmacy receiving inspection.',
+      });
+    } finally {
+      setRxInboundLoading(false);
+    }
+  };
+
+  const handlePharmacyDispense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rxDispenseSerial) return;
+    setRxDispenseLoading(true);
+    setPharmacyFeedback(null);
+    try {
+      const updated = await pharmacyDispenseDrug(rxDispenseSerial, {
+        prescriptionNumber: rxPrescriptionNumber,
+        prescribingDoctor: rxDoctorName,
+        patientToken: rxPatientToken,
+        pharmacistName: currentUser?.fullName || currentUser?.email || 'Licensed Pharmacist',
+        notes: rxDispenseNotes,
+      });
+      setPharmacyFeedback({
+        type: 'success',
+        message: `Medication ${updated.serialNumber} successfully dispensed under Rx #${updated.prescriptionNumber} to Patient Token ${updated.patientToken}. Anti-double-dispensing circuit breaker permanently engaged.`,
+      });
+      await loadDrugs();
+      await loadPharmacySummary();
+    } catch (err: any) {
+      setPharmacyFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Dispensing failed.',
+      });
+    } finally {
+      setRxDispenseLoading(false);
+    }
+  };
+
+  const handlePharmacyRetire = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rxRetireSerial) return;
+    setRxRetireLoading(true);
+    setPharmacyFeedback(null);
+    try {
+      const updated = await pharmacyRetireDrug(rxRetireSerial, {
+        action: rxRetireAction,
+        reason: rxDestructionReason,
+        witnessPharmacist: rxDestructionWitness,
+        certificateId: rxDestructionCert,
+      });
+      setPharmacyFeedback({
+        type: 'success',
+        message: rxRetireAction === 'DESTROY'
+          ? `Medicine unit ${updated.serialNumber} retired and logged under Biohazard Destruction Certificate ${updated.destructionCertificateId}. Removed from dispensary stock.`
+          : `Medicine unit ${updated.serialNumber} marked for Return-to-Vendor (RTV) reverse logistics. Status: RETURNED.`,
+      });
+      await loadDrugs();
+      await loadPharmacySummary();
+    } catch (err: any) {
+      setPharmacyFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to retire medication.',
+      });
+    } finally {
+      setRxRetireLoading(false);
+    }
+  };
+
+  const handleReportSuspectedCounterfeit = async (serial: string) => {
+    if (!serial) return;
+    setRxAlertLoading(true);
+    setPharmacyFeedback(null);
+    try {
+      await pharmacyRetireDrug(serial, {
+        action: 'DESTROY',
+        reason: `SUSPECTED_COUNTERFEIT: ${rxAlertNotes}`,
+        witnessPharmacist: rxInboundPharmacist,
+        certificateId: `ALERT-SEC-${Date.now().toString().slice(-8)}`,
+      });
+      setPharmacyFeedback({
+        type: 'success',
+        message: `Suspected counterfeit alert flagged for ${serial}. Unit placed into high-security quarantine for regulatory inspection.`,
+      });
+      await loadDrugs();
+      await loadPharmacySummary();
+    } catch (err: any) {
+      setPharmacyFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to flag suspected counterfeit.',
+      });
+    } finally {
+      setRxAlertLoading(false);
+    }
+  };
+
   const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedSerial) return;
@@ -1326,6 +1495,21 @@ export default function DashboardPage() {
                 }`}
               >
                 <Truck className="h-4 w-4" /> Logistics & Fleet Operations
+              </button>
+            )}
+            {(currentRole === 'ADMIN' || currentRole === 'PHARMACY') && (
+              <button
+                onClick={() => {
+                  setActiveTab('pharmacy');
+                  loadPharmacySummary();
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                  activeTab === 'pharmacy'
+                    ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                    : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+                }`}
+              >
+                <Store className="h-4 w-4" /> Pharmacy Dispensary & Rx
               </button>
             )}
             {(currentRole === 'ADMIN' || currentRole === 'REGULATOR') && (
@@ -4941,6 +5125,1025 @@ export default function DashboardPage() {
                               </div>
                             ))
                         )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'pharmacy' && (
+            <div className="space-y-6">
+              <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border-[#00D6B4]/30 text-xs font-bold uppercase tracking-wider">
+                      DSCSA Title II Compliant
+                    </span>
+                    <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono">
+                      Hospital Dispensary Bay 1
+                    </span>
+                  </div>
+                  <h2 className="text-2xl font-black text-[#F1F5F9] mt-2 tracking-tight">
+                    Pharmacy Dispensary & Clinical Command
+                  </h2>
+                  <p className="text-xs text-[#94A3B8] mt-1">
+                    Complete pharmacy operations suite: 3Ts inbound verification, cold-storage refrigerators, clinical prescription dispensing with anti-double-dispense circuit breakers, reverse logistics, and patient recall contact tracing.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      loadDrugs();
+                      loadPharmacySummary();
+                    }}
+                    className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl font-bold text-xs flex items-center gap-2"
+                  >
+                    <RefreshCw className="h-4 w-4" /> Sync Dispensary Stats
+                  </button>
+                </div>
+              </div>
+
+              {pharmacyFeedback && (
+                <div
+                  className={`p-4 rounded-xl text-xs font-semibold flex items-center justify-between ${
+                    pharmacyFeedback.type === 'success'
+                      ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
+                      : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {pharmacyFeedback.type === 'success' ? (
+                      <CheckCircle className="h-4 w-4 text-emerald-400" />
+                    ) : (
+                      <AlertTriangle className="h-4 w-4 text-rose-400" />
+                    )}
+                    <span>{pharmacyFeedback.message}</span>
+                  </div>
+                  <button
+                    onClick={() => setPharmacyFeedback(null)}
+                    className="text-xs opacity-70 hover:opacity-100"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center gap-2 border-b border-[#304257] pb-3">
+                {[
+                  { id: 'inbound', label: '1. Inbound 3Ts Receiving Dock', icon: Package },
+                  { id: 'dispensary', label: '2. Dispensary Fridges & Shelves', icon: Snowflake },
+                  { id: 'dispense', label: '3. Clinical Rx Dispensing Terminal', icon: FileText },
+                  { id: 'returns', label: '4. Returns & Hazardous Destruction', icon: Trash2 },
+                  { id: 'recalls', label: '5. Patient Recall Tracing & Safety', icon: AlertOctagon },
+                ].map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = pharmacySubTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setPharmacySubTab(tab.id as any)}
+                      className={`btn btn-sm rounded-xl font-bold text-xs flex items-center gap-2 transition ${
+                        isActive
+                          ? 'bg-[#00D6B4] text-[#0B1220] shadow-md border-none'
+                          : 'bg-[#172638] text-[#94A3B8] hover:text-[#F1F5F9] border border-[#304257]'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" /> {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {pharmacySubTab === 'inbound' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-7 card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-5">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                      <div>
+                        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                          <Package className="h-5 w-5 text-[#00D6B4]" /> Inbound Consignment & 3Ts Receiving Inspection
+                        </h3>
+                        <p className="text-xs text-[#94A3B8]">
+                          Verify DSCSA 3Ts transaction records, arrival cold-chain temperature, and license before transferring to dispensary stock.
+                        </p>
+                      </div>
+                      <span className="badge bg-[#00D6B4]/10 text-[#00D6B4] border-[#00D6B4]/20 text-[10px] font-mono">
+                        DOCK-INSPECT
+                      </span>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Select Arriving Consignment / Medicine Serial
+                        </label>
+                        <select
+                          value={rxInboundSerial || (drugs[0]?.serialNumber ?? '')}
+                          onChange={(e) => setRxInboundSerial(e.target.value)}
+                          className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                        >
+                          <option value="">-- Choose Consignment --</option>
+                          {drugs.map((d) => (
+                            <option key={d.id} value={d.serialNumber}>
+                              {d.serialNumber} - {d.name} ({d.batchNumber}) | Dest: {d.targetPharmacy || 'Pharmacy'} | Status: {d.status}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {rxInboundSerial && (() => {
+                        const cur = drugs.find((d) => d.serialNumber === rxInboundSerial);
+                        if (!cur) return null;
+                        return (
+                          <div className="p-3.5 bg-[#0B1220] border border-[#304257] rounded-xl grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                            <div>
+                              <span className="text-[10px] text-[#94A3B8] uppercase block">Medicine</span>
+                              <strong className="text-[#F1F5F9]">{cur.name}</strong>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-[#94A3B8] uppercase block">Batch</span>
+                              <span className="text-[#00D6B4] font-mono">{cur.batchNumber}</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-[#94A3B8] uppercase block">Temp Spec</span>
+                              <span className="text-emerald-400 font-bold">{cur.tempMin ?? 2}°C to {cur.tempMax ?? 8}°C</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-[#94A3B8] uppercase block">Current Status</span>
+                              <span className="badge badge-sm bg-[#243247] text-[#94A3B8] border-[#304257]">{cur.status}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      <div className="p-3 bg-[#0B1220] border border-[#304257] rounded-xl space-y-2">
+                        <span className="text-xs font-bold text-[#00D6B4] block uppercase tracking-wider">
+                          DSCSA 3Ts Continuous Verification Checklist
+                        </span>
+                        <div className="space-y-1.5 text-xs text-[#F1F5F9]">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" defaultChecked className="checkbox checkbox-xs checkbox-primary" />
+                            <span>Transaction Information (TI): NDC, lot number, and shipment date match bill of lading</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" defaultChecked className="checkbox checkbox-xs checkbox-primary" />
+                            <span>Transaction History (TH): Continuous unbroken cryptographic trail from manufacturer</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" defaultChecked className="checkbox checkbox-xs checkbox-primary" />
+                            <span>Transaction Statement (TS): Licensed entity legal compliance certification verified</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs text-[#94A3B8] font-semibold">
+                            Arrival Dockside Infrared Thermometer Probe (°C)
+                          </label>
+                          <span className={`text-xs font-mono font-bold ${
+                            Number(rxInboundTemp) < 2 || Number(rxInboundTemp) > 8 ? 'text-rose-400' : 'text-emerald-400'
+                          }`}>
+                            {rxInboundTemp}°C ({Number(rxInboundTemp) < 2 || Number(rxInboundTemp) > 8 ? 'EXCURSION' : 'COMPLIANT'})
+                          </span>
+                        </div>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={rxInboundTemp}
+                          onChange={(e) => setRxInboundTemp(parseFloat(e.target.value) || 0)}
+                          className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                        />
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {[
+                            { label: '4.0°C (Vaccine Compliant)', val: 4.0 },
+                            { label: '5.5°C (Chilled Biologics)', val: 5.5 },
+                            { label: '9.4°C (Thermal Excursion)', val: 9.4 },
+                            { label: '-1.8°C (Sub-Zero Freezing)', val: -1.8 },
+                          ].map((preset) => (
+                            <button
+                              key={preset.label}
+                              type="button"
+                              onClick={() => setRxInboundTemp(preset.val)}
+                              className="btn btn-xs bg-[#0B1220] hover:bg-[#243247] text-[#94A3B8] hover:text-[#00D6B4] border border-[#304257] rounded-lg text-[10px]"
+                            >
+                              {preset.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Designated Pharmacy Storage Location
+                        </label>
+                        <select
+                          value={rxInboundLocation}
+                          onChange={(e) => setRxInboundLocation(e.target.value)}
+                          className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                        >
+                          <option value="FRIDGE_VACCINE_1">Certified Vaccine Refrigerator 1 (2.0°C - 8.0°C)</option>
+                          <option value="FRIDGE_BIOLOGICS_2">Biologics & Injectables Refrigerator 2 (2.0°C - 8.0°C)</option>
+                          <option value="SHELF_AMB_ORAL">Ambient Prescription Shelves (15.0°C - 25.0°C)</option>
+                          <option value="VAULT_NARCOTICS">Schedule II Locked Narcotics Safe</option>
+                        </select>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                            Receiving Pharmacist Name
+                          </label>
+                          <input
+                            type="text"
+                            value={rxInboundPharmacist}
+                            onChange={(e) => setRxInboundPharmacist(e.target.value)}
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                            Pharmacist State License #
+                          </label>
+                          <input
+                            type="text"
+                            value={rxInboundLicense}
+                            onChange={(e) => setRxInboundLicense(e.target.value)}
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] font-mono"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Inbound Receiving Observations
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={rxInboundNotes}
+                          onChange={(e) => setRxInboundNotes(e.target.value)}
+                          placeholder="e.g. Courier cold-pack intact, calibrated infrared probe verified, transferred immediately into vaccine refrigerator."
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 pt-2">
+                        <button
+                          type="button"
+                          disabled={rxInboundLoading || !rxInboundSerial}
+                          onClick={() => handlePharmacyReceiveInbound('ACCEPTED')}
+                          className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs flex items-center justify-center gap-2"
+                        >
+                          <CheckCircle className="h-4 w-4" /> {rxInboundLoading ? 'Recording...' : 'Accept & Transfer to Dispensary'}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={rxInboundLoading || !rxInboundSerial}
+                          onClick={() => handlePharmacyReceiveInbound('REJECTED')}
+                          className="btn btn-sm bg-rose-600 hover:bg-rose-700 text-white border-none rounded-xl font-bold text-xs flex items-center justify-center gap-2"
+                        >
+                          <AlertOctagon className="h-4 w-4" /> Reject at Dock & Quarantine
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#00D6B4] flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4 text-[#00D6B4]" /> DSCSA Pharmacy Obligations
+                      </h4>
+                      <p className="text-xs text-[#94A3B8] leading-relaxed">
+                        Under US DSCSA Title II, dispensers cannot accept drug ownership without verifying complete transaction information (TI), transaction history (TH), and transaction statements (TS).
+                      </p>
+                      <div className="space-y-2 text-xs text-[#94A3B8]">
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>Verify continuous 3Ts pedigree from authorized distributor</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>Immediate quarantine if cold-chain was breached in transit</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>Record pharmacist state license number on receiving record</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>Archive electronic pedigree records for minimum 6-year statutory period</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-[#00D6B4]" /> Recent Pharmacy Receiving Records
+                      </h4>
+                      <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                        {drugs.filter((d) => d.pharmacyInboundStatus).length === 0 ? (
+                          <p className="text-xs text-[#94A3B8] italic">No pharmacy receiving records logged yet.</p>
+                        ) : (
+                          drugs
+                            .filter((d) => d.pharmacyInboundStatus)
+                            .map((d) => (
+                              <div
+                                key={d.id}
+                                className="p-3 bg-[#0B1220] border border-[#304257] rounded-xl text-xs space-y-1"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="font-mono text-[#00D6B4] font-bold">{d.serialNumber}</span>
+                                  <span
+                                    className={`badge badge-xs font-bold ${
+                                      d.pharmacyInboundStatus === 'ACCEPTED'
+                                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                                        : 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                                    }`}
+                                  >
+                                    {d.pharmacyInboundStatus}
+                                  </span>
+                                </div>
+                                <div className="text-[#94A3B8] text-[11px] flex items-center justify-between">
+                                  <span>Dock Temp: {d.pharmacyInboundTemp ?? 'N/A'}°C</span>
+                                  <span className="font-mono text-[10px] text-[#F1F5F9]">{d.pharmacyStorageLocation}</span>
+                                </div>
+                                <div className="text-[10px] text-[#94A3B8] truncate">
+                                  Pharmacist: {d.pharmacyInboundPharmacist} ({d.pharmacyInboundLicense})
+                                </div>
+                              </div>
+                            ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {pharmacySubTab === 'dispensary' && (
+                <div className="space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
+                      <div className="flex items-center justify-between text-[#94A3B8]">
+                        <span className="text-[10px] uppercase font-bold tracking-wider">Vaccine Refrigerator 1</span>
+                        <Snowflake className="h-4 w-4 text-[#00D6B4]" />
+                      </div>
+                      <div className="text-2xl font-black text-[#F1F5F9]">
+                        {drugs.filter((d) => d.pharmacyStorageLocation === 'FRIDGE_VACCINE_1').length} units
+                      </div>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-emerald-400 font-mono font-bold">3.8°C (Optimal)</span>
+                        <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-none font-bold">NORMAL</span>
+                      </div>
+                    </div>
+
+                    <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
+                      <div className="flex items-center justify-between text-[#94A3B8]">
+                        <span className="text-[10px] uppercase font-bold tracking-wider">Biologics Chiller 2</span>
+                        <Snowflake className="h-4 w-4 text-cyan-400" />
+                      </div>
+                      <div className="text-2xl font-black text-cyan-400">
+                        {drugs.filter((d) => d.pharmacyStorageLocation === 'FRIDGE_BIOLOGICS_2').length} units
+                      </div>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-emerald-400 font-mono font-bold">4.2°C (Optimal)</span>
+                        <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-none font-bold">NORMAL</span>
+                      </div>
+                    </div>
+
+                    <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
+                      <div className="flex items-center justify-between text-[#94A3B8]">
+                        <span className="text-[10px] uppercase font-bold tracking-wider">Ambient Prescription Shelf</span>
+                        <Package className="h-4 w-4 text-amber-400" />
+                      </div>
+                      <div className="text-2xl font-black text-amber-400">
+                        {drugs.filter((d) => d.pharmacyStorageLocation === 'SHELF_AMB_ORAL' || !d.pharmacyStorageLocation).length} units
+                      </div>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-[#94A3B8] font-mono">21.5°C (Controlled)</span>
+                        <span className="badge badge-xs bg-slate-700 text-slate-300 border-none">AMBIENT</span>
+                      </div>
+                    </div>
+
+                    <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
+                      <div className="flex items-center justify-between text-[#94A3B8]">
+                        <span className="text-[10px] uppercase font-bold tracking-wider">Schedule II Safe Vault</span>
+                        <Lock className="h-4 w-4 text-rose-400" />
+                      </div>
+                      <div className="text-2xl font-black text-rose-400">
+                        {drugs.filter((d) => d.pharmacyStorageLocation === 'VAULT_NARCOTICS').length} units
+                      </div>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-rose-400 font-bold">LOCKED & LOGGED</span>
+                        <span className="badge badge-xs bg-rose-500/20 text-rose-300 border-none font-bold">VAULT</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                          <Snowflake className="h-5 w-5 text-[#00D6B4]" /> Dispensary Inventory & Refrigerator Storage Matrix
+                        </h3>
+                        <p className="text-xs text-[#94A3B8]">
+                          Active pharmacy shelf inventory with verified storage compartment and expiration tracking.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="table table-sm w-full text-xs">
+                        <thead>
+                          <tr className="border-b border-[#304257] text-[#94A3B8]">
+                            <th>Serial Number</th>
+                            <th>Medicine & Batch</th>
+                            <th>Storage Location</th>
+                            <th>Expiry Date</th>
+                            <th>FEFO Urgency</th>
+                            <th>Dispense State</th>
+                            <th className="text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#304257]">
+                          {[...drugs]
+                            .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime())
+                            .map((d) => {
+                              const days = getDaysToExpiry(d.expiryDate);
+                              return (
+                                <tr key={d.id} className="hover:bg-[#243247]/50 transition">
+                                  <td className="font-mono text-[#00D6B4] font-bold">{d.serialNumber}</td>
+                                  <td>
+                                    <div className="font-bold text-[#F1F5F9]">{d.name}</div>
+                                    <div className="text-[10px] text-[#94A3B8] font-mono">{d.batchNumber}</div>
+                                  </td>
+                                  <td>
+                                    <span className="badge badge-xs bg-[#243247] text-[#94A3B8] border-[#304257] font-mono">
+                                      {d.pharmacyStorageLocation || 'SHELF_AMB_ORAL'}
+                                    </span>
+                                  </td>
+                                  <td className="font-mono text-[#F1F5F9]">
+                                    {new Date(d.expiryDate).toLocaleDateString()}
+                                  </td>
+                                  <td>
+                                    {days === null ? (
+                                      <span className="badge badge-xs bg-slate-700 text-slate-300">N/A</span>
+                                    ) : days <= 30 ? (
+                                      <span className="badge badge-xs bg-rose-500/20 text-rose-300 border-rose-500/30 font-bold">
+                                        CRITICAL ({days}d)
+                                      </span>
+                                    ) : days <= 90 ? (
+                                      <span className="badge badge-xs bg-amber-500/20 text-amber-300 border-amber-500/30 font-bold">
+                                        EXPIRING ({days}d)
+                                      </span>
+                                    ) : (
+                                      <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
+                                        STABLE ({days}d)
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td>
+                                    {d.dispensedAt ? (
+                                      <span className="badge badge-xs bg-[#00D6B4]/20 text-[#00D6B4] border-[#00D6B4]/30 font-bold">
+                                        DISPENSED
+                                      </span>
+                                    ) : d.isRecalled ? (
+                                      <span className="badge badge-xs bg-rose-500/20 text-rose-300 border-rose-500/30 font-bold">
+                                        RECALLED
+                                      </span>
+                                    ) : (
+                                      <span className="badge badge-xs bg-slate-700 text-slate-300 border-none">
+                                        IN_STOCK
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="text-right">
+                                    <div className="flex items-center justify-end gap-1.5">
+                                      {!d.dispensedAt && (
+                                        <button
+                                          onClick={() => {
+                                            setRxDispenseSerial(d.serialNumber);
+                                            setPharmacySubTab('dispense');
+                                          }}
+                                          className="btn btn-xs bg-[#00D6B4]/15 hover:bg-[#00D6B4]/25 text-[#00D6B4] border border-[#00D6B4]/30 rounded-lg text-[10px]"
+                                        >
+                                          Rx Dispense
+                                        </button>
+                                      )}
+                                      <button
+                                        onClick={() => {
+                                          setRxRetireSerial(d.serialNumber);
+                                          setPharmacySubTab('returns');
+                                        }}
+                                        className="btn btn-xs bg-[#243247] hover:bg-[#304257] text-[#94A3B8] hover:text-rose-400 border border-[#304257] rounded-lg text-[10px]"
+                                      >
+                                        Retire / Destroy
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {pharmacySubTab === 'dispense' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-7 card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-5">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                      <div>
+                        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-[#00D6B4]" /> Clinical Prescription (Rx) Dispensing Terminal
+                        </h3>
+                        <p className="text-xs text-[#94A3B8]">
+                          Fulfill verified patient prescription with automated anti-double-dispensing circuit breakers and expiry validation.
+                        </p>
+                      </div>
+                      <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-mono">
+                        PATIENT HANDOVER
+                      </span>
+                    </div>
+
+                    <form onSubmit={handlePharmacyDispense} className="space-y-4">
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Target Medicine Serial (Dispensing Unit)
+                        </label>
+                        <select
+                          value={rxDispenseSerial || (drugs.find((d) => !d.dispensedAt)?.serialNumber ?? '')}
+                          onChange={(e) => setRxDispenseSerial(e.target.value)}
+                          className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          required
+                        >
+                          <option value="">-- Choose Unit for Prescription --</option>
+                          {drugs.map((d) => (
+                            <option key={d.id} value={d.serialNumber}>
+                              {d.serialNumber} - {d.name} ({d.batchNumber}) | Loc: {d.pharmacyStorageLocation || 'Dispensary'} | {d.dispensedAt ? 'ALREADY DISPENSED' : 'AVAILABLE'}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {rxDispenseSerial && (() => {
+                        const target = drugs.find((d) => d.serialNumber === rxDispenseSerial);
+                        if (!target) return null;
+                        const isExpired = target.expiryDate ? new Date(target.expiryDate).getTime() < Date.now() : false;
+                        const isDispensed = !!target.dispensedAt;
+                        const isRecalled = !!target.isRecalled;
+                        return (
+                          <div className="p-3.5 bg-[#0B1220] border border-[#304257] rounded-xl space-y-2">
+                            <span className="text-[10px] text-[#94A3B8] uppercase font-bold block">
+                              Automated Clinical Safety Interlocks
+                            </span>
+                            <div className="grid grid-cols-3 gap-2 text-xs">
+                              <div className={`p-2 rounded-lg border ${isDispensed ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'}`}>
+                                <span className="text-[9px] uppercase block">Double-Dispense</span>
+                                <strong>{isDispensed ? 'BLOCKED' : 'CLEAR'}</strong>
+                              </div>
+                              <div className={`p-2 rounded-lg border ${isExpired ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'}`}>
+                                <span className="text-[9px] uppercase block">Expiration Check</span>
+                                <strong>{isExpired ? 'EXPIRED' : 'VALID'}</strong>
+                              </div>
+                              <div className={`p-2 rounded-lg border ${isRecalled ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'}`}>
+                                <span className="text-[9px] uppercase block">Recall & Hold</span>
+                                <strong>{isRecalled ? 'RECALLED' : 'CLEAR'}</strong>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                            Prescription Number (Rx ID)
+                          </label>
+                          <input
+                            type="text"
+                            value={rxPrescriptionNumber}
+                            onChange={(e) => setRxPrescriptionNumber(e.target.value)}
+                            placeholder="e.g. RX-2026-984421"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] font-mono"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                            Prescribing Physician (MD)
+                          </label>
+                          <input
+                            type="text"
+                            value={rxDoctorName}
+                            onChange={(e) => setRxDoctorName(e.target.value)}
+                            placeholder="e.g. Dr. Robert Chen, MD"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Patient Identifier / Anonymized Token Hash
+                        </label>
+                        <input
+                          type="text"
+                          value={rxPatientToken}
+                          onChange={(e) => setRxPatientToken(e.target.value)}
+                          placeholder="e.g. PT-HASH-8831"
+                          className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] font-mono"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Dispensing Notes & Patient Instructions
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={rxDispenseNotes}
+                          onChange={(e) => setRxDispenseNotes(e.target.value)}
+                          placeholder="e.g. Dispensed with standard patient counselling and GxP cold-pack container."
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                        />
+                      </div>
+
+                      <div className="pt-2">
+                        <button
+                          type="submit"
+                          disabled={rxDispenseLoading || !rxDispenseSerial}
+                          className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs w-full flex items-center justify-center gap-2"
+                        >
+                          <CheckCircle className="h-4 w-4" /> {rxDispenseLoading ? 'Dispensing...' : 'Verify & Complete Clinical Dispense'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#00D6B4] flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4 text-[#00D6B4]" /> Anti-Counterfeit Dispense Logic
+                      </h4>
+                      <p className="text-xs text-[#94A3B8] leading-relaxed">
+                        Under clinical dispensary protocols, serialized units can be dispensed exactly once. Any secondary attempt to dispense this serial number is blocked to prevent counterfeit duplicate packaging.
+                      </p>
+                      <div className="space-y-2 text-xs text-[#94A3B8]">
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>Validates active prescription from authorized physician</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>Irreversible ledger state transition to DISPENSED</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>Anonymized patient reference token protects clinical privacy</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-[#00D6B4]" /> Recent Clinical Dispense Log
+                      </h4>
+                      <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                        {drugs.filter((d) => d.dispensedAt).length === 0 ? (
+                          <p className="text-xs text-[#94A3B8] italic">No medications dispensed in current session.</p>
+                        ) : (
+                          drugs
+                            .filter((d) => d.dispensedAt)
+                            .map((d) => (
+                              <div
+                                key={d.id}
+                                className="p-3 bg-[#0B1220] border border-[#304257] rounded-xl text-xs space-y-1"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="font-mono text-[#00D6B4] font-bold">{d.serialNumber}</span>
+                                  <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-mono">
+                                    {d.prescriptionNumber}
+                                  </span>
+                                </div>
+                                <div className="text-[#94A3B8] text-[11px] flex items-center justify-between">
+                                  <span>Doctor: {d.prescribingDoctor}</span>
+                                  <span className="font-mono text-[10px] text-cyan-300">Pt: {d.patientToken}</span>
+                                </div>
+                                <div className="text-[10px] text-[#94A3B8] flex items-center justify-between">
+                                  <span>Dispensed by: {d.dispensedByPharmacist}</span>
+                                  <span>{new Date(d.dispensedAt!).toLocaleDateString()}</span>
+                                </div>
+                              </div>
+                            ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {pharmacySubTab === 'returns' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-7 card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-5">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                      <div>
+                        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                          <Trash2 className="h-5 w-5 text-rose-400" /> Reverse Logistics & Hazardous Destruction
+                        </h3>
+                        <p className="text-xs text-[#94A3B8]">
+                          Log certified pharmaceutical destruction or initiate distributor Return-to-Vendor (RTV).
+                        </p>
+                      </div>
+                      <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/30 text-[10px] font-mono">
+                        RETIREMENT
+                      </span>
+                    </div>
+
+                    <form onSubmit={handlePharmacyRetire} className="space-y-4">
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Target Medicine Serial
+                        </label>
+                        <select
+                          value={rxRetireSerial || (drugs[0]?.serialNumber ?? '')}
+                          onChange={(e) => setRxRetireSerial(e.target.value)}
+                          className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          required
+                        >
+                          <option value="">-- Choose Unit to Retire --</option>
+                          {drugs.map((d) => (
+                            <option key={d.id} value={d.serialNumber}>
+                              {d.serialNumber} - {d.name} ({d.batchNumber}) | Status: {d.status}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Retirement Action</label>
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setRxRetireAction('DESTROY')}
+                            className={`py-2 px-3 rounded-xl border text-xs font-bold transition ${
+                              rxRetireAction === 'DESTROY'
+                                ? 'bg-rose-500/20 border-rose-500 text-rose-300'
+                                : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                            }`}
+                          >
+                            Certified Incineration / Destruction
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setRxRetireAction('RETURN')}
+                            className={`py-2 px-3 rounded-xl border text-xs font-bold transition ${
+                              rxRetireAction === 'RETURN'
+                                ? 'bg-amber-500/20 border-amber-500 text-amber-300'
+                                : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                            }`}
+                          >
+                            Return to Distributor (RTV)
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Retirement Justification Reason
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={rxDestructionReason}
+                          onChange={(e) => setRxDestructionReason(e.target.value)}
+                          placeholder="e.g. Expired on dispensary shelf - beyond 30 days past shelf limit"
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          required
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                            Destruction / Return Certificate #
+                          </label>
+                          <input
+                            type="text"
+                            value={rxDestructionCert}
+                            onChange={(e) => setRxDestructionCert(e.target.value)}
+                            placeholder="e.g. CERT-INCIN-8891"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] font-mono"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                            Witness Pharmacist Name
+                          </label>
+                          <input
+                            type="text"
+                            value={rxDestructionWitness}
+                            onChange={(e) => setRxDestructionWitness(e.target.value)}
+                            placeholder="e.g. Dr. Sarah Lin, PharmD"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="pt-2">
+                        <button
+                          type="submit"
+                          disabled={rxRetireLoading || !rxRetireSerial}
+                          className="btn btn-sm bg-rose-600 hover:bg-rose-700 text-white border-none rounded-xl font-bold text-xs w-full flex items-center justify-center gap-2"
+                        >
+                          <Trash2 className="h-4 w-4" /> {rxRetireLoading ? 'Retiring...' : 'Execute Retirement & Anchor Certificate'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4 text-rose-400" /> Biohazard Destruction Compliance
+                      </h4>
+                      <p className="text-xs text-[#94A3B8] leading-relaxed">
+                        Expired or compromised pharmaceutical inventory must be destroyed via certified high-temperature incineration under DEA Title 21 and EPA regulations.
+                      </p>
+                      <div className="space-y-2 text-xs text-[#94A3B8]">
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-rose-400" />
+                          <span>Two-witness signoff required for controlled medications</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-rose-400" />
+                          <span>Destruction certificate hash permanently recorded on ledger</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-rose-400" />
+                          <span>Status set to DESTROYED removing unit from circulation</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-[#00D6B4]" /> Destruction & Returns Log
+                      </h4>
+                      <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                        {drugs.filter((d) => d.destructionCertificateId || d.returnReason).length === 0 ? (
+                          <p className="text-xs text-[#94A3B8] italic">No medications retired or returned yet.</p>
+                        ) : (
+                          drugs
+                            .filter((d) => d.destructionCertificateId || d.returnReason)
+                            .map((d) => (
+                              <div
+                                key={d.id}
+                                className="p-3 bg-[#0B1220] border border-[#304257] rounded-xl text-xs space-y-1"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="font-mono text-[#00D6B4] font-bold">{d.serialNumber}</span>
+                                  <span className="badge badge-xs bg-rose-500/20 text-rose-300 border-rose-500/30 font-bold">
+                                    {d.destructionCertificateId ? 'DESTROYED' : 'RETURNED'}
+                                  </span>
+                                </div>
+                                <div className="text-[11px] text-[#94A3B8] truncate">
+                                  Cert: {d.destructionCertificateId || 'RTV Return'}
+                                </div>
+                                <div className="text-[10px] text-[#94A3B8] italic">
+                                  Reason: {d.destructionReason || d.returnReason}
+                                </div>
+                              </div>
+                            ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {pharmacySubTab === 'recalls' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-7 card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-5">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                      <div>
+                        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                          <AlertOctagon className="h-5 w-5 text-amber-400" /> Patient Recall Contact Tracing Matrix
+                        </h3>
+                        <p className="text-xs text-[#94A3B8]">
+                          Instant lookup of patient prescription records for recalled batches to execute emergency safety outreach.
+                        </p>
+                      </div>
+                      <span className="badge bg-amber-500/20 text-amber-300 border-amber-500/30 text-[10px] font-mono">
+                        SAFETY TRACE
+                      </span>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Dispensed Prescriptions Under Watch ({drugs.filter((d) => !!d.dispensedAt).length} units dispensed)
+                        </label>
+                        <div className="overflow-x-auto">
+                          <table className="table table-sm w-full text-xs">
+                            <thead>
+                              <tr className="border-b border-[#304257] text-[#94A3B8]">
+                                <th>Serial #</th>
+                                <th>Rx #</th>
+                                <th>Batch #</th>
+                                <th>Patient Token</th>
+                                <th>Prescribing Doctor</th>
+                                <th>Recall State</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[#304257]">
+                              {drugs
+                                .filter((d) => !!d.dispensedAt)
+                                .map((d) => (
+                                  <tr key={d.id} className="hover:bg-[#243247]/50">
+                                    <td className="font-mono text-[#00D6B4] font-bold">{d.serialNumber}</td>
+                                    <td className="font-mono text-[#F1F5F9]">{d.prescriptionNumber}</td>
+                                    <td className="font-mono text-[#94A3B8]">{d.batchNumber}</td>
+                                    <td className="font-mono text-cyan-300">{d.patientToken}</td>
+                                    <td className="text-[#F1F5F9]">{d.prescribingDoctor}</td>
+                                    <td>
+                                      {d.isRecalled ? (
+                                        <span className="badge badge-xs bg-rose-500/20 text-rose-300 border-rose-500/30 font-bold">
+                                          RECALLED LOT
+                                        </span>
+                                      ) : (
+                                        <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-bold">
+                                          CLEAR
+                                        </span>
+                                      )}
+                                    </td>
+                                  </tr>
+                                ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-4">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-rose-400" /> Flag Suspected Counterfeit
+                      </h4>
+                      <p className="text-xs text-[#94A3B8]">
+                        Instantly isolate suspected illegitimate medicine units, notify regulatory watchdog, and lock ledger custody.
+                      </p>
+
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                            Target Medicine Serial
+                          </label>
+                          <select
+                            value={rxAlertSerial || (drugs[0]?.serialNumber ?? '')}
+                            onChange={(e) => setRxAlertSerial(e.target.value)}
+                            className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          >
+                            <option value="">-- Choose Consignment --</option>
+                            {drugs.map((d) => (
+                              <option key={d.id} value={d.serialNumber}>
+                                {d.serialNumber} - {d.name} ({d.batchNumber})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                            Security Anomaly Observed
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={rxAlertNotes}
+                            onChange={(e) => setRxAlertNotes(e.target.value)}
+                            placeholder="Describe physical flaw (e.g. 2D DataMatrix code unreadable, duplicate serial, damaged foil seal)"
+                            className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          />
+                        </div>
+
+                        <button
+                          type="button"
+                          disabled={rxAlertLoading || !rxAlertSerial}
+                          onClick={() => handleReportSuspectedCounterfeit(rxAlertSerial || drugs[0]?.serialNumber)}
+                          className="btn btn-sm bg-rose-600 hover:bg-rose-700 text-white border-none rounded-xl font-bold text-xs w-full flex items-center justify-center gap-2"
+                        >
+                          <AlertTriangle className="h-4 w-4" /> {rxAlertLoading ? 'Flagging...' : 'Flag Suspected Counterfeit & Quarantine'}
+                        </button>
                       </div>
                     </div>
                   </div>
