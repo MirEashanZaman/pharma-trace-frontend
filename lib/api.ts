@@ -125,6 +125,12 @@ export interface Drug {
   adeSeverity?: string;
   adeReactionDetails?: string;
   adeReportedAt?: string;
+  patientReportCount?: number;
+  lastPatientReportAt?: string;
+  patientLeafletSummary?: string;
+  patientDosageInstructions?: string;
+  patientStorageAdvice?: string;
+  patientSideEffects?: string;
   createdAt: string;
 }
 
@@ -904,6 +910,37 @@ export const regulatorUpdateInvestigationDocket = async (data: {
 
 export const fetchRegulatorAlcoaAnalysis = async (): Promise<AlcoaAnalysisResult> => {
   const res = await api.get('/drugs/regulatory/alcoa-analysis');
+  return res.data;
+};
+
+export interface PatientReportDto {
+  reportType: 'ADVERSE_REACTION' | 'SUSPECTED_COUNTERFEIT' | 'DAMAGED_PACKAGING';
+  description: string;
+  contactEmail?: string;
+  severity?: 'LIFE_THREATENING' | 'HOSPITALIZATION' | 'DISABILITY' | 'MILD';
+  physicalFlaw?: string;
+}
+
+export interface PatientReportResult {
+  confirmationId: string;
+  serialNumber: string;
+  drugName?: string;
+  batchNumber?: string;
+  reportType: string;
+  status: string;
+  receivedAt: string;
+  safetyAdvisory: string;
+  emergencyHotlines: {
+    poisonControl: string;
+    fdaMedWatch: string;
+  };
+}
+
+export const submitPatientReport = async (
+  serialNumber: string,
+  data: PatientReportDto,
+): Promise<PatientReportResult> => {
+  const res = await api.post(`/drugs/${serialNumber}/patient-report`, data);
   return res.data;
 };
 
