@@ -53,11 +53,27 @@ export interface AuthResponse {
 export interface Drug {
   id: number;
   serialNumber: string;
-  name: string;
+  name?: string;
+  drugName?: string;
   manufacturer: string;
   batchNumber: string;
-  manufactureDate: string;
-  expiryDate: string;
+  manufactureDate?: string;
+  expiryDate?: string;
+  dosageForm?: string;
+  strength?: string;
+  apiSupplier?: string;
+  apiCasNumber?: string;
+  rawMaterialLot?: string;
+  qcStatus?: string;
+  qcPurityPercentage?: number;
+  qcPhLevel?: number;
+  qcEndotoxinLimit?: string;
+  qcCertHash?: string;
+  qcSignedBy?: string;
+  qcSignedAt?: string;
+  carrierName?: string;
+  sealNumber?: string;
+  isRecalled?: boolean;
   createdAt: string;
 }
 
@@ -566,6 +582,55 @@ export const createInvitation = async (data: {
 
 export const revokeInvitation = async (id: number): Promise<{ revoked: boolean }> => {
   const res = await api.delete(`/auth/invitations/${id}`);
+  return res.data;
+};
+
+export const bulkCreateDrugs = async (data: {
+  name: string;
+  manufacturer: string;
+  batchNumber: string;
+  expiryDate?: string;
+  quantity: number;
+  dosageForm?: string;
+  strength?: string;
+  apiSupplier?: string;
+  apiCasNumber?: string;
+  rawMaterialLot?: string;
+}): Promise<Drug[]> => {
+  const res = await api.post('/drugs/bulk', data);
+  return res.data;
+};
+
+export const submitQcRelease = async (
+  serialNumber: string,
+  data: {
+    purityPercentage: number;
+    phLevel: number;
+    endotoxinLimit: string;
+    disposition: 'QC_PASSED' | 'FAILED_QC';
+    signedBy: string;
+  },
+): Promise<Drug> => {
+  const res = await api.post(`/drugs/${serialNumber}/qc-release`, data);
+  return res.data;
+};
+
+export const dispatchBatch = async (
+  serialNumber: string,
+  data: {
+    carrierName: string;
+    sealNumber?: string;
+  },
+): Promise<Drug> => {
+  const res = await api.post(`/drugs/${serialNumber}/dispatch`, data);
+  return res.data;
+};
+
+export const quarantineBatch = async (
+  batchNumber: string,
+  reason?: string,
+): Promise<{ batchNumber: string; quarantinedCount: number; reason: string }> => {
+  const res = await api.post(`/drugs/batch/${batchNumber}/quarantine`, { reason });
   return res.data;
 };
 
