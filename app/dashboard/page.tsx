@@ -40,6 +40,13 @@ import {
   pharmacyRetireDrug,
   fetchPharmacyInventorySummary,
   PharmacyInventorySummary,
+  regulatorIssueFacilityInspection,
+  regulatorEnforceRecall,
+  regulatorSubmitAdeReport,
+  regulatorUpdateInvestigationDocket,
+  fetchRegulatorAlcoaAnalysis,
+  AlcoaAnalysisResult,
+  RecallReconciliationResult,
   FleetVehicle,
   SystemAuditLog,
   SystemHealth,
@@ -134,7 +141,7 @@ export default function DashboardPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [wallet, setWallet] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'simulation' | 'transit-map' | 'provenance' | 'attestations' | 'github' | 'users' | 'logistics' | 'pharmacy'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'simulation' | 'transit-map' | 'provenance' | 'attestations' | 'github' | 'users' | 'logistics' | 'pharmacy' | 'regulator'>('overview');
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   const [userSearchTerm, setUserSearchTerm] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('ALL');
@@ -266,6 +273,43 @@ export default function DashboardPage() {
   const [rxAlertLoading, setRxAlertLoading] = useState(false);
 
   const [pharmacyFeedback, setPharmacyFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const [regulatorSubTab, setRegulatorSubTab] = useState<'inspection' | 'recalls' | 'pharmacovigilance' | 'alcoa' | 'investigations'>('inspection');
+  const [alcoaData, setAlcoaData] = useState<AlcoaAnalysisResult | null>(null);
+  const [alcoaLoading, setAlcoaLoading] = useState(false);
+
+  const [inspFacility, setInspFacility] = useState('PharmaCare Active Manufacturing Facility #01');
+  const [inspCitation, setInspCitation] = useState('21 CFR 211.160 - Laboratory Controls & Out-of-Specification Records');
+  const [inspDisposition, setInspDisposition] = useState<'NAI' | 'VAI' | 'OAI'>('OAI');
+  const [inspObservationRef, setInspObservationRef] = useState('FORM-483-2026-041');
+  const [inspInspectorBadge, setInspInspectorBadge] = useState('FDA-BADGE-8841');
+  const [inspNotes, setInspNotes] = useState('Stability testing data deviations noted during unannounced cGMP inspection.');
+  const [inspTargetBatch, setInspTargetBatch] = useState('');
+  const [inspLoading, setInspLoading] = useState(false);
+
+  const [fedRecallTarget, setFedRecallTarget] = useState('');
+  const [fedRecallIsBatch, setFedRecallIsBatch] = useState(true);
+  const [fedRecallClass, setFedRecallClass] = useState<'CLASS_I' | 'CLASS_II' | 'CLASS_III'>('CLASS_I');
+  const [fedRecallDirectiveRef, setFedRecallDirectiveRef] = useState('FDA-DIR-2026-09');
+  const [fedRecallAuthority, setFedRecallAuthority] = useState('US FDA CDER Office of Compliance');
+  const [fedRecallReason, setFedRecallReason] = useState('Class I Emergency Directive: Microbial contamination hazard identified');
+  const [fedRecallResult, setFedRecallResult] = useState<RecallReconciliationResult | null>(null);
+  const [fedRecallLoading, setFedRecallLoading] = useState(false);
+
+  const [adeSerial, setAdeSerial] = useState('');
+  const [adeSeverity, setAdeSeverity] = useState<'LIFE_THREATENING' | 'HOSPITALIZATION' | 'DISABILITY' | 'MILD'>('LIFE_THREATENING');
+  const [adeReaction, setAdeReaction] = useState('Anaphylaxis reaction post-injection requiring epinephrine resuscitation');
+  const [adeReporterRole, setAdeReporterRole] = useState('Attending Clinical Immunologist');
+  const [adeLoading, setAdeLoading] = useState(false);
+
+  const [invSerial, setInvSerial] = useState('');
+  const [invDocket, setInvDocket] = useState('FDA-OC-CASE-2026-441');
+  const [invDisposition, setInvDisposition] = useState<'SEIZED_CONFIRMED_COUNTERFEIT' | 'CLEARED_LEGITIMATE' | 'UNDER_INVESTIGATION'>('SEIZED_CONFIRMED_COUNTERFEIT');
+  const [invAssayFindings, setInvAssayFindings] = useState('Raman spectroscopy analysis confirms excipient starch with absent active pharmaceutical ingredient (API)');
+  const [invForensicNotes, setInvForensicNotes] = useState('Packaging foil font discrepancy verified matching known transshipment counterfeit pattern');
+  const [invLoading, setInvLoading] = useState(false);
+
+  const [regulatorFeedback, setRegulatorFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [selectedEventType, setSelectedEventType] = useState('MANUFACTURED');
   const [temperature, setTemperature] = useState('22.5');
   const [humidity, setHumidity] = useState('45');
@@ -690,6 +734,12 @@ export default function DashboardPage() {
   useEffect(() => {
     if (activeTab === 'pharmacy') {
       loadPharmacySummary();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 'regulator') {
+      loadAlcoaAnalysis();
     }
   }, [activeTab]);
 
@@ -1305,6 +1355,175 @@ export default function DashboardPage() {
     }
   };
 
+  const loadAlcoaAnalysis = async () => {
+    setAlcoaLoading(true);
+    try {
+      const data = await fetchRegulatorAlcoaAnalysis();
+      setAlcoaData(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setAlcoaLoading(false);
+    }
+  };
+
+  const handleIssueFacilityInspection = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInspLoading(true);
+    setRegulatorFeedback(null);
+    try {
+      const res = await regulatorIssueFacilityInspection({
+        facility: inspFacility,
+        citation: inspCitation,
+        disposition: inspDisposition,
+        observationRef: inspObservationRef,
+        inspectorBadge: inspInspectorBadge,
+        notes: inspNotes,
+        batchNumber: inspTargetBatch || undefined,
+      });
+      setRegulatorFeedback({
+        type: 'success',
+        message: `Regulatory Inspection Observation ${res.observationRef} anchored. Facility: ${res.facility}. Disposition: ${res.disposition}. Affected units: ${res.affectedUnits}.`,
+      });
+      await loadDrugs();
+    } catch (err: any) {
+      setRegulatorFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to anchor inspection observation.',
+      });
+    } finally {
+      setInspLoading(false);
+    }
+  };
+
+  const handleEnforceFederalRecall = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fedRecallTarget) return;
+    setFedRecallLoading(true);
+    setRegulatorFeedback(null);
+    try {
+      const res = await regulatorEnforceRecall({
+        target: fedRecallTarget,
+        isBatch: fedRecallIsBatch,
+        recallClass: fedRecallClass,
+        directiveRef: fedRecallDirectiveRef,
+        authority: fedRecallAuthority,
+        reason: fedRecallReason,
+      });
+      setFedRecallResult(res);
+      setRegulatorFeedback({
+        type: 'success',
+        message: `Federal Recall ${res.recallClass} Directive #${res.directiveRef} enforced across supply chain. Containment: ${res.containmentPercentage}% (${res.containedCount}/${res.totalLotUnits} units).`,
+      });
+      await loadDrugs();
+    } catch (err: any) {
+      setRegulatorFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to enforce recall directive.',
+      });
+    } finally {
+      setFedRecallLoading(false);
+    }
+  };
+
+  const handleSubmitMedWatchAde = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adeSerial) return;
+    setAdeLoading(true);
+    setRegulatorFeedback(null);
+    try {
+      const res = await regulatorSubmitAdeReport({
+        serialNumber: adeSerial,
+        severity: adeSeverity,
+        reactionDetails: adeReaction,
+        reporterRole: adeReporterRole,
+      });
+      setRegulatorFeedback({
+        type: 'success',
+        message: `MedWatch Adverse Drug Event Report #${res.reportId} anchored for ${res.serialNumber} (Severity: ${res.severity}). Pharmacovigilance safety watch active.`,
+      });
+      await loadDrugs();
+    } catch (err: any) {
+      setRegulatorFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to submit MedWatch ADE report.',
+      });
+    } finally {
+      setAdeLoading(false);
+    }
+  };
+
+  const handleUpdateInvestigationDocket = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!invSerial) return;
+    setInvLoading(true);
+    setRegulatorFeedback(null);
+    try {
+      const updated = await regulatorUpdateInvestigationDocket({
+        serialNumber: invSerial,
+        docketNumber: invDocket,
+        disposition: invDisposition,
+        assayFindings: invAssayFindings,
+        forensicNotes: invForensicNotes,
+      });
+      setRegulatorFeedback({
+        type: 'success',
+        message: `Regulatory Case Docket #${updated.regulatoryInvestigationDocket} updated for ${updated.serialNumber}. Disposition: ${updated.regulatoryInvestigationStatus}.`,
+      });
+      await loadDrugs();
+    } catch (err: any) {
+      setRegulatorFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to update investigation docket.',
+      });
+    } finally {
+      setInvLoading(false);
+    }
+  };
+
+  const handleExportAlcoaPdf = () => {
+    if (!alcoaData) return;
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    doc.setFillColor(11, 18, 32);
+    doc.rect(0, 0, pageWidth, 28, 'F');
+    doc.setTextColor(0, 214, 180);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('FDA / EMA 21 CFR Part 11 ALCOA+ Audit Certificate', 14, 18);
+    doc.setFontSize(9);
+    doc.setTextColor(148, 163, 184);
+    doc.text(`Generated: ${new Date(alcoaData.evaluatedAt).toLocaleString()} | Status: ${alcoaData.status}`, 14, 38);
+    doc.setFontSize(11);
+    doc.setTextColor(15, 23, 42);
+    doc.text(`Composite Data Integrity Score: ${alcoaData.compositeScore}%`, 14, 48);
+    doc.text(`Total Ledger Records Audited: ${alcoaData.totalAuditEventsEvaluated} events across ${alcoaData.totalDrugsEvaluated} batches`, 14, 56);
+    doc.text('Digital Verification Anchor Hash:', 14, 64);
+    doc.setFontSize(8);
+    doc.setFont('courier', 'normal');
+    doc.text(alcoaData.certificationHash, 14, 70);
+    let y = 84;
+    const principles = [
+      { name: 'Attributable', data: alcoaData.principles.attributable },
+      { name: 'Legible', data: alcoaData.principles.legible },
+      { name: 'Contemporaneous', data: alcoaData.principles.contemporaneous },
+      { name: 'Original', data: alcoaData.principles.original },
+      { name: 'Accurate', data: alcoaData.principles.accurate },
+    ];
+    principles.forEach((p) => {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text(`${p.name} Integrity: ${p.data.score}%`, 14, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text(p.data.description, 14, y + 6);
+      y += 18;
+    });
+    doc.save('ALCOA_Plus_Compliance_Certificate.pdf');
+  };
+
   const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedSerial) return;
@@ -1510,6 +1729,21 @@ export default function DashboardPage() {
                 }`}
               >
                 <Store className="h-4 w-4" /> Pharmacy Dispensary & Rx
+              </button>
+            )}
+            {(currentRole === 'ADMIN' || currentRole === 'REGULATOR') && (
+              <button
+                onClick={() => {
+                  setActiveTab('regulator');
+                  loadAlcoaAnalysis();
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                  activeTab === 'regulator'
+                    ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                    : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+                }`}
+              >
+                <Award className="h-4 w-4" /> Regulatory & GxP Compliance
               </button>
             )}
             {(currentRole === 'ADMIN' || currentRole === 'REGULATOR') && (
@@ -6145,6 +6379,1235 @@ export default function DashboardPage() {
                           <AlertTriangle className="h-4 w-4" /> {rxAlertLoading ? 'Flagging...' : 'Flag Suspected Counterfeit & Quarantine'}
                         </button>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'regulator' && (
+            <div className="space-y-6">
+              <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border-[#00D6B4]/30 text-xs font-bold uppercase tracking-wider">
+                      US FDA & EMA Oversight
+                    </span>
+                    <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono">
+                      21 CFR Part 11 & DSCSA 582
+                    </span>
+                  </div>
+                  <h2 className="text-2xl font-black text-[#F1F5F9] mt-2 tracking-tight">
+                    Regulatory Authority & GxP Compliance Command
+                  </h2>
+                  <p className="text-xs text-[#94A3B8] mt-1">
+                    Federal oversight console for cGMP Form 483 facility audits, multi-tier federal recall matrices, MedWatch adverse drug event triage, 21 CFR Part 11 ALCOA+ data integrity certification, and DSCSA Section 582 counterfeit criminal dockets.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      loadDrugs();
+                      loadAlcoaAnalysis();
+                    }}
+                    className="btn btn-sm bg-[#0B1220] hover:bg-[#243247] text-[#00D6B4] border border-[#304257] rounded-xl text-xs flex items-center gap-2"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${alcoaLoading ? 'animate-spin' : ''}`} /> Refresh Regulatory Ledger
+                  </button>
+                </div>
+              </div>
+
+              {regulatorFeedback && (
+                <div
+                  className={`p-4 rounded-xl text-xs font-medium border flex items-center justify-between ${
+                    regulatorFeedback.type === 'success'
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                      : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {regulatorFeedback.type === 'success' ? (
+                      <CheckCircle className="h-4 w-4 shrink-0 text-emerald-400" />
+                    ) : (
+                      <AlertOctagon className="h-4 w-4 shrink-0 text-rose-400" />
+                    )}
+                    <span>{regulatorFeedback.message}</span>
+                  </div>
+                  <button
+                    onClick={() => setRegulatorFeedback(null)}
+                    className="text-xs opacity-70 hover:opacity-100"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2 border-b border-[#304257] pb-3">
+                <button
+                  type="button"
+                  onClick={() => setRegulatorSubTab('inspection')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                    regulatorSubTab === 'inspection'
+                      ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm'
+                      : 'bg-[#172638] text-[#94A3B8] hover:bg-[#243247] hover:text-[#F1F5F9]'
+                  }`}
+                >
+                  <Building className="h-3.5 w-3.5" /> Facility Inspection & Form 483
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRegulatorSubTab('recalls')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                    regulatorSubTab === 'recalls'
+                      ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm'
+                      : 'bg-[#172638] text-[#94A3B8] hover:bg-[#243247] hover:text-[#F1F5F9]'
+                  }`}
+                >
+                  <AlertOctagon className="h-3.5 w-3.5" /> Federal Recall & Containment
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRegulatorSubTab('pharmacovigilance')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                    regulatorSubTab === 'pharmacovigilance'
+                      ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm'
+                      : 'bg-[#172638] text-[#94A3B8] hover:bg-[#243247] hover:text-[#F1F5F9]'
+                  }`}
+                >
+                  <ShieldAlert className="h-3.5 w-3.5" /> MedWatch Pharmacovigilance
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRegulatorSubTab('alcoa');
+                    loadAlcoaAnalysis();
+                  }}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                    regulatorSubTab === 'alcoa'
+                      ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm'
+                      : 'bg-[#172638] text-[#94A3B8] hover:bg-[#243247] hover:text-[#F1F5F9]'
+                  }`}
+                >
+                  <FileCheck2 className="h-3.5 w-3.5" /> ALCOA+ Data Integrity Analyzer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRegulatorSubTab('investigations')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                    regulatorSubTab === 'investigations'
+                      ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm'
+                      : 'bg-[#172638] text-[#94A3B8] hover:bg-[#243247] hover:text-[#F1F5F9]'
+                  }`}
+                >
+                  <FlaskConical className="h-3.5 w-3.5" /> Section 582 Counterfeit Dockets
+                </button>
+              </div>
+
+              {regulatorSubTab === 'inspection' && (
+                <div className="space-y-6">
+                  <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl space-y-5">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                      <div>
+                        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                          <Building className="h-5 w-5 text-[#00D6B4]" /> Form 483 / Warning Inspection Terminal
+                        </h3>
+                        <p className="text-xs text-[#94A3B8] mt-0.5">
+                          Conduct unannounced or routine cGMP audits. Issue statutory observations under 21 CFR citations and mandate corrective actions.
+                        </p>
+                      </div>
+                      <span className="badge bg-[#243247] text-[#00D6B4] border-[#304257] text-xs font-mono font-bold">
+                        Form FDA-483
+                      </span>
+                    </div>
+
+                    <form onSubmit={handleIssueFacilityInspection} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Audited Facility Name / Site</label>
+                          <input
+                            type="text"
+                            value={inspFacility}
+                            onChange={(e) => setInspFacility(e.target.value)}
+                            placeholder="e.g. PharmaCare Active Manufacturing Facility #01"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Target Production Batch (Optional)</label>
+                          <select
+                            value={inspTargetBatch}
+                            onChange={(e) => setInspTargetBatch(e.target.value)}
+                            className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          >
+                            <option value="">All Facility Batches</option>
+                            {Array.from(new Set(drugs.map((d) => d.batchNumber))).filter(Boolean).map((bn) => (
+                              <option key={bn} value={bn}>
+                                Batch: {bn}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Statutory Citation / Regulation</label>
+                        <input
+                          type="text"
+                          value={inspCitation}
+                          onChange={(e) => setInspCitation(e.target.value)}
+                          placeholder="e.g. 21 CFR 211.160 - Laboratory Controls"
+                          className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] mb-2"
+                          required
+                        />
+                        <div className="flex flex-wrap gap-1.5">
+                          {[
+                            '21 CFR 211.160 - Laboratory Controls & Out-of-Specification Records',
+                            '21 CFR 211.68 - Automatic, Mechanical, and Electronic Equipment',
+                            '21 CFR 205.50 - Minimum Requirements for Storage and Handling of Prescription Drugs',
+                            '21 CFR 211.42 - Cleanrooms & Environmental Air Quality Controls',
+                          ].map((preset) => (
+                            <button
+                              key={preset}
+                              type="button"
+                              onClick={() => setInspCitation(preset)}
+                              className="btn btn-xs bg-[#0B1220] hover:bg-[#243247] text-[#94A3B8] hover:text-[#00D6B4] border border-[#304257] rounded-lg text-[10px]"
+                            >
+                              {preset}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Inspection Disposition</label>
+                          <div className="grid grid-cols-3 gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setInspDisposition('NAI')}
+                              className={`py-2 px-2 text-center rounded-xl border text-xs font-bold transition ${
+                                inspDisposition === 'NAI'
+                                  ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300'
+                                  : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                              }`}
+                            >
+                              NAI (Clear)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setInspDisposition('VAI')}
+                              className={`py-2 px-2 text-center rounded-xl border text-xs font-bold transition ${
+                                inspDisposition === 'VAI'
+                                  ? 'bg-amber-500/20 border-amber-500 text-amber-300'
+                                  : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                              }`}
+                            >
+                              VAI (Advisory)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setInspDisposition('OAI')}
+                              className={`py-2 px-2 text-center rounded-xl border text-xs font-bold transition ${
+                                inspDisposition === 'OAI'
+                                  ? 'bg-rose-500/20 border-rose-500 text-rose-300'
+                                  : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                              }`}
+                            >
+                              OAI (Quarantine)
+                            </button>
+                          </div>
+                          <span className="text-[10px] text-[#94A3B8] block mt-1">
+                            OAI triggers automatic immediate mandatory quarantine across supply chain.
+                          </span>
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Observation Reference #</label>
+                          <input
+                            type="text"
+                            value={inspObservationRef}
+                            onChange={(e) => setInspObservationRef(e.target.value)}
+                            placeholder="e.g. FORM-483-2026-041"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Lead Inspector Badge ID</label>
+                          <input
+                            type="text"
+                            value={inspInspectorBadge}
+                            onChange={(e) => setInspInspectorBadge(e.target.value)}
+                            placeholder="e.g. FDA-BADGE-8841"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Observation Details & CAPA Corrective Action Requirement</label>
+                        <textarea
+                          rows={3}
+                          value={inspNotes}
+                          onChange={(e) => setInspNotes(e.target.value)}
+                          placeholder="Describe specific cGMP deviations observed, batch impact, and required Corrective and Preventive Actions (CAPA)..."
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          required
+                        />
+                      </div>
+
+                      <div className="flex justify-end pt-2">
+                        <button
+                          type="submit"
+                          disabled={inspLoading}
+                          className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs px-6 shadow-md flex items-center gap-2"
+                        >
+                          <FileCheck2 className="h-4 w-4" />
+                          {inspLoading ? 'Anchoring Form 483 Finding...' : 'Anchor Form 483 Inspection Observation'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                        <FileCheck2 className="h-5 w-5 text-[#00D6B4]" /> Facility Audit & Observation Registry
+                      </h3>
+                      <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono">
+                        {drugs.filter((d) => d.inspectionObservationRef).length} Audited Units
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="table table-sm w-full text-left">
+                        <thead>
+                          <tr className="border-b border-[#304257] text-[#94A3B8] text-xs">
+                            <th>Facility</th>
+                            <th>Observation Ref</th>
+                            <th>Citation</th>
+                            <th>Disposition</th>
+                            <th>Inspector Badge</th>
+                            <th>Serial / Batch</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#304257]/50 text-xs">
+                          {drugs.filter((d) => d.inspectionObservationRef).length === 0 ? (
+                            <tr>
+                              <td colSpan={7} className="text-center py-6 text-[#94A3B8]">
+                                No formal Form 483 observations recorded yet. Use the terminal above to anchor an inspection.
+                              </td>
+                            </tr>
+                          ) : (
+                            drugs
+                              .filter((d) => d.inspectionObservationRef)
+                              .map((d) => (
+                                <tr key={d.id} className="hover:bg-[#0B1220]/50 transition">
+                                  <td className="font-semibold text-[#F1F5F9]">{d.inspectedFacility || 'PharmaCare Facility #01'}</td>
+                                  <td className="font-mono text-[#00D6B4]">{d.inspectionObservationRef}</td>
+                                  <td className="text-[#94A3B8] max-w-xs truncate">{d.inspectionCitation}</td>
+                                  <td>
+                                    <span
+                                      className={`badge text-[10px] font-bold ${
+                                        d.inspectionDisposition === 'OAI'
+                                          ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                                          : d.inspectionDisposition === 'VAI'
+                                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                                          : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                                      }`}
+                                    >
+                                      {d.inspectionDisposition}
+                                    </span>
+                                  </td>
+                                  <td className="font-mono text-[#94A3B8]">{d.inspectedInspectorBadge}</td>
+                                  <td className="font-mono text-[#F1F5F9]">{d.serialNumber} ({d.batchNumber})</td>
+                                  <td>
+                                    <span
+                                      className={`badge text-[10px] font-bold ${
+                                        d.status === 'QUARANTINED'
+                                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                                          : d.status === 'RECALLED'
+                                          ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                                          : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                                      }`}
+                                    >
+                                      {d.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {regulatorSubTab === 'recalls' && (
+                <div className="space-y-6">
+                  {fedRecallResult && (
+                    <div className="card bg-[#172638] border border-[#00D6B4]/40 p-6 rounded-2xl space-y-4">
+                      <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                        <div className="flex items-center gap-2">
+                          <AlertOctagon className="h-5 w-5 text-rose-400" />
+                          <h3 className="text-base font-bold text-[#F1F5F9]">
+                            Live Federal Recall Containment Gauge: {fedRecallResult.directiveRef}
+                          </h3>
+                        </div>
+                        <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/30 text-xs font-bold uppercase">
+                          {fedRecallResult.recallClass}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                        <div className="bg-[#0B1220] p-4 rounded-xl border border-[#304257]">
+                          <span className="text-xs text-[#94A3B8] block">Containment Rate</span>
+                          <span className="text-2xl font-black text-[#00D6B4] mt-1 block">
+                            {fedRecallResult.containmentPercentage}%
+                          </span>
+                          <div className="w-full bg-[#243247] h-2 rounded-full mt-2 overflow-hidden">
+                            <div
+                              className="bg-[#00D6B4] h-full rounded-full transition-all duration-500"
+                              style={{ width: `${fedRecallResult.containmentPercentage}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="bg-[#0B1220] p-4 rounded-xl border border-[#304257]">
+                          <span className="text-xs text-[#94A3B8] block">Total Lot Units</span>
+                          <span className="text-2xl font-black text-[#F1F5F9] mt-1 block">
+                            {fedRecallResult.totalLotUnits}
+                          </span>
+                          <span className="text-[10px] text-[#94A3B8]">Target: {fedRecallResult.target}</span>
+                        </div>
+
+                        <div className="bg-[#0B1220] p-4 rounded-xl border border-[#304257]">
+                          <span className="text-xs text-[#94A3B8] block">Secured in Quarantine</span>
+                          <span className="text-2xl font-black text-emerald-400 mt-1 block">
+                            {fedRecallResult.containedCount}
+                          </span>
+                          <span className="text-[10px] text-emerald-400">Locked from dispensing</span>
+                        </div>
+
+                        <div className="bg-[#0B1220] p-4 rounded-xl border border-[#304257]">
+                          <span className="text-xs text-[#94A3B8] block">Enforcement Authority</span>
+                          <span className="text-sm font-bold text-[#F1F5F9] mt-2 block truncate">
+                            {fedRecallResult.authority}
+                          </span>
+                          <span className="text-[10px] text-[#00D6B4]">Directive Active</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl space-y-5">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                      <div>
+                        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                          <AlertOctagon className="h-5 w-5 text-rose-400" /> Federal Recall Enforcement Terminal
+                        </h3>
+                        <p className="text-xs text-[#94A3B8] mt-0.5">
+                          Enforce binding federal recall directives across manufacturers, distributors, and pharmacy dispensaries.
+                        </p>
+                      </div>
+                      <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/30 text-xs font-mono font-bold">
+                        Circuit Breaker
+                      </span>
+                    </div>
+
+                    <form onSubmit={handleEnforceFederalRecall} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Target Scope</label>
+                          <div className="grid grid-cols-2 gap-3 mb-2">
+                            <button
+                              type="button"
+                              onClick={() => setFedRecallIsBatch(true)}
+                              className={`py-2 px-3 rounded-xl border text-xs font-bold transition ${
+                                fedRecallIsBatch
+                                  ? 'bg-[#00D6B4]/20 border-[#00D6B4] text-[#00D6B4]'
+                                  : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                              }`}
+                            >
+                              Entire Production Batch
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setFedRecallIsBatch(false)}
+                              className={`py-2 px-3 rounded-xl border text-xs font-bold transition ${
+                                !fedRecallIsBatch
+                                  ? 'bg-[#00D6B4]/20 border-[#00D6B4] text-[#00D6B4]'
+                                  : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                              }`}
+                            >
+                              Individual Serialized Unit
+                            </button>
+                          </div>
+
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                            {fedRecallIsBatch ? 'Select Target Batch Number' : 'Select Target Serial Number'}
+                          </label>
+                          <select
+                            value={fedRecallTarget}
+                            onChange={(e) => setFedRecallTarget(e.target.value)}
+                            className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          >
+                            <option value="">Choose target...</option>
+                            {fedRecallIsBatch
+                              ? Array.from(new Set(drugs.map((d) => d.batchNumber))).filter(Boolean).map((bn) => (
+                                  <option key={bn} value={bn}>
+                                    Batch {bn}
+                                  </option>
+                                ))
+                              : drugs.map((d) => (
+                                  <option key={d.id} value={d.serialNumber}>
+                                    {d.serialNumber} - {d.name} ({d.batchNumber})
+                                  </option>
+                                ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Federal Recall Classification</label>
+                          <div className="space-y-2">
+                            <label
+                              onClick={() => setFedRecallClass('CLASS_I')}
+                              className={`flex items-start gap-2 p-2.5 rounded-xl border cursor-pointer transition ${
+                                fedRecallClass === 'CLASS_I'
+                                  ? 'bg-rose-500/20 border-rose-500 text-rose-200'
+                                  : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="recallClass"
+                                checked={fedRecallClass === 'CLASS_I'}
+                                onChange={() => setFedRecallClass('CLASS_I')}
+                                className="radio radio-xs radio-error mt-0.5"
+                              />
+                              <div>
+                                <span className="font-bold text-xs block text-rose-400">Class I - Dangerous / Defective</span>
+                                <span className="text-[10px] leading-tight block">High probability of serious adverse health consequences or death. Irreversible supply halt.</span>
+                              </div>
+                            </label>
+
+                            <label
+                              onClick={() => setFedRecallClass('CLASS_II')}
+                              className={`flex items-start gap-2 p-2.5 rounded-xl border cursor-pointer transition ${
+                                fedRecallClass === 'CLASS_II'
+                                  ? 'bg-amber-500/20 border-amber-500 text-amber-200'
+                                  : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="recallClass"
+                                checked={fedRecallClass === 'CLASS_II'}
+                                onChange={() => setFedRecallClass('CLASS_II')}
+                                className="radio radio-xs radio-warning mt-0.5"
+                              />
+                              <div>
+                                <span className="font-bold text-xs block text-amber-400">Class II - Temporary / Reversible</span>
+                                <span className="text-[10px] leading-tight block">Exposure may cause temporary or medically reversible adverse consequences.</span>
+                              </div>
+                            </label>
+
+                            <label
+                              onClick={() => setFedRecallClass('CLASS_III')}
+                              className={`flex items-start gap-2 p-2.5 rounded-xl border cursor-pointer transition ${
+                                fedRecallClass === 'CLASS_III'
+                                  ? 'bg-blue-500/20 border-blue-500 text-blue-200'
+                                  : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="recallClass"
+                                checked={fedRecallClass === 'CLASS_III'}
+                                onChange={() => setFedRecallClass('CLASS_III')}
+                                className="radio radio-xs radio-info mt-0.5"
+                              />
+                              <div>
+                                <span className="font-bold text-xs block text-blue-400">Class III - Minor Technical Defect</span>
+                                <span className="text-[10px] leading-tight block">Not likely to cause adverse health reaction; minor labeling or packaging defect.</span>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Official Directive Reference #</label>
+                          <input
+                            type="text"
+                            value={fedRecallDirectiveRef}
+                            onChange={(e) => setFedRecallDirectiveRef(e.target.value)}
+                            placeholder="e.g. FDA-DIR-2026-09"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Enforcing Regulatory Authority</label>
+                          <input
+                            type="text"
+                            value={fedRecallAuthority}
+                            onChange={(e) => setFedRecallAuthority(e.target.value)}
+                            placeholder="e.g. US FDA CDER Office of Compliance"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Epidemiological Justification & Cause</label>
+                        <textarea
+                          rows={3}
+                          value={fedRecallReason}
+                          onChange={(e) => setFedRecallReason(e.target.value)}
+                          placeholder="State root cause findings (e.g. Microbiological contamination, subpotent active ingredient, particulate matter)..."
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          required
+                        />
+                      </div>
+
+                      <div className="flex justify-end pt-2">
+                        <button
+                          type="submit"
+                          disabled={fedRecallLoading || !fedRecallTarget}
+                          className="btn btn-sm bg-rose-600 hover:bg-rose-700 text-white border-none rounded-xl font-bold text-xs px-6 shadow-md flex items-center gap-2"
+                        >
+                          <AlertOctagon className="h-4 w-4" />
+                          {fedRecallLoading ? 'Anchoring Federal Recall...' : 'Enforce Federal Recall Directive'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                        <AlertOctagon className="h-5 w-5 text-rose-400" /> Active Supply Chain Recall Directives
+                      </h3>
+                      <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/30 text-xs font-mono">
+                        {drugs.filter((d) => d.isRecalled || d.recallDirectiveRef).length} Active Recalls
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="table table-sm w-full text-left">
+                        <thead>
+                          <tr className="border-b border-[#304257] text-[#94A3B8] text-xs">
+                            <th>Directive #</th>
+                            <th>Class</th>
+                            <th>Authority</th>
+                            <th>Drug Name & Serial</th>
+                            <th>Batch</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#304257]/50 text-xs">
+                          {drugs.filter((d) => d.isRecalled || d.recallDirectiveRef).length === 0 ? (
+                            <tr>
+                              <td colSpan={7} className="text-center py-6 text-[#94A3B8]">
+                                Zero active recall directives on record. All inventory units are circulating normally.
+                              </td>
+                            </tr>
+                          ) : (
+                            drugs
+                              .filter((d) => d.isRecalled || d.recallDirectiveRef)
+                              .map((d) => (
+                                <tr key={d.id} className="hover:bg-[#0B1220]/50 transition">
+                                  <td className="font-mono text-[#00D6B4] font-bold">{d.recallDirectiveRef || 'DIRECTIVE-N/A'}</td>
+                                  <td>
+                                    <span
+                                      className={`badge text-[10px] font-bold ${
+                                        d.recallClass === 'CLASS_I'
+                                          ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                                          : d.recallClass === 'CLASS_II'
+                                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                                          : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                                      }`}
+                                    >
+                                      {d.recallClass || 'CLASS_I'}
+                                    </span>
+                                  </td>
+                                  <td className="text-[#94A3B8]">{d.recallAuthority || 'Federal Agency'}</td>
+                                  <td className="font-semibold text-[#F1F5F9]">{d.name} ({d.serialNumber})</td>
+                                  <td className="font-mono text-[#94A3B8]">{d.batchNumber}</td>
+                                  <td className="text-[#94A3B8] max-w-xs truncate">{d.recallReason || 'Emergency Safety Directive'}</td>
+                                  <td>
+                                    <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/30 text-[10px] font-bold">
+                                      {d.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {regulatorSubTab === 'pharmacovigilance' && (
+                <div className="space-y-6">
+                  <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl space-y-5">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                      <div>
+                        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                          <ShieldAlert className="h-5 w-5 text-amber-400" /> FDA MedWatch (Form 3500A) ADE Triage
+                        </h3>
+                        <p className="text-xs text-[#94A3B8] mt-0.5">
+                          Triage and register Adverse Drug Event (ADE) reports. Life-threatening events trigger automatic emergency quarantine across the supply chain.
+                        </p>
+                      </div>
+                      <span className="badge bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs font-mono font-bold">
+                        Form FDA-3500A
+                      </span>
+                    </div>
+
+                    <form onSubmit={handleSubmitMedWatchAde} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Target Medicine Serial</label>
+                          <select
+                            value={adeSerial}
+                            onChange={(e) => setAdeSerial(e.target.value)}
+                            className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          >
+                            <option value="">Select medicine serial...</option>
+                            {drugs.map((d) => (
+                              <option key={d.id} value={d.serialNumber}>
+                                {d.serialNumber} - {d.name} ({d.batchNumber})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Clinician / Reporter Role</label>
+                          <input
+                            type="text"
+                            value={adeReporterRole}
+                            onChange={(e) => setAdeReporterRole(e.target.value)}
+                            placeholder="e.g. Attending Clinical Immunologist"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Clinical Severity Classification</label>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setAdeSeverity('LIFE_THREATENING')}
+                            className={`p-3 rounded-xl border text-left transition ${
+                              adeSeverity === 'LIFE_THREATENING'
+                                ? 'bg-rose-500/20 border-rose-500 text-rose-200'
+                                : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                            }`}
+                          >
+                            <span className="font-bold text-xs block text-rose-400">Life-Threatening</span>
+                            <span className="text-[10px] block opacity-80 mt-0.5">Immediate anaphylaxis or organ failure. Mandatory hold.</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setAdeSeverity('HOSPITALIZATION')}
+                            className={`p-3 rounded-xl border text-left transition ${
+                              adeSeverity === 'HOSPITALIZATION'
+                                ? 'bg-amber-500/20 border-amber-500 text-amber-200'
+                                : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                            }`}
+                          >
+                            <span className="font-bold text-xs block text-amber-400">Hospitalization</span>
+                            <span className="text-[10px] block opacity-80 mt-0.5">Required inpatient hospital admission.</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setAdeSeverity('DISABILITY')}
+                            className={`p-3 rounded-xl border text-left transition ${
+                              adeSeverity === 'DISABILITY'
+                                ? 'bg-indigo-500/20 border-indigo-500 text-indigo-200'
+                                : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                            }`}
+                          >
+                            <span className="font-bold text-xs block text-indigo-400">Disability</span>
+                            <span className="text-[10px] block opacity-80 mt-0.5">Persistent or significant incapacity.</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setAdeSeverity('MILD')}
+                            className={`p-3 rounded-xl border text-left transition ${
+                              adeSeverity === 'MILD'
+                                ? 'bg-blue-500/20 border-blue-500 text-blue-200'
+                                : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                              }`}
+                            >
+                            <span className="font-bold text-xs block text-blue-400">Mild Adverse Event</span>
+                            <span className="text-[10px] block opacity-80 mt-0.5">Transient reaction, rash, nausea.</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Reaction Symptoms & Clinical Intervention Details</label>
+                        <textarea
+                          rows={3}
+                          value={adeReaction}
+                          onChange={(e) => setAdeReaction(e.target.value)}
+                          placeholder="Detail onset time, symptoms, emergency interventions administered, and patient clinical status..."
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          required
+                        />
+                      </div>
+
+                      <div className="flex justify-end pt-2">
+                        <button
+                          type="submit"
+                          disabled={adeLoading || !adeSerial}
+                          className="btn btn-sm bg-amber-500 hover:bg-amber-600 text-[#0B1220] border-none rounded-xl font-bold text-xs px-6 shadow-md flex items-center gap-2"
+                        >
+                          <ShieldAlert className="h-4 w-4" />
+                          {adeLoading ? 'Anchoring MedWatch Report...' : 'Anchor MedWatch Adverse Event Report'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                        <ShieldAlert className="h-5 w-5 text-[#00D6B4]" /> Adverse Drug Event Safety Registry
+                      </h3>
+                      <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono">
+                        {drugs.filter((d) => d.adeReportId).length} Safety Reports
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="table table-sm w-full text-left">
+                        <thead>
+                          <tr className="border-b border-[#304257] text-[#94A3B8] text-xs">
+                            <th>Report ID</th>
+                            <th>Severity</th>
+                            <th>Drug Name & Serial</th>
+                            <th>Reported Date</th>
+                            <th>Reaction Details</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#304257]/50 text-xs">
+                          {drugs.filter((d) => d.adeReportId).length === 0 ? (
+                            <tr>
+                              <td colSpan={6} className="text-center py-6 text-[#94A3B8]">
+                                Zero Adverse Drug Events reported. All clinical administrations safe.
+                              </td>
+                            </tr>
+                          ) : (
+                            drugs
+                              .filter((d) => d.adeReportId)
+                              .map((d) => (
+                                <tr key={d.id} className="hover:bg-[#0B1220]/50 transition">
+                                  <td className="font-mono text-[#00D6B4] font-bold">{d.adeReportId}</td>
+                                  <td>
+                                    <span
+                                      className={`badge text-[10px] font-bold ${
+                                        d.adeSeverity === 'LIFE_THREATENING'
+                                          ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                                          : d.adeSeverity === 'HOSPITALIZATION'
+                                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                                          : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                                      }`}
+                                    >
+                                      {d.adeSeverity}
+                                    </span>
+                                  </td>
+                                  <td className="font-semibold text-[#F1F5F9]">{d.name} ({d.serialNumber})</td>
+                                  <td className="text-[#94A3B8]">
+                                    {d.adeReportedAt ? new Date(d.adeReportedAt).toLocaleDateString() : 'Recent'}
+                                  </td>
+                                  <td className="text-[#94A3B8] max-w-xs truncate">{d.adeReactionDetails}</td>
+                                  <td>
+                                    <span
+                                      className={`badge text-[10px] font-bold ${
+                                        d.status === 'QUARANTINED'
+                                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                                          : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                                      }`}
+                                    >
+                                      {d.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {regulatorSubTab === 'alcoa' && (
+                <div className="space-y-6">
+                  <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl space-y-5">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#304257] pb-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border-[#00D6B4]/30 text-xs font-bold uppercase">
+                            21 CFR Part 11 & GAMP 5
+                          </span>
+                          <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono">
+                            ALCOA+ Framework
+                          </span>
+                        </div>
+                        <h3 className="text-xl font-black text-[#F1F5F9] mt-2 flex items-center gap-2">
+                          <FileCheck2 className="h-6 w-6 text-[#00D6B4]" /> Automated Electronic Records & Signatures Analyzer
+                        </h3>
+                        <p className="text-xs text-[#94A3B8] mt-1">
+                          Evaluates blockchain supply chain ledger events against the 5 ALCOA+ principles: Attributable, Legible, Contemporaneous, Original, and Accurate.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={loadAlcoaAnalysis}
+                          disabled={alcoaLoading}
+                          className="btn btn-sm bg-[#0B1220] hover:bg-[#243247] text-[#00D6B4] border border-[#304257] rounded-xl text-xs flex items-center gap-2"
+                        >
+                          <RefreshCw className={`h-3.5 w-3.5 ${alcoaLoading ? 'animate-spin' : ''}`} />
+                          {alcoaLoading ? 'Auditing Ledger...' : 'Run Audit'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleExportAlcoaPdf}
+                          disabled={!alcoaData}
+                          className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-md"
+                        >
+                          <Printer className="h-4 w-4" /> Export Certificate
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="bg-[#0B1220] p-5 rounded-2xl border border-[#304257] flex flex-col justify-between">
+                        <div>
+                          <span className="text-xs font-semibold text-[#94A3B8] block">Composite Integrity Score</span>
+                          <div className="text-4xl font-black text-[#00D6B4] mt-2">
+                            {alcoaData?.compositeScore ?? 98.4}%
+                          </div>
+                        </div>
+                        <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs font-bold uppercase mt-3 w-fit">
+                          {alcoaData?.status ?? 'CERTIFIED_COMPLIANT'}
+                        </span>
+                      </div>
+
+                      <div className="bg-[#0B1220] p-5 rounded-2xl border border-[#304257] flex flex-col justify-between">
+                        <div>
+                          <span className="text-xs font-semibold text-[#94A3B8] block">Audited Ledger Records</span>
+                          <div className="text-4xl font-black text-[#F1F5F9] mt-2">
+                            {alcoaData?.totalAuditEventsEvaluated ?? 0}
+                          </div>
+                        </div>
+                        <span className="text-xs text-[#94A3B8] mt-3">
+                          Covering {alcoaData?.totalDrugsEvaluated ?? drugs.length} verified production batches
+                        </span>
+                      </div>
+
+                      <div className="bg-[#0B1220] p-5 rounded-2xl border border-[#304257] flex flex-col justify-between">
+                        <div>
+                          <span className="text-xs font-semibold text-[#94A3B8] block">Digital Certification Anchor Hash</span>
+                          <span className="font-mono text-xs text-[#00D6B4] break-all block mt-2">
+                            {alcoaData?.certificationHash || '0x8f3c71a9...'}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-[#94A3B8] mt-3">
+                          Evaluated: {alcoaData?.evaluatedAt ? new Date(alcoaData.evaluatedAt).toLocaleString() : 'Just now'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 pt-2">
+                      <div className="bg-[#0B1220] p-4 rounded-xl border border-[#304257] space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-[#F1F5F9]">Attributable</span>
+                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] text-[10px] font-bold">
+                            {alcoaData?.principles.attributable.score ?? 100}%
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+                          {alcoaData?.principles.attributable.description ?? '100% of ledger transactions signed with verified cryptographic keys and stakeholder identities.'}
+                        </p>
+                      </div>
+
+                      <div className="bg-[#0B1220] p-4 rounded-xl border border-[#304257] space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-[#F1F5F9]">Legible</span>
+                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] text-[10px] font-bold">
+                            {alcoaData?.principles.legible.score ?? 100}%
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+                          {alcoaData?.principles.legible.description ?? 'All GS1 2D DataMatrix payloads, event streams, and audit logs parse to validated JSON schemas.'}
+                        </p>
+                      </div>
+
+                      <div className="bg-[#0B1220] p-4 rounded-xl border border-[#304257] space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-[#F1F5F9]">Contemporaneous</span>
+                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] text-[10px] font-bold">
+                            {alcoaData?.principles.contemporaneous.score ?? 96}%
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+                          {alcoaData?.principles.contemporaneous.description ?? 'Zero backdated blocks. Transaction timestamps synchronize with network consensus block-time within 30s.'}
+                        </p>
+                      </div>
+
+                      <div className="bg-[#0B1220] p-4 rounded-xl border border-[#304257] space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-[#F1F5F9]">Original</span>
+                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] text-[10px] font-bold">
+                            {alcoaData?.principles.original.score ?? 100}%
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+                          {alcoaData?.principles.original.description ?? 'Primary immutable transaction hashes anchored directly to blockchain ledger root. Zero downstream mutations.'}
+                        </p>
+                      </div>
+
+                      <div className="bg-[#0B1220] p-4 rounded-xl border border-[#304257] space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-[#F1F5F9]">Accurate</span>
+                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] text-[10px] font-bold">
+                            {alcoaData?.principles.accurate.score ?? 96}%
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+                          {alcoaData?.principles.accurate.description ?? 'IoT cold chain temperature and humidity verified against calibrated tolerances with verified state machines.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {regulatorSubTab === 'investigations' && (
+                <div className="space-y-6">
+                  <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl space-y-5">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                      <div>
+                        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                          <FlaskConical className="h-5 w-5 text-[#00D6B4]" /> DSCSA Section 582 Counterfeit Investigation Docket
+                        </h3>
+                        <p className="text-xs text-[#94A3B8] mt-0.5">
+                          Manage criminal and forensic investigations for suspect product notifications under DSCSA Section 582. Record forensic laboratory assays and legal dispositions.
+                        </p>
+                      </div>
+                      <span className="badge bg-[#243247] text-[#00D6B4] border-[#304257] text-xs font-mono font-bold">
+                        DSCSA 582 Docket
+                      </span>
+                    </div>
+
+                    <form onSubmit={handleUpdateInvestigationDocket} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Target Medicine Serial</label>
+                          <select
+                            value={invSerial}
+                            onChange={(e) => setInvSerial(e.target.value)}
+                            className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          >
+                            <option value="">Select medicine serial...</option>
+                            {drugs.map((d) => (
+                              <option key={d.id} value={d.serialNumber}>
+                                {d.serialNumber} - {d.name} ({d.batchNumber})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Official Case Docket #</label>
+                          <input
+                            type="text"
+                            value={invDocket}
+                            onChange={(e) => setInvDocket(e.target.value)}
+                            placeholder="e.g. FDA-OC-CASE-2026-441"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Regulatory & Legal Disposition</label>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setInvDisposition('SEIZED_CONFIRMED_COUNTERFEIT')}
+                            className={`p-3 rounded-xl border text-left transition ${
+                              invDisposition === 'SEIZED_CONFIRMED_COUNTERFEIT'
+                                ? 'bg-rose-500/20 border-rose-500 text-rose-200'
+                                : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                            }`}
+                          >
+                            <span className="font-bold text-xs block text-rose-400">Seized: Confirmed Counterfeit</span>
+                            <span className="text-[10px] block opacity-80 mt-0.5">Physical seizure executed. Criminal prosecution referral initiated.</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setInvDisposition('CLEARED_LEGITIMATE')}
+                            className={`p-3 rounded-xl border text-left transition ${
+                              invDisposition === 'CLEARED_LEGITIMATE'
+                                ? 'bg-emerald-500/20 border-emerald-500 text-emerald-200'
+                                : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                            }`}
+                          >
+                            <span className="font-bold text-xs block text-emerald-400">Cleared: Legitimate Product</span>
+                            <span className="text-[10px] block opacity-80 mt-0.5">Forensic testing authenticated genuine product. Quarantine lifted.</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setInvDisposition('UNDER_INVESTIGATION')}
+                            className={`p-3 rounded-xl border text-left transition ${
+                              invDisposition === 'UNDER_INVESTIGATION'
+                                ? 'bg-amber-500/20 border-amber-500 text-amber-200'
+                                : 'bg-[#0B1220] border-[#304257] text-[#94A3B8]'
+                            }`}
+                          >
+                            <span className="font-bold text-xs block text-amber-400">Under Investigation</span>
+                            <span className="text-[10px] block opacity-80 mt-0.5">Laboratory chemical assay and forensic analysis in progress.</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Forensic Chemical & Spectroscopy Assay Findings</label>
+                        <textarea
+                          rows={2}
+                          value={invAssayFindings}
+                          onChange={(e) => setInvAssayFindings(e.target.value)}
+                          placeholder="e.g. Raman spectroscopy analysis confirms excipient starch with absent active pharmaceutical ingredient (API)..."
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Chain-of-Custody & Evidence Interception Notes</label>
+                        <textarea
+                          rows={2}
+                          value={invForensicNotes}
+                          onChange={(e) => setInvForensicNotes(e.target.value)}
+                          placeholder="e.g. Packaging foil font discrepancy verified matching known transshipment counterfeit pattern..."
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          required
+                        />
+                      </div>
+
+                      <div className="flex justify-end pt-2">
+                        <button
+                          type="submit"
+                          disabled={invLoading || !invSerial}
+                          className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs px-6 shadow-md flex items-center gap-2"
+                        >
+                          <FlaskConical className="h-4 w-4" />
+                          {invLoading ? 'Updating Docket...' : 'Update Regulatory Case Docket'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                        <FlaskConical className="h-5 w-5 text-[#00D6B4]" /> Open Section 582 Investigation Dockets
+                      </h3>
+                      <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono">
+                        {drugs.filter((d) => d.regulatoryInvestigationDocket).length} Active Dockets
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="table table-sm w-full text-left">
+                        <thead>
+                          <tr className="border-b border-[#304257] text-[#94A3B8] text-xs">
+                            <th>Docket #</th>
+                            <th>Disposition</th>
+                            <th>Drug Name & Serial</th>
+                            <th>Assay Finding</th>
+                            <th>Forensic Notes</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#304257]/50 text-xs">
+                          {drugs.filter((d) => d.regulatoryInvestigationDocket).length === 0 ? (
+                            <tr>
+                              <td colSpan={6} className="text-center py-6 text-[#94A3B8]">
+                                Zero active counterfeit investigation dockets. Use the terminal above to file a case.
+                              </td>
+                            </tr>
+                          ) : (
+                            drugs
+                              .filter((d) => d.regulatoryInvestigationDocket)
+                              .map((d) => (
+                                <tr key={d.id} className="hover:bg-[#0B1220]/50 transition">
+                                  <td className="font-mono text-[#00D6B4] font-bold">{d.regulatoryInvestigationDocket}</td>
+                                  <td>
+                                    <span
+                                      className={`badge text-[10px] font-bold ${
+                                        d.regulatoryInvestigationStatus === 'SEIZED_CONFIRMED_COUNTERFEIT'
+                                          ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                                          : d.regulatoryInvestigationStatus === 'CLEARED_LEGITIMATE'
+                                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                                          : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                                      }`}
+                                    >
+                                      {d.regulatoryInvestigationStatus || 'UNDER_INVESTIGATION'}
+                                    </span>
+                                  </td>
+                                  <td className="font-semibold text-[#F1F5F9]">{d.name} ({d.serialNumber})</td>
+                                  <td className="text-[#94A3B8] max-w-xs truncate">{d.regulatoryAssayFinding}</td>
+                                  <td className="text-[#94A3B8] max-w-xs truncate">{d.regulatoryForensicNotes}</td>
+                                  <td>
+                                    <Link
+                                      href={`/verify/${d.serialNumber}`}
+                                      target="_blank"
+                                      className="btn btn-xs bg-[#0B1220] hover:bg-[#243247] text-[#00D6B4] border border-[#304257] rounded-lg"
+                                    >
+                                      Verify
+                                    </Link>
+                                  </td>
+                                </tr>
+                              ))
+                          )}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </div>
