@@ -88,6 +88,25 @@ export interface Drug {
   deliveryProofSignature?: string;
   deliveryProofReceivedBy?: string;
   deliveryProofDeliveredAt?: string;
+  pharmacyInboundStatus?: string;
+  pharmacyInboundTemp?: number;
+  pharmacyInboundNotes?: string;
+  pharmacyInboundPharmacist?: string;
+  pharmacyInboundLicense?: string;
+  pharmacyInboundAt?: string;
+  pharmacyStorageLocation?: string;
+  prescriptionNumber?: string;
+  prescribingDoctor?: string;
+  patientToken?: string;
+  dispensedByPharmacist?: string;
+  dispensedAt?: string;
+  dispenseNotes?: string;
+  destructionCertificateId?: string;
+  destructionReason?: string;
+  destructionWitness?: string;
+  destroyedAt?: string;
+  returnReason?: string;
+  returnedToDistributorAt?: string;
   createdAt: string;
 }
 
@@ -723,6 +742,64 @@ export const confirmPharmacyDelivery = async (
   },
 ): Promise<Drug> => {
   const res = await api.post(`/drugs/${serialNumber}/confirm-delivery`, data);
+  return res.data;
+};
+
+export interface PharmacyInventorySummary {
+  totalUnits: number;
+  vaccineFridge: number;
+  biologicsFridge: number;
+  ambientShelf: number;
+  narcoticsVault: number;
+  dispensedCount: number;
+  quarantinedCount: number;
+}
+
+export const pharmacyReceiveDrug = async (
+  serialNumber: string,
+  data: {
+    disposition: 'ACCEPTED' | 'REJECTED';
+    receivingTemp: number;
+    storageLocation: string;
+    pharmacistName: string;
+    pharmacistLicense: string;
+    notes?: string;
+    pharmacyName?: string;
+  },
+): Promise<Drug> => {
+  const res = await api.post(`/drugs/${serialNumber}/pharmacy-receive`, data);
+  return res.data;
+};
+
+export const pharmacyDispenseDrug = async (
+  serialNumber: string,
+  data: {
+    prescriptionNumber: string;
+    prescribingDoctor: string;
+    patientToken: string;
+    pharmacistName: string;
+    notes?: string;
+  },
+): Promise<Drug> => {
+  const res = await api.post(`/drugs/${serialNumber}/pharmacy-dispense`, data);
+  return res.data;
+};
+
+export const pharmacyRetireDrug = async (
+  serialNumber: string,
+  data: {
+    action: 'DESTROY' | 'RETURN';
+    reason: string;
+    witnessPharmacist?: string;
+    certificateId?: string;
+  },
+): Promise<Drug> => {
+  const res = await api.post(`/drugs/${serialNumber}/pharmacy-retire`, data);
+  return res.data;
+};
+
+export const fetchPharmacyInventorySummary = async (): Promise<PharmacyInventorySummary> => {
+  const res = await api.get('/drugs/pharmacy/inventory-summary');
   return res.data;
 };
 
