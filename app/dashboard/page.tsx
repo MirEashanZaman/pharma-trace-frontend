@@ -30,6 +30,12 @@ import {
   submitQcRelease,
   dispatchBatch,
   quarantineBatch,
+  receiveInboundDrug,
+  assignFleetVehicle,
+  fetchFleetOverview,
+  createPharmacyManifest,
+  confirmPharmacyDelivery,
+  FleetVehicle,
   SystemAuditLog,
   SystemHealth,
   EnterpriseInvitation,
@@ -123,7 +129,7 @@ export default function DashboardPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [wallet, setWallet] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'simulation' | 'transit-map' | 'provenance' | 'attestations' | 'github' | 'users'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'simulation' | 'transit-map' | 'provenance' | 'attestations' | 'github' | 'users' | 'logistics'>('overview');
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   const [userSearchTerm, setUserSearchTerm] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('ALL');
@@ -191,6 +197,39 @@ export default function DashboardPage() {
   const [mfgQuarantineReason, setMfgQuarantineReason] = useState('Retained factory sample stability deviation');
   const [mfgQuarantineLoading, setMfgQuarantineLoading] = useState(false);
   const [mfgFeedback, setMfgFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [distributorSubTab, setDistributorSubTab] = useState<'inbound' | 'vault' | 'fleet' | 'manifest' | 'pod'>('inbound');
+  const [fleetVehicles, setFleetVehicles] = useState<FleetVehicle[]>([]);
+  const [fleetLoading, setFleetLoading] = useState(false);
+
+  const [inboundSerial, setInboundSerial] = useState('');
+  const [inboundSealVerified, setInboundSealVerified] = useState(true);
+  const [inboundTemp, setInboundTemp] = useState(4.2);
+  const [inboundNotes, setInboundNotes] = useState('');
+  const [inboundZone, setInboundZone] = useState('ZONE_A_COLD_2_8');
+  const [inboundLoading, setInboundLoading] = useState(false);
+
+  const [assignSerial, setAssignSerial] = useState('');
+  const [assignVehicleId, setAssignVehicleId] = useState('VAN-408');
+  const [assignDestination, setAssignDestination] = useState('Metro Healthcare Corridor');
+  const [assignLoading, setAssignLoading] = useState(false);
+
+  const [manifestPharmacyName, setManifestPharmacyName] = useState('CVS Central Hospital');
+  const [manifestPharmacyAddress, setManifestPharmacyAddress] = useState('450 Medical Center Blvd, Suite 101');
+  const [manifestVehicleId, setManifestVehicleId] = useState('VAN-408');
+  const [manifestDriverName, setManifestDriverName] = useState('Marcus Vance');
+  const [manifestDepartureSeal, setManifestDepartureSeal] = useState('SEAL-DIST-8841');
+  const [manifestSelectedSerials, setManifestSelectedSerials] = useState<string[]>([]);
+  const [manifestLoading, setManifestLoading] = useState(false);
+  const [manifestResult, setManifestResult] = useState<any>(null);
+
+  const [podSerial, setPodSerial] = useState('');
+  const [podPharmacistName, setPodPharmacistName] = useState('Dr. Sarah Lin, PharmD');
+  const [podPharmacistLicense, setPodPharmacistLicense] = useState('RPH-NY-448190');
+  const [podTemp, setPodTemp] = useState(4.4);
+  const [podNotes, setPodNotes] = useState('Inbound cold-chain seal intact, dock temp verified');
+  const [podLoading, setPodLoading] = useState(false);
+
+  const [distributorFeedback, setDistributorFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [selectedEventType, setSelectedEventType] = useState('MANUFACTURED');
   const [temperature, setTemperature] = useState('22.5');
   const [humidity, setHumidity] = useState('45');
@@ -436,6 +475,7 @@ export default function DashboardPage() {
 
     loadUser();
     loadDrugs();
+    loadFleetOverview();
 
     const socketUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3500';
     const socket: Socket = io(socketUrl, {
@@ -604,6 +644,12 @@ export default function DashboardPage() {
       }
     }
   }, [activeTab, currentUser, adminSubTab, auditRoleFilter, auditMethodFilter]);
+
+  useEffect(() => {
+    if (activeTab === 'logistics') {
+      loadFleetOverview();
+    }
+  }, [activeTab]);
 
   const handleWarnUser = async (id: number) => {
     if (!warningReasonInput.trim()) return;
@@ -945,6 +991,151 @@ export default function DashboardPage() {
     }
   };
 
+  const loadFleetOverview = async () => {
+    setFleetLoading(true);
+    try {
+      const data = await fetchFleetOverview();
+      setFleetVehicles(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setFleetLoading(false);
+    }
+  };
+
+  const handleInboundInspection = async (disposition: 'ACCEPTED' | 'REJECTED') => {
+    if (!inboundSerial) return;
+    setInboundLoading(true);
+    setDistributorFeedback(null);
+    try {
+      const updated = await receiveInboundDrug(inboundSerial, {
+        inspectionDisposition: disposition,
+        sealVerified: inboundSealVerified,
+        receivingTemp: Number(inboundTemp),
+        notes: inboundNotes,
+        inspectedBy: currentUser?.fullName || currentUser?.email || 'DHL Dock Inspector',
+        location: `${currentUser?.organization || 'DHL Healthcare Logistics'} - Receiving Bay 4`,
+        storageZone: inboundZone,
+      });
+      setDistributorFeedback({
+        type: 'success',
+        message: disposition === 'ACCEPTED'
+          ? `Consignment ${updated.serialNumber} ACCEPTED into ${inboundZone}. Custody transferred to ${currentUser?.organization || 'DHL Healthcare Logistics'}.`
+          : `Consignment ${updated.serialNumber} REJECTED at dockside due to GxP deviation. Pallet placed in Quarantine.`,
+      });
+      await loadDrugs();
+    } catch (err: any) {
+      setDistributorFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to record inbound inspection.',
+      });
+    } finally {
+      setInboundLoading(false);
+    }
+  };
+
+  const handleAssignFleet = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!assignSerial) return;
+    setAssignLoading(true);
+    setDistributorFeedback(null);
+    try {
+      const driver = fleetVehicles.find((v) => v.vehicleId === assignVehicleId)?.driverName || 'Fleet Courier';
+      const updated = await assignFleetVehicle(assignSerial, {
+        vehicleId: assignVehicleId,
+        driverName: driver,
+        routeDestination: assignDestination,
+        targetPharmacy: manifestPharmacyName,
+      });
+      setDistributorFeedback({
+        type: 'success',
+        message: `Batch ${updated.serialNumber} assigned to ${assignVehicleId} (Driver: ${driver}). Route: ${assignDestination}.`,
+      });
+      await loadDrugs();
+      await loadFleetOverview();
+    } catch (err: any) {
+      setDistributorFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to assign vehicle.',
+      });
+    } finally {
+      setAssignLoading(false);
+    }
+  };
+
+  const handleCreateManifest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (manifestSelectedSerials.length === 0) {
+      setDistributorFeedback({
+        type: 'error',
+        message: 'Please select at least one serialized unit for the delivery manifest.',
+      });
+      return;
+    }
+    setManifestLoading(true);
+    setDistributorFeedback(null);
+    try {
+      const res = await createPharmacyManifest({
+        pharmacyName: manifestPharmacyName,
+        pharmacyAddress: manifestPharmacyAddress,
+        serialNumbers: manifestSelectedSerials,
+        vehicleId: manifestVehicleId,
+        driverName: manifestDriverName,
+        departureSeal: manifestDepartureSeal,
+      });
+      setManifestResult(res);
+      setDistributorFeedback({
+        type: 'success',
+        message: `Electronic Bill of Lading (e-BoL) ${res.manifestId} created for ${res.pharmacyName}. Dispatched ${res.dispatchedSerials?.length} units via ${res.vehicleId}.`,
+      });
+      setManifestSelectedSerials([]);
+      await loadDrugs();
+      await loadFleetOverview();
+    } catch (err: any) {
+      setDistributorFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to create delivery manifest.',
+      });
+    } finally {
+      setManifestLoading(false);
+    }
+  };
+
+  const handleConfirmDelivery = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!podSerial) return;
+    setPodLoading(true);
+    setDistributorFeedback(null);
+    try {
+      const updated = await confirmPharmacyDelivery(podSerial, {
+        pharmacistName: podPharmacistName,
+        pharmacistLicense: podPharmacistLicense,
+        deliveryTemp: Number(podTemp),
+        notes: podNotes,
+      });
+      setDistributorFeedback({
+        type: 'success',
+        message: `Proof of Delivery (PoD) confirmed for ${updated.serialNumber}. Custody legally transferred to ${updated.currentCustodian}. Digital Receipt: ${updated.deliveryProofSignature}.`,
+      });
+      await loadDrugs();
+    } catch (err: any) {
+      setDistributorFeedback({
+        type: 'error',
+        message: err.response?.data?.message || 'Failed to confirm pharmacy delivery.',
+      });
+    } finally {
+      setPodLoading(false);
+    }
+  };
+
+  const getDaysToExpiry = (expiryDateStr?: string) => {
+    if (!expiryDateStr) return null;
+    const expiry = new Date(expiryDateStr).getTime();
+    const now = new Date().getTime();
+    if (isNaN(expiry)) return null;
+    return Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+  };
+
   const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedSerial) return;
@@ -1122,6 +1313,21 @@ export default function DashboardPage() {
             >
               <Network className="h-4 w-4" /> Provenance DAG
             </button>
+            {(currentRole === 'ADMIN' || currentRole === 'DISTRIBUTOR') && (
+              <button
+                onClick={() => {
+                  setActiveTab('logistics');
+                  loadFleetOverview();
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                  activeTab === 'logistics'
+                    ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
+                    : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
+                }`}
+              >
+                <Truck className="h-4 w-4" /> Logistics & Fleet Operations
+              </button>
+            )}
             {(currentRole === 'ADMIN' || currentRole === 'REGULATOR') && (
               <button
                 onClick={() => setActiveTab('attestations')}
@@ -3684,6 +3890,1062 @@ export default function DashboardPage() {
               </div>
             </div>
           )}
+            </div>
+          )}
+
+          {activeTab === 'logistics' && (
+            <div className="space-y-6">
+              <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border-[#00D6B4]/30 text-xs font-bold uppercase tracking-wider">
+                      Distributor GxP Operations
+                    </span>
+                    <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono">
+                      Bay Area Cold-Chain Hub
+                    </span>
+                  </div>
+                  <h2 className="text-2xl font-black text-[#F1F5F9] mt-2 tracking-tight">
+                    Logistics & Fleet Command Suite
+                  </h2>
+                  <p className="text-xs text-[#94A3B8] mt-1">
+                    End-to-end pharmaceutical logistics management: dock receiving inspection, cold-room vaults, FEFO cross-docking, fleet telemetry, and digital delivery handshakes.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      loadDrugs();
+                      loadFleetOverview();
+                    }}
+                    className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl font-bold text-xs flex items-center gap-2"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${fleetLoading ? 'animate-spin' : ''}`} /> Sync Hub Telemetry
+                  </button>
+                </div>
+              </div>
+
+              {distributorFeedback && (
+                <div
+                  className={`p-4 rounded-xl text-xs font-semibold flex items-center justify-between ${
+                    distributorFeedback.type === 'success'
+                      ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
+                      : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {distributorFeedback.type === 'success' ? (
+                      <CheckCircle className="h-4 w-4 text-emerald-400" />
+                    ) : (
+                      <AlertTriangle className="h-4 w-4 text-rose-400" />
+                    )}
+                    <span>{distributorFeedback.message}</span>
+                  </div>
+                  <button
+                    onClick={() => setDistributorFeedback(null)}
+                    className="text-xs opacity-70 hover:opacity-100"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center gap-2 border-b border-[#304257] pb-3">
+                {[
+                  { id: 'inbound', label: '1. Inbound Receiving Dock', icon: Package },
+                  { id: 'vault', label: '2. Cold-Room Vault & FEFO', icon: Snowflake },
+                  { id: 'fleet', label: '3. Multi-Vehicle Fleet Board', icon: Truck },
+                  { id: 'manifest', label: '4. Pharmacy Delivery Manifest', icon: FileText },
+                  { id: 'pod', label: '5. Proof of Delivery Handshake', icon: ShieldCheck },
+                ].map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = distributorSubTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setDistributorSubTab(tab.id as any)}
+                      className={`btn btn-sm rounded-xl font-bold text-xs flex items-center gap-2 transition ${
+                        isActive
+                          ? 'bg-[#00D6B4] text-[#0B1220] shadow-md border-none'
+                          : 'bg-[#172638] text-[#94A3B8] hover:text-[#F1F5F9] border border-[#304257]'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" /> {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {distributorSubTab === 'inbound' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-7 card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-5">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                      <div>
+                        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                          <Package className="h-5 w-5 text-[#00D6B4]" /> Consignment Inbound Gateway
+                        </h3>
+                        <p className="text-xs text-[#94A3B8]">
+                          Inspect dockside temperature probe readings and verify seal integrity before entering cold vault.
+                        </p>
+                      </div>
+                      <span className="badge bg-[#00D6B4]/10 text-[#00D6B4] border-[#00D6B4]/20 text-[10px] font-mono">
+                        BAY-4 ACTIVE
+                      </span>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Select Inbound Consignment / Medicine Serial
+                        </label>
+                        <select
+                          value={inboundSerial || (drugs[0]?.serialNumber ?? '')}
+                          onChange={(e) => setInboundSerial(e.target.value)}
+                          className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                        >
+                          <option value="">-- Choose Consignment --</option>
+                          {drugs.map((d) => (
+                            <option key={d.id} value={d.serialNumber}>
+                              {d.serialNumber} - {d.name} ({d.batchNumber}) | Status: {d.status} | Custodian: {d.currentCustodian || 'MANUFACTURER'}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {inboundSerial && (() => {
+                        const cur = drugs.find((d) => d.serialNumber === inboundSerial);
+                        if (!cur) return null;
+                        return (
+                          <div className="p-3.5 bg-[#0B1220] border border-[#304257] rounded-xl grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                            <div>
+                              <span className="text-[10px] text-[#94A3B8] uppercase block">Medicine</span>
+                              <strong className="text-[#F1F5F9]">{cur.name}</strong>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-[#94A3B8] uppercase block">Batch</span>
+                              <span className="text-[#00D6B4] font-mono">{cur.batchNumber}</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-[#94A3B8] uppercase block">Temp Spec</span>
+                              <span className="text-emerald-400 font-bold">{cur.tempMin ?? 2}°C to {cur.tempMax ?? 8}°C</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-[#94A3B8] uppercase block">Current Status</span>
+                              <span className="badge badge-sm bg-[#243247] text-[#94A3B8] border-[#304257]">{cur.status}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Physical Tamper-Evident Seal Verification
+                        </label>
+                        <div className="flex items-center gap-3 p-3 bg-[#0B1220] border border-[#304257] rounded-xl">
+                          <input
+                            type="checkbox"
+                            checked={inboundSealVerified}
+                            onChange={(e) => setInboundSealVerified(e.target.checked)}
+                            className="checkbox checkbox-sm checkbox-primary border-[#304257]"
+                          />
+                          <span className="text-xs text-[#F1F5F9] font-medium">
+                            Security barcode seal intact and verified matching bill of lading (BoL)
+                          </span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs text-[#94A3B8] font-semibold">
+                            Dockside Infrared Thermometer Probe Reading (°C)
+                          </label>
+                          <span className={`text-xs font-mono font-bold ${
+                            Number(inboundTemp) < 2 || Number(inboundTemp) > 8 ? 'text-rose-400' : 'text-emerald-400'
+                          }`}>
+                            {inboundTemp}°C ({Number(inboundTemp) < 2 || Number(inboundTemp) > 8 ? 'EXCURSION' : 'COMPLIANT'})
+                          </span>
+                        </div>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={inboundTemp}
+                          onChange={(e) => setInboundTemp(parseFloat(e.target.value) || 0)}
+                          className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                        />
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {[
+                            { label: '4.2°C (Optimal)', val: 4.2 },
+                            { label: '6.5°C (Chilled)', val: 6.5 },
+                            { label: '9.8°C (Thermal Breach)', val: 9.8 },
+                            { label: '-1.5°C (Sub-Zero Freeze)', val: -1.5 },
+                          ].map((preset) => (
+                            <button
+                              key={preset.label}
+                              type="button"
+                              onClick={() => setInboundTemp(preset.val)}
+                              className="btn btn-xs bg-[#0B1220] hover:bg-[#243247] text-[#94A3B8] hover:text-[#00D6B4] border border-[#304257] rounded-lg text-[10px]"
+                            >
+                              {preset.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Target Vault Cold-Storage Zone
+                        </label>
+                        <select
+                          value={inboundZone}
+                          onChange={(e) => setInboundZone(e.target.value)}
+                          className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                        >
+                          <option value="ZONE_A_COLD_2_8">Zone A: Biologics Cold Vault (2.0°C to 8.0°C)</option>
+                          <option value="ZONE_B_CRYO_M20">Zone B: Deep Freeze Cryo Vault (-20.0°C)</option>
+                          <option value="ZONE_C_CONTROLLED_15_25">Zone C: Controlled Room Temperature (15.0°C to 25.0°C)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Dock Inspection Findings & Observations
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={inboundNotes}
+                          onChange={(e) => setInboundNotes(e.target.value)}
+                          placeholder="e.g. Reefer compressor active upon arrival. Tamper seal validated against manufacturer manifest. No condensation or carton stress."
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 pt-2">
+                        <button
+                          type="button"
+                          disabled={inboundLoading || !inboundSerial}
+                          onClick={() => handleInboundInspection('ACCEPTED')}
+                          className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs flex items-center justify-center gap-2"
+                        >
+                          <CheckCircle className="h-4 w-4" /> {inboundLoading ? 'Recording...' : 'Accept Consignment into Vault'}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={inboundLoading || !inboundSerial}
+                          onClick={() => handleInboundInspection('REJECTED')}
+                          className="btn btn-sm bg-rose-600 hover:bg-rose-700 text-white border-none rounded-xl font-bold text-xs flex items-center justify-center gap-2"
+                        >
+                          <AlertOctagon className="h-4 w-4" /> Reject at Dock & Quarantine
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#00D6B4] flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4 text-[#00D6B4]" /> GxP Dock Receiving Protocol
+                      </h4>
+                      <p className="text-xs text-[#94A3B8] leading-relaxed">
+                        Under Good Distribution Practice (GDP 2013/C 343/01), receiving distributors must record temperature integrity before transferring custody from long-haul reefers to storage vaults.
+                      </p>
+                      <div className="space-y-2 text-xs text-[#94A3B8]">
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>Check calibrated NIST thermometer probe</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>Scan 2D DataMatrix serial to verify ledger state</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>Immediate quarantine if seal is broken or temp exceeds 8°C</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>Cryptographic custody transfer recorded upon acceptance</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-[#00D6B4]" /> Recent Inbound Inspection Log
+                      </h4>
+                      <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                        {drugs.filter((d) => d.inboundInspectionStatus).length === 0 ? (
+                          <p className="text-xs text-[#94A3B8] italic">No inbound inspections logged in current session.</p>
+                        ) : (
+                          drugs
+                            .filter((d) => d.inboundInspectionStatus)
+                            .map((d) => (
+                              <div
+                                key={d.id}
+                                className="p-3 bg-[#0B1220] border border-[#304257] rounded-xl text-xs space-y-1"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="font-mono text-[#00D6B4] font-bold">{d.serialNumber}</span>
+                                  <span
+                                    className={`badge badge-xs font-bold ${
+                                      d.inboundInspectionStatus === 'ACCEPTED'
+                                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                                        : 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                                    }`}
+                                  >
+                                    {d.inboundInspectionStatus}
+                                  </span>
+                                </div>
+                                <div className="text-[#94A3B8] text-[11px] flex items-center justify-between">
+                                  <span>Dock Temp: {d.inboundInspectionTemp ?? 'N/A'}°C</span>
+                                  <span>{d.storageZone || 'ZONE_A_COLD_2_8'}</span>
+                                </div>
+                                <div className="text-[10px] text-[#94A3B8] truncate">
+                                  Inspected by: {d.inboundInspectedBy || 'Dock Agent'}
+                                </div>
+                              </div>
+                            ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {distributorSubTab === 'vault' && (
+                <div className="space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#94A3B8]">
+                        Vault Active Consignments
+                      </span>
+                      <div className="text-2xl font-black text-[#F1F5F9]">
+                        {drugs.filter((d) => d.storageZone || d.currentCustodian?.toLowerCase().includes('distributor') || d.currentCustodian?.toLowerCase().includes('dhl')).length}
+                      </div>
+                      <span className="text-[11px] text-[#00D6B4]">Stored in Cold Facility</span>
+                    </div>
+
+                    <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#94A3B8]">
+                        Zone A: Biologics (2°C - 8°C)
+                      </span>
+                      <div className="text-2xl font-black text-cyan-400">
+                        {drugs.filter((d) => d.storageZone === 'ZONE_A_COLD_2_8' || !d.storageZone).length}
+                      </div>
+                      <span className="text-[11px] text-[#94A3B8]">Vaccines & Monoclonals</span>
+                    </div>
+
+                    <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#94A3B8]">
+                        Zone B: Cryo Vault (-20°C)
+                      </span>
+                      <div className="text-2xl font-black text-indigo-400">
+                        {drugs.filter((d) => d.storageZone === 'ZONE_B_CRYO_M20').length}
+                      </div>
+                      <span className="text-[11px] text-[#94A3B8]">mRNA & Enzyme Vials</span>
+                    </div>
+
+                    <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#94A3B8]">
+                        FEFO Priority (&lt; 90 Days)
+                      </span>
+                      <div className="text-2xl font-black text-amber-400">
+                        {drugs.filter((d) => {
+                          const days = getDaysToExpiry(d.expiryDate);
+                          return days !== null && days <= 90;
+                        }).length}
+                      </div>
+                      <span className="text-[11px] text-amber-300">Prioritize Outbound Dispatch</span>
+                    </div>
+                  </div>
+
+                  <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                          <Snowflake className="h-5 w-5 text-[#00D6B4]" /> Cold-Room Vault & First-Expired, First-Out (FEFO) Matrix
+                        </h3>
+                        <p className="text-xs text-[#94A3B8]">
+                          Inventory sorted strictly by expiration date to guarantee GxP FEFO compliance before dispatching to hospitals and pharmacies.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const fefoCandidates = [...drugs]
+                            .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime())
+                            .slice(0, 3)
+                            .map((d) => d.serialNumber);
+                          setManifestSelectedSerials(fefoCandidates);
+                          setDistributorSubTab('manifest');
+                        }}
+                        className="btn btn-xs bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs px-3"
+                      >
+                        Auto-Select Top 3 FEFO for Manifest
+                      </button>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="table table-sm w-full text-xs">
+                        <thead>
+                          <tr className="border-b border-[#304257] text-[#94A3B8]">
+                            <th>Serial Number</th>
+                            <th>Medicine & Batch</th>
+                            <th>Vault Zone</th>
+                            <th>Expiry Date</th>
+                            <th>FEFO Urgency</th>
+                            <th>Custodian</th>
+                            <th>Vehicle Assignment</th>
+                            <th className="text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#304257]">
+                          {[...drugs]
+                            .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime())
+                            .map((d) => {
+                              const days = getDaysToExpiry(d.expiryDate);
+                              return (
+                                <tr key={d.id} className="hover:bg-[#243247]/50 transition">
+                                  <td className="font-mono text-[#00D6B4] font-bold">{d.serialNumber}</td>
+                                  <td>
+                                    <div className="font-bold text-[#F1F5F9]">{d.name}</div>
+                                    <div className="text-[10px] text-[#94A3B8] font-mono">{d.batchNumber}</div>
+                                  </td>
+                                  <td>
+                                    <span className="badge badge-xs bg-[#243247] text-[#94A3B8] border-[#304257] font-mono">
+                                      {d.storageZone || 'ZONE_A_COLD_2_8'}
+                                    </span>
+                                  </td>
+                                  <td className="font-mono text-[#F1F5F9]">
+                                    {new Date(d.expiryDate).toLocaleDateString()}
+                                  </td>
+                                  <td>
+                                    {days === null ? (
+                                      <span className="badge badge-xs bg-slate-700 text-slate-300">N/A</span>
+                                    ) : days <= 30 ? (
+                                      <span className="badge badge-xs bg-rose-500/20 text-rose-300 border-rose-500/30 font-bold">
+                                        CRITICAL ({days}d)
+                                      </span>
+                                    ) : days <= 90 ? (
+                                      <span className="badge badge-xs bg-amber-500/20 text-amber-300 border-amber-500/30 font-bold">
+                                        EXPIRING SOON ({days}d)
+                                      </span>
+                                    ) : (
+                                      <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
+                                        STABLE ({days}d)
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="text-[#94A3B8]">{d.currentCustodian || 'MANUFACTURER'}</td>
+                                  <td>
+                                    {d.assignedVehicleId ? (
+                                      <span className="badge badge-xs bg-cyan-500/20 text-cyan-300 border-cyan-500/30 font-mono font-bold">
+                                        {d.assignedVehicleId}
+                                      </span>
+                                    ) : (
+                                      <span className="text-[10px] text-[#94A3B8] italic">Unassigned</span>
+                                    )}
+                                  </td>
+                                  <td className="text-right">
+                                    <div className="flex items-center justify-end gap-1.5">
+                                      <button
+                                        onClick={() => {
+                                          setAssignSerial(d.serialNumber);
+                                          setDistributorSubTab('fleet');
+                                        }}
+                                        className="btn btn-xs bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-lg text-[10px]"
+                                      >
+                                        Assign Fleet
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          if (!manifestSelectedSerials.includes(d.serialNumber)) {
+                                            setManifestSelectedSerials((prev) => [...prev, d.serialNumber]);
+                                          }
+                                          setDistributorSubTab('manifest');
+                                        }}
+                                        className="btn btn-xs bg-[#00D6B4]/15 hover:bg-[#00D6B4]/25 text-[#00D6B4] border border-[#00D6B4]/30 rounded-lg text-[10px]"
+                                      >
+                                        + Manifest
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {distributorSubTab === 'fleet' && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    {fleetVehicles.map((veh) => (
+                      <div
+                        key={veh.vehicleId}
+                        className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-4 shadow-sm"
+                      >
+                        <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                          <div className="flex items-center gap-2">
+                            <Truck className="h-5 w-5 text-[#00D6B4]" />
+                            <div>
+                              <h4 className="text-sm font-black text-[#F1F5F9] font-mono">{veh.vehicleId}</h4>
+                              <p className="text-[10px] text-[#94A3B8]">{veh.model} ({veh.plate})</p>
+                            </div>
+                          </div>
+                          <span
+                            className={`badge badge-sm font-bold ${
+                              veh.status === 'OPTIMAL'
+                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                                : veh.status === 'WARNING'
+                                ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                                : 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                            }`}
+                          >
+                            {veh.status}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div className="p-2.5 bg-[#0B1220] border border-[#304257] rounded-xl">
+                            <span className="text-[10px] text-[#94A3B8] uppercase block">Reefer Temp</span>
+                            <span className="text-base font-black text-[#00D6B4] font-mono">{veh.currentTemp}°C</span>
+                          </div>
+                          <div className="p-2.5 bg-[#0B1220] border border-[#304257] rounded-xl">
+                            <span className="text-[10px] text-[#94A3B8] uppercase block">Compressor</span>
+                            <span className="text-xs font-bold text-emerald-400">{veh.compressorStatus}</span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5 text-xs">
+                          <div className="flex items-center justify-between text-[#94A3B8]">
+                            <span>Driver:</span>
+                            <strong className="text-[#F1F5F9]">{veh.driverName}</strong>
+                          </div>
+                          <div className="flex items-center justify-between text-[#94A3B8]">
+                            <span>Door Seal:</span>
+                            <span className="text-emerald-400 font-bold">{veh.doorSealStatus}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-[#94A3B8]">
+                            <span>Target Facility:</span>
+                            <span className="text-[#F1F5F9] truncate max-w-[150px]">{veh.targetPharmacy}</span>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-[#304257]">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[10px] text-[#94A3B8] uppercase font-bold">Assigned Serials ({veh.assignedBatches.length})</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                            {veh.assignedBatches.length === 0 ? (
+                              <span className="text-[11px] text-[#94A3B8] italic">No active batches assigned</span>
+                            ) : (
+                              veh.assignedBatches.map((s) => (
+                                <span
+                                  key={s}
+                                  className="badge badge-xs bg-[#243247] text-[#00D6B4] border-[#304257] font-mono"
+                                >
+                                  {s}
+                                </span>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-4">
+                    <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                      <Truck className="h-5 w-5 text-[#00D6B4]" /> Quick Consignment Vehicle Assignment
+                    </h3>
+                    <p className="text-xs text-[#94A3B8]">
+                      Assign verified warehouse consignments to active refrigerated transport vehicles with designated courier and transit corridors.
+                    </p>
+
+                    <form onSubmit={handleAssignFleet} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Target Medicine Serial</label>
+                        <select
+                          value={assignSerial || (drugs[0]?.serialNumber ?? '')}
+                          onChange={(e) => setAssignSerial(e.target.value)}
+                          className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          required
+                        >
+                          <option value="">-- Choose Consignment --</option>
+                          {drugs.map((d) => (
+                            <option key={d.id} value={d.serialNumber}>
+                              {d.serialNumber} - {d.name} ({d.assignedVehicleId ? `Vehicle: ${d.assignedVehicleId}` : 'Unassigned'})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Fleet Transport Unit</label>
+                        <select
+                          value={assignVehicleId}
+                          onChange={(e) => setAssignVehicleId(e.target.value)}
+                          className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                        >
+                          <option value="VAN-408">VAN-408 (Mercedes Sprinter Reefer | Marcus Vance)</option>
+                          <option value="TRUCK-112">TRUCK-112 (Volvo FH Heavy Reefer | Elena Rostova)</option>
+                          <option value="SHUTTLE-07">SHUTTLE-07 (Ford E-Transit Urban Shuttle | David Kim)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Transit Route Corridor</label>
+                        <input
+                          type="text"
+                          value={assignDestination}
+                          onChange={(e) => setAssignDestination(e.target.value)}
+                          placeholder="e.g. Metro Healthcare Corridor - Bay Express"
+                          className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          required
+                        />
+                      </div>
+
+                      <div className="flex items-end">
+                        <button
+                          type="submit"
+                          disabled={assignLoading || !assignSerial}
+                          className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs w-full h-[38px] flex items-center justify-center gap-2"
+                        >
+                          <Check className="h-4 w-4" /> {assignLoading ? 'Assigning...' : 'Assign Consignment'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
+
+              {distributorSubTab === 'manifest' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-7 card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-5">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                      <div>
+                        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-[#00D6B4]" /> Outbound Pharmacy Delivery Manifest (e-BoL)
+                        </h3>
+                        <p className="text-xs text-[#94A3B8]">
+                          Generate an official Electronic Bill of Lading with cryptographic security departure seal.
+                        </p>
+                      </div>
+                      <span className="badge bg-[#00D6B4]/10 text-[#00D6B4] border-[#00D6B4]/20 text-[10px] font-mono">
+                        e-BoL GEN
+                      </span>
+                    </div>
+
+                    <form onSubmit={handleCreateManifest} className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                            Destination Pharmacy / Hospital
+                          </label>
+                          <input
+                            type="text"
+                            value={manifestPharmacyName}
+                            onChange={(e) => setManifestPharmacyName(e.target.value)}
+                            placeholder="e.g. CVS Central Hospital"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                            Delivery Facility Address
+                          </label>
+                          <input
+                            type="text"
+                            value={manifestPharmacyAddress}
+                            onChange={(e) => setManifestPharmacyAddress(e.target.value)}
+                            placeholder="e.g. 450 Medical Center Blvd, Suite 101"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Fleet Vehicle</label>
+                          <select
+                            value={manifestVehicleId}
+                            onChange={(e) => setManifestVehicleId(e.target.value)}
+                            className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          >
+                            <option value="VAN-408">VAN-408 (Sprinter)</option>
+                            <option value="TRUCK-112">TRUCK-112 (Volvo Heavy)</option>
+                            <option value="SHUTTLE-07">SHUTTLE-07 (E-Transit)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Courier / Driver Name</label>
+                          <input
+                            type="text"
+                            value={manifestDriverName}
+                            onChange={(e) => setManifestDriverName(e.target.value)}
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Departure Security Seal #</label>
+                          <input
+                            type="text"
+                            value={manifestDepartureSeal}
+                            onChange={(e) => setManifestDepartureSeal(e.target.value)}
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] font-mono"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-xs text-[#94A3B8] font-semibold">
+                            Select Serialized Units for Manifest ({manifestSelectedSerials.length} selected)
+                          </label>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const allSerials = drugs.map((d) => d.serialNumber);
+                                setManifestSelectedSerials(allSerials);
+                              }}
+                              className="text-[10px] text-[#00D6B4] hover:underline font-bold"
+                            >
+                              Select All
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setManifestSelectedSerials([])}
+                              className="text-[10px] text-rose-400 hover:underline"
+                            >
+                              Clear
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="max-h-48 overflow-y-auto space-y-1.5 p-2 bg-[#0B1220] border border-[#304257] rounded-xl">
+                          {drugs.map((d) => {
+                            const isChecked = manifestSelectedSerials.includes(d.serialNumber);
+                            const days = getDaysToExpiry(d.expiryDate);
+                            return (
+                              <label
+                                key={d.id}
+                                className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition text-xs ${
+                                  isChecked ? 'bg-[#243247] border border-[#00D6B4]/30' : 'hover:bg-[#172638]'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setManifestSelectedSerials((prev) => [...prev, d.serialNumber]);
+                                      } else {
+                                        setManifestSelectedSerials((prev) => prev.filter((s) => s !== d.serialNumber));
+                                      }
+                                    }}
+                                    className="checkbox checkbox-xs checkbox-primary"
+                                  />
+                                  <span className="font-mono text-[#00D6B4] font-bold">{d.serialNumber}</span>
+                                  <span className="text-[#F1F5F9]">{d.name} ({d.batchNumber})</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {days !== null && days <= 90 && (
+                                    <span className="badge badge-xs bg-amber-500/20 text-amber-300 border-amber-500/30 text-[9px]">
+                                      FEFO {days}d
+                                    </span>
+                                  )}
+                                  <span className="badge badge-xs bg-[#0B1220] text-[#94A3B8] border-[#304257] text-[10px]">
+                                    {d.status}
+                                  </span>
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="pt-2">
+                        <button
+                          type="submit"
+                          disabled={manifestLoading || manifestSelectedSerials.length === 0}
+                          className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs w-full flex items-center justify-center gap-2"
+                        >
+                          <FileText className="h-4 w-4" /> {manifestLoading ? 'Generating e-BoL...' : 'Generate e-BoL & Dispatch Consignment'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-4">
+                    {manifestResult ? (
+                      <div className="card bg-[#172638] border border-[#00D6B4]/40 rounded-2xl p-6 space-y-4 shadow-xl animate-in fade-in zoom-in-95">
+                        <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-5 w-5 text-[#00D6B4]" />
+                            <h4 className="text-sm font-black text-[#F1F5F9] font-mono">
+                              {manifestResult.manifestId}
+                            </h4>
+                          </div>
+                          <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-bold">
+                            e-BoL ACTIVE
+                          </span>
+                        </div>
+
+                        <div className="space-y-2 text-xs">
+                          <div className="flex justify-between text-[#94A3B8]">
+                            <span>Destination:</span>
+                            <strong className="text-[#F1F5F9]">{manifestResult.pharmacyName}</strong>
+                          </div>
+                          <div className="flex justify-between text-[#94A3B8]">
+                            <span>Address:</span>
+                            <span className="text-[#F1F5F9]">{manifestResult.pharmacyAddress}</span>
+                          </div>
+                          <div className="flex justify-between text-[#94A3B8]">
+                            <span>Vehicle / Driver:</span>
+                            <span className="text-[#00D6B4] font-mono">{manifestResult.vehicleId} ({manifestResult.driverName})</span>
+                          </div>
+                          <div className="flex justify-between text-[#94A3B8]">
+                            <span>Security Seal:</span>
+                            <span className="font-mono text-emerald-400 font-bold">{manifestResult.departureSeal}</span>
+                          </div>
+                          <div className="flex justify-between text-[#94A3B8]">
+                            <span>Dispatched At:</span>
+                            <span className="text-[#94A3B8]">{new Date(manifestResult.dispatchedAt).toLocaleString()}</span>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-[#304257]">
+                          <span className="text-[10px] text-[#94A3B8] uppercase font-bold block mb-1">
+                            Dispatched Serial Numbers ({manifestResult.dispatchedSerials?.length})
+                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {manifestResult.dispatchedSerials?.map((s: string) => (
+                              <span
+                                key={s}
+                                className="badge badge-xs bg-[#243247] text-[#00D6B4] border-[#304257] font-mono"
+                              >
+                                {s}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="pt-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (typeof window !== 'undefined') window.print();
+                            }}
+                            className="btn btn-xs bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-lg font-bold text-xs w-full flex items-center justify-center gap-1.5"
+                          >
+                            <Printer className="h-3.5 w-3.5" /> Print Physical e-BoL Slip
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-6 text-center space-y-3">
+                        <FileText className="h-10 w-10 text-[#94A3B8] mx-auto opacity-50" />
+                        <h4 className="text-sm font-bold text-[#F1F5F9]">Electronic Bill of Lading Preview</h4>
+                        <p className="text-xs text-[#94A3B8]">
+                          Select destination pharmacy, security seal, and serialized consignments to compile and anchor an official e-BoL dispatch record.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {distributorSubTab === 'pod' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-7 card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-5">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                      <div>
+                        <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                          <ShieldCheck className="h-5 w-5 text-[#00D6B4]" /> Electronic Proof of Delivery (PoD) Terminal
+                        </h3>
+                        <p className="text-xs text-[#94A3B8]">
+                          Counter-sign arrival temperature and pharmacist credentials to finalize legal custody handover.
+                        </p>
+                      </div>
+                      <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-mono">
+                        CUSTODY CLOSING
+                      </span>
+                    </div>
+
+                    <form onSubmit={handleConfirmDelivery} className="space-y-4">
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Target Delivered Medicine Serial
+                        </label>
+                        <select
+                          value={podSerial || (drugs[0]?.serialNumber ?? '')}
+                          onChange={(e) => setPodSerial(e.target.value)}
+                          className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          required
+                        >
+                          <option value="">-- Choose Consignment for Handover --</option>
+                          {drugs.map((d) => (
+                            <option key={d.id} value={d.serialNumber}>
+                              {d.serialNumber} - {d.name} ({d.batchNumber}) | Dest: {d.targetPharmacy || 'Hospital'} | Status: {d.status}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                            Receiving Pharmacist Full Name
+                          </label>
+                          <input
+                            type="text"
+                            value={podPharmacistName}
+                            onChange={(e) => setPodPharmacistName(e.target.value)}
+                            placeholder="e.g. Dr. Sarah Lin, PharmD"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                            Pharmacist State License #
+                          </label>
+                          <input
+                            type="text"
+                            value={podPharmacistLicense}
+                            onChange={(e) => setPodPharmacistLicense(e.target.value)}
+                            placeholder="e.g. RPH-NY-448190"
+                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] font-mono"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs text-[#94A3B8] font-semibold">
+                            Arrival Dock Temperature Probe (°C)
+                          </label>
+                          <span className={`text-xs font-mono font-bold ${
+                            Number(podTemp) < 2 || Number(podTemp) > 8 ? 'text-rose-400' : 'text-emerald-400'
+                          }`}>
+                            {podTemp}°C ({Number(podTemp) < 2 || Number(podTemp) > 8 ? 'DEVIATION' : 'ACCEPTABLE'})
+                          </span>
+                        </div>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={podTemp}
+                          onChange={(e) => setPodTemp(parseFloat(e.target.value) || 0)}
+                          className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                          Handover Inspection Notes
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={podNotes}
+                          onChange={(e) => setPodNotes(e.target.value)}
+                          placeholder="e.g. Inbound cold-chain seal intact, dock temp verified, placed directly in hospital vaccine refrigerator."
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                        />
+                      </div>
+
+                      <div className="p-3 bg-[#0B1220] border border-[#304257] rounded-xl space-y-1">
+                        <span className="text-[10px] text-[#94A3B8] uppercase block">Digital Counter-Signature Proof</span>
+                        <div className="font-mono text-xs text-[#00D6B4] truncate">
+                          SIG-POD-SHA256-AUTHENTICATED
+                        </div>
+                      </div>
+
+                      <div className="pt-2">
+                        <button
+                          type="submit"
+                          disabled={podLoading || !podSerial}
+                          className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs w-full flex items-center justify-center gap-2"
+                        >
+                          <CheckCircle className="h-4 w-4" /> {podLoading ? 'Confirming...' : 'Execute Custody Handshake & Confirm PoD'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#00D6B4] flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4 text-[#00D6B4]" /> Legal Handover Compliance
+                      </h4>
+                      <p className="text-xs text-[#94A3B8] leading-relaxed">
+                        Executing this electronic handshake transfers distributor liability to the dispensing healthcare institution under DSCSA Title II.
+                      </p>
+                      <div className="space-y-2 text-xs text-[#94A3B8]">
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>Pharmacist active license validation verified</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>Final arrival cold-chain probe check recorded</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>Drug status updated to DELIVERED</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#00D6B4]" />
+                          <span>DISTRIBUTED custody event anchored to blockchain ledger</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-[#00D6B4]" /> Delivered Batches (PoD Confirmed)
+                      </h4>
+                      <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                        {drugs.filter((d) => d.status === 'DELIVERED' || d.deliveryProofSignature).length === 0 ? (
+                          <p className="text-xs text-[#94A3B8] italic">No delivered batches with PoD confirmed yet.</p>
+                        ) : (
+                          drugs
+                            .filter((d) => d.status === 'DELIVERED' || d.deliveryProofSignature)
+                            .map((d) => (
+                              <div
+                                key={d.id}
+                                className="p-3 bg-[#0B1220] border border-[#304257] rounded-xl text-xs space-y-1"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="font-mono text-[#00D6B4] font-bold">{d.serialNumber}</span>
+                                  <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-bold">
+                                    DELIVERED
+                                  </span>
+                                </div>
+                                <div className="text-[#94A3B8] text-[11px]">
+                                  Received by: <strong className="text-[#F1F5F9]">{d.deliveryProofReceivedBy || 'Pharmacist'}</strong>
+                                </div>
+                                <div className="text-[10px] text-[#94A3B8] font-mono truncate">
+                                  Sig: {d.deliveryProofSignature || 'Verified'}
+                                </div>
+                              </div>
+                            ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </main>
