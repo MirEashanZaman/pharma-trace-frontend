@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Navigation } from '@/components/navigation';
 import dynamic from 'next/dynamic';
-import { connectMetaMask, signAttestationMessage } from '@/lib/web3';
+import { connectMetaMask, signAttestationMessage, SUPPORTED_NETWORKS, switchEthereumChain } from '@/lib/web3';
 import {
   fetchDrugs,
   fetchDrugEvents,
@@ -140,6 +140,17 @@ export default function DashboardPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
   const [wallet, setWallet] = useState<string | null>(null);
+  const [activeNetworkKey, setActiveNetworkKey] = useState<string>('0xaa36a7');
+  const [switchingNetwork, setSwitchingNetwork] = useState(false);
+
+  const handleNetworkSwitch = async (chainHex: string) => {
+    setSwitchingNetwork(true);
+    const success = await switchEthereumChain(chainHex);
+    if (success) {
+      setActiveNetworkKey(chainHex);
+    }
+    setSwitchingNetwork(false);
+  };
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'simulation' | 'transit-map' | 'provenance' | 'attestations' | 'github' | 'users' | 'logistics' | 'pharmacy' | 'regulator'>('overview');
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
@@ -3554,52 +3565,247 @@ export default function DashboardPage() {
           )}
 
           {activeTab === 'attestations' && (
-            <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
-              <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
-                <Lock className="h-5 w-5 text-[#00D6B4]" /> Hash & Ledger Information
-              </h3>
-              <p className="text-xs text-[#94A3B8]">
-                Review immutable event hashes anchored to the Ethereum / EVM contract.
-              </p>
-              <div className="space-y-3">
-                {events.map((ev) => (
-                  <div key={ev.id} className="p-4 bg-[#172638] rounded-xl border border-[#304257] font-mono text-xs space-y-1">
-                    <div className="flex justify-between text-[#F1F5F9]">
-                      <span>Event: <strong className="text-[#00D6B4]">{ev.eventType}</strong></span>
-                      <span className="text-[#A3E635] font-semibold flex items-center gap-1">
-                        <CheckCircle className="h-3.5 w-3.5" /> Anchored
-                      </span>
-                    </div>
-                    <div className="text-[#94A3B8] truncate">Hash: {ev.eventHash}</div>
+            <div className="space-y-6">
+              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#304257]">
+                  <div>
+                    <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                      <Network className="h-5 w-5 text-[#00D6B4]" /> Multi-L2 Network Settlement Layer
+                    </h3>
+                    <p className="text-xs text-[#94A3B8] mt-1">
+                      Anchor pharmaceutical attestations and verify digital twin states across supported EVM networks.
+                    </p>
                   </div>
-                ))}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-[#94A3B8]">Connected Wallet:</span>
+                    <span className="badge badge-sm bg-[#172638] text-[#00D6B4] border-[#304257] font-mono">
+                      {wallet ? `${wallet.slice(0, 6)}...${wallet.slice(-4)}` : 'Enterprise Gasless Relay'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {Object.entries(SUPPORTED_NETWORKS).map(([hexId, net]) => {
+                    const isActive = activeNetworkKey === hexId;
+                    return (
+                      <button
+                        key={hexId}
+                        type="button"
+                        disabled={switchingNetwork}
+                        onClick={() => handleNetworkSwitch(hexId)}
+                        className={`p-3.5 rounded-xl border text-left transition flex flex-col justify-between ${
+                          isActive
+                            ? 'bg-[#172638] border-[#00D6B4] shadow-sm'
+                            : 'bg-[#172638]/60 border-[#304257] hover:border-[#94A3B8]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-[#F1F5F9]">{net.chainName}</span>
+                          <span className={`h-2 w-2 rounded-full ${isActive ? 'bg-[#00D6B4] animate-pulse' : 'bg-[#94A3B8]'}`} />
+                        </div>
+                        <div className="text-[10px] font-mono text-[#94A3B8] mt-2 flex justify-between items-center">
+                          <span>Chain ID: {parseInt(hexId, 16)}</span>
+                          <span className="text-[#00D6B4] font-semibold">{net.nativeCurrency.symbol}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="pt-3 border-t border-[#304257] flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  disabled={dossierLoading}
-                  onClick={() => handleExportDossier('pdf')}
-                  className="btn btn-xs bg-[#00D6B4] hover:bg-[#00D6B4]/80 text-[#0B1220] font-bold border-none rounded-lg flex items-center gap-1.5"
-                >
-                  <FileText className="h-3.5 w-3.5" /> Download Dossier (PDF)
-                </button>
-                <button
-                  type="button"
-                  disabled={dossierLoading}
-                  onClick={() => handleExportDossier('csv')}
-                  className="btn btn-xs bg-[#172638] hover:bg-[#1E2E44] text-[#F1F5F9] border-[#304257] rounded-lg font-bold flex items-center gap-1.5"
-                >
-                  <FileSpreadsheet className="h-3.5 w-3.5 text-[#00D6B4]" /> Export CSV
-                </button>
-                <button
-                  type="button"
-                  disabled={dossierLoading}
-                  onClick={() => handleExportDossier('json')}
-                  className="btn btn-xs bg-[#172638] hover:bg-[#1E2E44] text-[#F1F5F9] border-[#304257] rounded-lg font-bold flex items-center gap-1.5"
-                >
-                  <FileJson className="h-3.5 w-3.5 text-[#00D6B4]" /> Export JSON
-                </button>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">ERC-1155 Multi-Token</span>
+                    <span className="badge badge-xs bg-[#00D6B4] text-[#0B1220] font-bold border-none">PharmaDigitalTwin</span>
+                  </div>
+                  <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
+                    <Layers className="h-4 w-4 text-[#00D6B4]" /> Hybrid Serialized Digital Twin
+                  </div>
+                  <div className="text-xs text-[#94A3B8] space-y-1.5 font-mono">
+                    <div className="flex justify-between">
+                      <span>Batch Supply:</span>
+                      <span className="text-[#F1F5F9]">Fungible Container Token</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Serialized Unit:</span>
+                      <span className="text-[#F1F5F9]">Non-Fungible Unit Token</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Dispense Protection:</span>
+                      <span className="text-[#00D6B4]">Single-Use Burn on Dispense</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">ERC-5192 Soulbound</span>
+                    <span className="badge badge-xs bg-[#A3E635] text-[#0B1220] font-bold border-none">Locked(uint256)</span>
+                  </div>
+                  <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-[#A3E635]" /> Regulatory GxP Accreditations
+                  </div>
+                  <div className="text-xs text-[#94A3B8] space-y-1.5 font-mono">
+                    <div className="flex justify-between">
+                      <span>Transferability:</span>
+                      <span className="text-[#A3E635]">Permanently Non-Transferable</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Accreditation Scope:</span>
+                      <span className="text-[#F1F5F9]">GMP / GDP / 21 CFR Part 11</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Standard ID:</span>
+                      <span className="text-[#94A3B8]">0xb45a3c0e (IERC-5192)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Carrier Escrow</span>
+                    <span className="badge badge-xs bg-[#00D6B4] text-[#0B1220] font-bold border-none">Multi-Oracle</span>
+                  </div>
+                  <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
+                    <Truck className="h-4 w-4 text-[#00D6B4]" /> Cryptographic Quorum Slashing
+                  </div>
+                  <div className="text-xs text-[#94A3B8] space-y-1.5 font-mono">
+                    <div className="flex justify-between">
+                      <span>Consensus Mode:</span>
+                      <span className="text-[#F1F5F9]">ECDSA Threshold Signatures</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Slashing Trigger:</span>
+                      <span className="text-[#F1F5F9]">Verified Excursion Proof</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Indemnity Payee:</span>
+                      <span className="text-[#00D6B4]">Direct Manufacturer Payout</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">ERC-4337 v0.7</span>
+                    <span className="badge badge-xs bg-[#00D6B4] text-[#0B1220] font-bold border-none">Paymaster</span>
+                  </div>
+                  <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-[#00D6B4]" /> Account Abstraction Gas Sponsorship
+                  </div>
+                  <div className="text-xs text-[#94A3B8] space-y-1.5 font-mono">
+                    <div className="flex justify-between">
+                      <span>Operation Struct:</span>
+                      <span className="text-[#F1F5F9]">PackedUserOperation</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Gasless Relay:</span>
+                      <span className="text-[#A3E635]">Active for Stakeholders</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Paymaster Deposit:</span>
+                      <span className="text-[#00D6B4]">2.00 ETH Subsidized</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Groth16 SNARK</span>
+                    <span className="badge badge-xs bg-[#00D6B4] text-[#0B1220] font-bold border-none">ZkColdChain</span>
+                  </div>
+                  <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
+                    <Cpu className="h-4 w-4 text-[#00D6B4]" /> Zero-Knowledge Bound Verification
+                  </div>
+                  <div className="text-xs text-[#94A3B8] space-y-1.5 font-mono">
+                    <div className="flex justify-between">
+                      <span>Elliptic Curve:</span>
+                      <span className="text-[#F1F5F9]">BN254 / alt_bn128</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Public Bounds:</span>
+                      <span className="text-[#F1F5F9]">[2.00 deg C, 8.00 deg C]</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Telemetry Privacy:</span>
+                      <span className="text-[#A3E635]">100% Zero-Leakage Proved</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Timelock Governance</span>
+                    <span className="badge badge-xs bg-[#00D6B4] text-[#0B1220] font-bold border-none">PharmaGovernance</span>
+                  </div>
+                  <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-[#00D6B4]" /> Multi-Sig Administrative Timelock
+                  </div>
+                  <div className="text-xs text-[#94A3B8] space-y-1.5 font-mono">
+                    <div className="flex justify-between">
+                      <span>Guardian Threshold:</span>
+                      <span className="text-[#F1F5F9]">2-of-3 Required</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Critical Parameters:</span>
+                      <span className="text-[#F1F5F9]">Time-Delayed Enactment</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Emergency Pause:</span>
+                      <span className="text-[#A3E635]">Regulator Role Authorized</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
+                <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
+                  <Lock className="h-5 w-5 text-[#00D6B4]" /> Immutable Event Hashes & Anchored Ledger
+                </h3>
+                <p className="text-xs text-[#94A3B8]">
+                  Review cryptographically anchored transaction roots, Merkle batches, and event data hashes.
+                </p>
+                <div className="space-y-3">
+                  {events.map((ev) => (
+                    <div key={ev.id} className="p-4 bg-[#172638] rounded-xl border border-[#304257] font-mono text-xs space-y-1.5">
+                      <div className="flex justify-between text-[#F1F5F9]">
+                        <span>Event: <strong className="text-[#00D6B4]">{ev.eventType}</strong></span>
+                        <span className="text-[#A3E635] font-semibold flex items-center gap-1">
+                          <CheckCircle className="h-3.5 w-3.5" /> Anchored
+                        </span>
+                      </div>
+                      <div className="text-[#94A3B8] truncate">Hash: {ev.eventHash}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-3 border-t border-[#304257] flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    disabled={dossierLoading}
+                    onClick={() => handleExportDossier('pdf')}
+                    className="btn btn-xs bg-[#00D6B4] hover:bg-[#00D6B4]/80 text-[#0B1220] font-bold border-none rounded-lg flex items-center gap-1.5"
+                  >
+                    <FileText className="h-3.5 w-3.5" /> Download Dossier (PDF)
+                  </button>
+                  <button
+                    type="button"
+                    disabled={dossierLoading}
+                    onClick={() => handleExportDossier('csv')}
+                    className="btn btn-xs bg-[#172638] hover:bg-[#1E2E44] text-[#F1F5F9] border-[#304257] rounded-lg font-bold flex items-center gap-1.5"
+                  >
+                    <FileSpreadsheet className="h-3.5 w-3.5 text-[#00D6B4]" /> Export CSV
+                  </button>
+                  <button
+                    type="button"
+                    disabled={dossierLoading}
+                    onClick={() => handleExportDossier('json')}
+                    className="btn btn-xs bg-[#172638] hover:bg-[#1E2E44] text-[#F1F5F9] border-[#304257] rounded-lg font-bold flex items-center gap-1.5"
+                  >
+                    <FileJson className="h-3.5 w-3.5 text-[#00D6B4]" /> Export JSON
+                  </button>
+                </div>
               </div>
             </div>
           )}
