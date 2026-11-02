@@ -131,6 +131,9 @@ export interface Drug {
   patientDosageInstructions?: string;
   patientStorageAdvice?: string;
   patientSideEffects?: string;
+  status?: string;
+  tempMin?: number;
+  tempMax?: number;
   createdAt: string;
 }
 
@@ -700,6 +703,9 @@ export interface FleetVehicle {
   vehicleId: string;
   driverName: string;
   model: string;
+  plate?: string;
+  doorSealStatus?: string;
+  targetPharmacy?: string;
   route: string;
   status: string;
   currentLocation: string;
