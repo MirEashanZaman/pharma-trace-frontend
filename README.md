@@ -2,46 +2,45 @@
 
 PharmaTrace-ES Frontend is a responsive Next.js 14 (App Router) web application designed for pharmaceutical supply chain traceability, decentralized custody attestation, carrier collateral staking, and regulatory compliance inspection.
 
-The interface is built with Tailwind CSS, DaisyUI, and shadcn/ui primitives following the Midnight Navy / Neon Teal design system (`#0B1220`, `#00D6B4`, `#243247`, `#172638`).
+The interface is built with Tailwind CSS, DaisyUI, and accessible component primitives following the Midnight Navy / Neon Teal design system (`#0B1220`, `#00D6B4`, `#243247`, `#172638`).
 
 ---
 
 ## Enterprise Portals and Features
 
-### 1. Public Drug Authenticity Verification (`/verify`)
+### 1. Modular Operations Dashboard (`/dashboard`)
+* **Real-Time Telemetry & Environmental Monitoring**: Live reefer temperature and relative humidity tracking with out-of-spec excursion alerts via the modular `OverviewTab` component.
+* **Smart Contract Telemetry Console**: Telemetry cards powered by `SmartContractTelemetry` providing visibility into Chainlink Automation Upkeep, CCIP Cross-Chain Bridge, Sparse Merkle Tree Rollup, and W3C DID cryptographic anchors.
+* **Dual-Custody Hospital Dispense Terminal**: Requires physician prescription registration and pharmacist digital signature verification.
+* **Administrative Compliance Console**: Live search, role filtering, operator warnings, and temporary account disablement with administrative self-protection safeguards.
+* **Saga Custody State Transitions**: Real-time management across `MANUFACTURED` -> `SHIPPED` -> `RECEIVED` -> `DISPENSED` -> `RECALLED` lifecycle states.
+
+### 2. Public Drug Authenticity Verification (`/verify`)
 * Real-time verification of pharmaceutical serial numbers and SHA-256 cryptographic attestation hashes.
-* Integrated camera QR scanner with simulated scanner audio and haptic sensory feedback.
-* Sample quick-fill test pills for instant evaluation (`SN-2026-AMOX500`, `SN-2026-INSULIN`, `DRUG-001`, `DRUG-002`).
-* Automated fallback resolution for catalog-registered batches with pending custody transitions.
-* Multi-format compliance dossier export engine supporting PDF, CSV, and raw JSON regulatory audit downloads.
+* Integrated camera QR scanner with simulated scanner audio and haptic feedback.
+* Sample test pills for instant validation (`SN-2026-AMOX500`, `SN-2026-INSULIN`, `DRUG-001`, `DRUG-002`).
+* Multi-format compliance dossier export engine supporting certified PDF, CSV, and raw JSON regulatory audit packages.
 
-### 2. Enterprise Operations Dashboard (`/dashboard`)
-* Real-time telemetry monitoring displaying reefer temperature, relative humidity, and transit waypoints.
-* Dual-custody hospital dispense terminal requiring physician prescription and pharmacist verification signatures.
-* Administrative compliance console with live search, role filtering, warning issuance, and temporary account disabling.
-* Mutual administrative protection safeguards preventing actions against fellow administrator accounts.
-* Compensating Saga custody handovers (`MANUFACTURED` -> `SHIPPED` -> `RECEIVED` -> `DISPENSED` -> `RECALLED`).
-
-### 3. User Identity and Profile Management (`/profile`)
+### 3. User Identity and Profile Security (`/profile`)
 * Displays active administrative warnings and compliance review notices.
-* Unique and immutable email identity protection preventing unauthorized email address alterations.
+* Immutable email identity protection preventing unauthorized identity modifications.
 * Fixed supply chain role enforcement locking role assignments post-registration.
-* Form inputs with standardized `Enter your...` descriptive guidance across name, organization, wallet, and password fields.
+* Standardized form ergonomics with descriptive guidance across name, organization, wallet, and password inputs.
 
 ### 4. Carrier Collateral Staking and Slashing (`/staking`)
 * Collateralized ERC-20 security deposit staking for accredited cold-chain logistics carriers.
-* Multi-sensor consensus evaluation evaluating temperature breach criteria.
+* Multi-sensor consensus evaluation assessing temperature breach duration and threshold criteria.
 * Autonomous slashing mechanisms executing on-chain indemnity transfers to pharmaceutical manufacturers.
 
 ### 5. Parametric Delivery Escrow and Keepers (`/escrow`)
 * Delivery-versus-payment (DvP) escrow engine holding commercial settlement funds.
 * Configurable cold-chain boundaries (minimum and maximum temperature thresholds).
-* Chainlink Automation 2.0 relayer integration (`checkUpkeep` / `performUpkeep`).
+* Chainlink Automation relayer integration (`checkUpkeep` / `performUpkeep`).
 
 ### 6. Regulatory Timelock Governance (`/governance`)
 * OpenZeppelin TimelockController multi-signature governance interface.
 * Threshold guardian node validation representing international authorities (FDA, EMA, WHO).
-* Timelock delay enforcement for emergency product recalls and directive execution.
+* Mandatory timelock delay enforcement for emergency product recalls and directive execution.
 
 ### 7. Digital Twin Authentication and Dispensing (`/dispense`)
 * GS1-128 and 2D DataMatrix barcode parsing (GTIN AI 01, Serial AI 21).
@@ -67,7 +66,7 @@ The interface is built with Tailwind CSS, DaisyUI, and shadcn/ui primitives foll
 PharmaTrace-ES adheres strictly to the Midnight Navy / Neon Teal design system across all views:
 
 * **Background Base**: `#0B1220` (Midnight Navy Dark)
-* **Surface Card & Panels**: `#172638` (Deep Slate Slate)
+* **Surface Card & Panels**: `#172638` (Deep Slate Container)
 * **Borders & Dividers**: `#304257` / `#243247` (Subtle Slate Border)
 * **Accent Brand Neon**: `#00D6B4` (Neon Teal Mint)
 * **Accent Hover**: `#00b89a` (Teal Darkened)
@@ -93,7 +92,7 @@ The global header in `components/navigation.tsx` implements responsive modular b
 pharma-trace-frontend/
 ├── app/
 │   ├── catalog/page.tsx               # ISR Dynamic Pharmaceutical Catalog
-│   ├── dashboard/page.tsx             # Interactive Custody Dashboard & Admin Console
+│   ├── dashboard/page.tsx             # Modular Custody Dashboard & Admin Console
 │   ├── dispense/page.tsx              # GS1 DataMatrix & Twin Burn Terminal
 │   ├── escrow/page.tsx                # Parametric Cold-Chain Escrow Portal
 │   ├── governance/page.tsx            # Multi-Sig Regulatory Timelock Governance
@@ -108,13 +107,19 @@ pharma-trace-frontend/
 │   ├── layout.tsx                     # Root Application Layout & Metadata
 │   └── page.tsx                       # Hero Landing Page
 ├── components/
+│   ├── dashboard/
+│   │   ├── smart-contract-telemetry.tsx # Web3 Settlement & Automation Telemetry
+│   │   └── tabs/
+│   │       └── overview-tab.tsx       # Registered Batches & Environmental Meters
 │   ├── navigation.tsx                 # Responsive Header with Enterprise Role Badges
 │   ├── provenance-dag.tsx             # Interactive SVG Provenance DAG Visualizer
-│   └── ui/                            # shadcn/ui Accessible Component Library
+│   └── ui/                            # Accessible UI Component Primitives
 ├── lib/
 │   ├── api.ts                         # Axios API Client SDK with Bearer Interceptor
+│   ├── compliance-report.ts           # PDF, CSV, and JSON Audit Package Generator
 │   ├── utils.ts                       # Class Name Merge Utility (clsx + tailwind-merge)
 │   └── web3.ts                        # Ethers.js Wallet Connection & EIP-191 Signer
+├── Dockerfile                         # Multi-Stage Non-Root Standalone Docker Build
 ├── package.json
 ├── tailwind.config.ts
 └── tsconfig.json
@@ -125,9 +130,8 @@ pharma-trace-frontend/
 ## Getting Started
 
 ### Prerequisites
-
-* Node.js v18+ or v20+
-* Running PharmaTrace Backend Service (Port 3500)
+- Node.js >= 20.0.0
+- Running PharmaTrace Backend Service (Port 3500)
 
 ### Environment Configuration
 
@@ -137,22 +141,19 @@ Create a `.env.local` file in `pharma-trace-frontend`:
 NEXT_PUBLIC_API_URL=http://localhost:3500
 ```
 
-### Installation and Development
+### Development Execution
 
 ```bash
-# Install dependencies
 npm install
-
-# Start development server on port 3001
 npm run dev -- -p 3001
 ```
 
 Access the application in your browser at `http://localhost:3001`.
 
-### Production Build
+### Production Build Verification
 
 ```bash
-# Build optimized production bundle
+# Compile and verify all 21 static/dynamic pages
 npm run build
 
 # Start production server
@@ -163,4 +164,4 @@ npm run start -- -p 3001
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for full details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
