@@ -4895,7 +4895,7 @@ export default function DashboardPage() {
                       <button
                         onClick={() => {
                           const fefoCandidates = [...drugs]
-                            .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime())
+                            .sort((a, b) => new Date(a.expiryDate || 0).getTime() - new Date(b.expiryDate || 0).getTime())
                             .slice(0, 3)
                             .map((d) => d.serialNumber);
                           setManifestSelectedSerials(fefoCandidates);
@@ -4923,7 +4923,7 @@ export default function DashboardPage() {
                         </thead>
                         <tbody className="divide-y divide-[#304257]">
                           {[...drugs]
-                            .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime())
+                            .sort((a, b) => new Date(a.expiryDate || 0).getTime() - new Date(b.expiryDate || 0).getTime())
                             .map((d) => {
                               const days = getDaysToExpiry(d.expiryDate);
                               return (
@@ -4939,7 +4939,7 @@ export default function DashboardPage() {
                                     </span>
                                   </td>
                                   <td className="font-mono text-[#F1F5F9]">
-                                    {new Date(d.expiryDate).toLocaleDateString()}
+                                    {d.expiryDate ? new Date(d.expiryDate).toLocaleDateString() : 'N/A'}
                                   </td>
                                   <td>
                                     {days === null ? (
@@ -6009,7 +6009,7 @@ export default function DashboardPage() {
                         </thead>
                         <tbody className="divide-y divide-[#304257]">
                           {[...drugs]
-                            .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime())
+                            .sort((a, b) => new Date(a.expiryDate || 0).getTime() - new Date(b.expiryDate || 0).getTime())
                             .map((d) => {
                               const days = getDaysToExpiry(d.expiryDate);
                               return (
@@ -6025,7 +6025,7 @@ export default function DashboardPage() {
                                     </span>
                                   </td>
                                   <td className="font-mono text-[#F1F5F9]">
-                                    {new Date(d.expiryDate).toLocaleDateString()}
+                                    {d.expiryDate ? new Date(d.expiryDate).toLocaleDateString() : 'N/A'}
                                   </td>
                                   <td>
                                     {days === null ? (
