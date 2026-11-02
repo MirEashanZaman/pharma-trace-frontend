@@ -1,4 +1,4 @@
-﻿FROM node:20-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -22,6 +22,10 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.mjs ./next.config.mjs
 
+RUN chown -R node:node /app
+
+USER node
+
 EXPOSE 3000
 
-CMD [npx, next, start, -p, 3000]
+CMD ["npx", "next", "start", "-p", "3000"]
