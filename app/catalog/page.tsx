@@ -94,7 +94,8 @@ const FALLBACK_CATALOG: CatalogDrug[] = [
 
 async function getCatalogDrugs(): Promise<CatalogDrug[]> {
   try {
-    const res = await fetch('http://localhost:3001/api/drugs', {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3500';
+    const res = await fetch(`${apiBase}/drugs`, {
       next: { revalidate: 60 },
     });
     if (!res.ok) {
