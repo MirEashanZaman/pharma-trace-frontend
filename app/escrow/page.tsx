@@ -339,7 +339,7 @@ export default function EscrowPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-[#0B1220] border border-[#304257] rounded-xl p-4">
+            <div className="bg-[#0B1220] border border-[#304257] rounded-xl p-4 min-w-0">
               <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Keeper Upkeep Needed</span>
               <div className="mt-2 flex items-center gap-2">
                 <span
@@ -354,7 +354,7 @@ export default function EscrowPage() {
               </div>
             </div>
 
-            <div className="bg-[#0B1220] border border-[#304257] rounded-xl p-4">
+            <div className="bg-[#0B1220] border border-[#304257] rounded-xl p-4 min-w-0">
               <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Upkeep Perform Bytes</span>
               <div className="text-xs font-mono text-[#00D6B4] mt-2 truncate">
                 {upkeepStatus?.performData && upkeepStatus.performData !== '0x'
@@ -363,9 +363,9 @@ export default function EscrowPage() {
               </div>
             </div>
 
-            <div className="bg-[#0B1220] border border-[#304257] rounded-xl p-4">
+            <div className="bg-[#0B1220] border border-[#304257] rounded-xl p-4 min-w-0">
               <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Last Relayer Execution</span>
-              <div className="text-xs font-mono text-cyan-300 mt-2">
+              <div className="text-xs font-mono text-cyan-300 mt-2 truncate">
                 {pollResult?.executedOrders?.length
                   ? `${pollResult.executedOrders.length} Order(s) Processed`
                   : 'Upkeep Synchronized'}
@@ -390,7 +390,7 @@ export default function EscrowPage() {
                   type="text"
                   value={serialNumber}
                   onChange={(e) => setSerialNumber(e.target.value)}
-                  placeholder="Enter your drug serial number"
+                  placeholder="e.g. SN-COLD-VACCINE-01"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -402,7 +402,7 @@ export default function EscrowPage() {
                     type="text"
                     value={sellerAddress}
                     onChange={(e) => setSellerAddress(e.target.value)}
-                    placeholder="Enter your seller wallet address (0x...)"
+                    placeholder="0x7099... (Seller Wallet)"
                     className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                 </div>
@@ -412,7 +412,7 @@ export default function EscrowPage() {
                     type="text"
                     value={buyerAddress}
                     onChange={(e) => setBuyerAddress(e.target.value)}
-                    placeholder="Enter your buyer wallet address (0x...)"
+                    placeholder="0x3C44... (Buyer Wallet)"
                     className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                 </div>
@@ -425,7 +425,7 @@ export default function EscrowPage() {
                     type="number"
                     value={amountEth}
                     onChange={(e) => setAmountEth(e.target.value)}
-                    placeholder="Enter your escrow amount (ETH)"
+                    placeholder="5.0"
                     className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                 </div>
@@ -435,7 +435,7 @@ export default function EscrowPage() {
                     type="number"
                     value={minTemp}
                     onChange={(e) => setMinTemp(e.target.value)}
-                    placeholder="Enter your min temp (°C)"
+                    placeholder="2.0"
                     className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                 </div>
@@ -445,7 +445,7 @@ export default function EscrowPage() {
                     type="number"
                     value={maxTemp}
                     onChange={(e) => setMaxTemp(e.target.value)}
-                    placeholder="Enter your max temp (°C)"
+                    placeholder="8.0"
                     className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                 </div>
@@ -457,7 +457,7 @@ export default function EscrowPage() {
                   type="number"
                   value={timeoutSeconds}
                   onChange={(e) => setTimeoutSeconds(e.target.value)}
-                  placeholder="Enter your delivery timeout in seconds"
+                  placeholder="86400 (24h)"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -480,10 +480,10 @@ export default function EscrowPage() {
               </h2>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="text"
-                placeholder="Enter your escrow order ID (0x...)"
+                placeholder="0x... (Escrow Order ID)"
                 value={searchOrderId}
                 onChange={(e) => setSearchOrderId(e.target.value)}
                 className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
@@ -491,17 +491,17 @@ export default function EscrowPage() {
               <button
                 onClick={() => handleFetchOrder(searchOrderId)}
                 disabled={loading}
-                className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl px-4"
+                className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl px-4 shrink-0"
               >
                 Inspect
               </button>
             </div>
 
             {activeOrder ? (
-              <div className="p-4 bg-[#0B1220] rounded-xl border border-[#304257] space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#94A3B8]">Order Identifier</span>
-                  <span className="font-mono text-xs text-[#00D6B4] font-bold truncate max-w-[200px]">
+              <div className="p-4 bg-[#0B1220] rounded-xl border border-[#304257] space-y-3 min-w-0">
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <span className="text-xs text-[#94A3B8] shrink-0">Order Identifier</span>
+                  <span className="font-mono text-xs text-[#00D6B4] font-bold truncate text-right min-w-0 flex-1">
                     {activeOrder.orderId}
                   </span>
                 </div>
@@ -528,9 +528,9 @@ export default function EscrowPage() {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#94A3B8]">Serial</span>
-                  <span className="font-mono text-xs text-[#F1F5F9]">{activeOrder.serialNumber}</span>
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <span className="text-xs text-[#94A3B8] shrink-0">Serial</span>
+                  <span className="font-mono text-xs text-[#F1F5F9] truncate text-right min-w-0 flex-1">{activeOrder.serialNumber}</span>
                 </div>
 
                 <div className="pt-2 border-t border-[#304257] space-y-2">
@@ -569,7 +569,7 @@ export default function EscrowPage() {
         </div>
 
         <div className="bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#304257] pb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#304257] pb-4">
             <div>
               <h2 className="text-lg font-bold text-[#F1F5F9] flex items-center gap-2">
                 <Cpu className="h-5 w-5 text-[#00D6B4]" />
@@ -583,14 +583,14 @@ export default function EscrowPage() {
             <button
               onClick={handleTestSponsorship}
               disabled={loading}
-              className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl"
+              className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl shrink-0"
             >
               Simulate Paymaster Sponsorship
             </button>
           </div>
 
           {aaStatus && (
-            <div className="p-4 bg-[#0B1220] rounded-xl border border-[#304257] space-y-2 text-xs font-mono">
+            <div className="p-4 bg-[#0B1220] rounded-xl border border-[#304257] space-y-2 text-xs font-mono min-w-0">
               <div className="flex items-center justify-between text-emerald-400 font-bold">
                 <span>PAYMASTER SPONSORSHIP STATUS</span>
                 <span>SPONSORED (VALID)</span>
@@ -598,7 +598,7 @@ export default function EscrowPage() {
               <div className="text-[#94A3B8] break-all">
                 PaymasterAndData: <span className="text-[#00D6B4]">{aaStatus.paymasterAndData}</span>
               </div>
-              <div className="text-[#94A3B8]">
+              <div className="text-[#94A3B8] break-all">
                 Sponsor Address: <span className="text-[#F1F5F9]">{aaStatus.paymasterAddress}</span>
               </div>
             </div>
