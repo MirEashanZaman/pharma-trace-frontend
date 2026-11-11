@@ -264,31 +264,31 @@ export default function StakingPage() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-[#172638] border border-[#304257] rounded-xl p-5">
+          <div className="bg-[#172638] border border-[#304257] rounded-xl p-5 min-w-0">
             <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Total Staked Collateral</span>
-            <div className="text-2xl font-black text-[#00D6B4] mt-1 font-mono">
+            <div className="text-2xl font-black text-[#00D6B4] mt-1 font-mono truncate">
               {accountData?.totalStaked != null ? `${Number(accountData.totalStaked).toLocaleString()} USDC` : '0 USDC'}
             </div>
             <span className="text-[11px] text-[#94A3B8] mt-1 block">ERC-20 Staked Balance</span>
           </div>
 
-          <div className="bg-[#172638] border border-[#304257] rounded-xl p-5">
+          <div className="bg-[#172638] border border-[#304257] rounded-xl p-5 min-w-0">
             <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Active Locked Bonds</span>
-            <div className="text-2xl font-black text-amber-400 mt-1 font-mono">
+            <div className="text-2xl font-black text-amber-400 mt-1 font-mono truncate">
               {accountData?.lockedInBonds != null ? `${Number(accountData.lockedInBonds).toLocaleString()} USDC` : '0 USDC'}
             </div>
             <span className="text-[11px] text-[#94A3B8] mt-1 block">Committed to Transit SLAs</span>
           </div>
 
-          <div className="bg-[#172638] border border-[#304257] rounded-xl p-5">
+          <div className="bg-[#172638] border border-[#304257] rounded-xl p-5 min-w-0">
             <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Available Capacity</span>
-            <div className="text-2xl font-black text-emerald-400 mt-1 font-mono">
+            <div className="text-2xl font-black text-emerald-400 mt-1 font-mono truncate">
               {accountData ? `${(Number(accountData.totalStaked) - Number(accountData.lockedInBonds)).toLocaleString()} USDC` : '0 USDC'}
             </div>
             <span className="text-[11px] text-[#94A3B8] mt-1 block">Free for New Shipments</span>
           </div>
 
-          <div className="bg-[#172638] border border-[#304257] rounded-xl p-5">
+          <div className="bg-[#172638] border border-[#304257] rounded-xl p-5 min-w-0">
             <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Accreditation Status</span>
             <div className="mt-2 flex items-center gap-2">
               <span
@@ -301,7 +301,7 @@ export default function StakingPage() {
                 {accountData?.isAccredited ? 'Accredited Carrier' : 'Unaccredited'}
               </span>
             </div>
-            <span className="text-[11px] text-[#94A3B8] mt-1 block font-mono">
+            <span className="text-[11px] text-[#94A3B8] mt-1 block font-mono truncate">
               Slashed: {accountData?.totalSlashed || 0} USDC
             </span>
           </div>
@@ -319,17 +319,18 @@ export default function StakingPage() {
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-[#94A3B8] block mb-1">Carrier Wallet Address</label>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     value={carrierAddress}
                     onChange={(e) => setCarrierAddress(e.target.value)}
+                    placeholder="0x7099... (Carrier Address)"
                     className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                   <button
                     onClick={() => loadAccountAndBonds(carrierAddress)}
                     disabled={loading}
-                    className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl px-4"
+                    className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl px-4 shrink-0"
                   >
                     Query
                   </button>
@@ -340,18 +341,18 @@ export default function StakingPage() {
                 <span className="text-xs font-bold text-[#00D6B4] uppercase tracking-wider block">
                   Deposit Collateral Stake
                 </span>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="number"
                     value={depositAmount}
                     onChange={(e) => setDepositAmount(e.target.value)}
-                    placeholder="Enter your deposit stake amount (USDC)"
+                    placeholder="e.g. 10000"
                     className="input input-sm w-full bg-[#172638] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                   <button
                     onClick={handleDeposit}
                     disabled={loading}
-                    className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none font-bold rounded-xl px-5"
+                    className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none font-bold rounded-xl px-5 shrink-0"
                   >
                     Stake
                   </button>
@@ -362,18 +363,18 @@ export default function StakingPage() {
                 <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">
                   Withdraw Unlocked Collateral
                 </span>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="number"
                     value={unstakeAmount}
                     onChange={(e) => setUnstakeAmount(e.target.value)}
-                    placeholder="Enter your withdrawal amount (USDC)"
+                    placeholder="e.g. 2000"
                     className="input input-sm w-full bg-[#172638] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                   <button
                     onClick={handleUnstake}
                     disabled={loading}
-                    className="btn btn-sm bg-amber-500 hover:bg-amber-600 text-[#0B1220] border-none font-bold rounded-xl px-5"
+                    className="btn btn-sm bg-amber-500 hover:bg-amber-600 text-[#0B1220] border-none font-bold rounded-xl px-5 shrink-0"
                   >
                     Unstake
                   </button>
@@ -397,6 +398,7 @@ export default function StakingPage() {
                   type="text"
                   value={shipmentId}
                   onChange={(e) => setShipmentId(e.target.value)}
+                  placeholder="e.g. SHIP-COLD-2026-08"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -407,6 +409,7 @@ export default function StakingPage() {
                   type="number"
                   value={bondAmount}
                   onChange={(e) => setBondAmount(e.target.value)}
+                  placeholder="e.g. 3000"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -417,6 +420,7 @@ export default function StakingPage() {
                   type="text"
                   value={manufacturerAddress}
                   onChange={(e) => setManufacturerAddress(e.target.value)}
+                  placeholder="0x3C44... (Manufacturer Address)"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -455,7 +459,7 @@ export default function StakingPage() {
             <div className="overflow-x-auto">
               <table className="table table-sm w-full text-xs">
                 <thead>
-                  <tr className="border-b border-[#304257] text-[#94A3B8]">
+                  <tr className="border-b border-[#304257] text-[#94A3B8] whitespace-nowrap">
                     <th>Shipment ID</th>
                     <th>Bond Amount</th>
                     <th>Status</th>
@@ -466,7 +470,7 @@ export default function StakingPage() {
                 </thead>
                 <tbody>
                   {bondsList.map((bond) => (
-                    <tr key={bond.shipmentId} className="border-b border-[#304257]/50 hover:bg-[#243247]/40">
+                    <tr key={bond.shipmentId} className="border-b border-[#304257]/50 hover:bg-[#243247]/40 whitespace-nowrap">
                       <td className="font-mono font-bold text-[#00D6B4]">{bond.shipmentId}</td>
                       <td className="font-mono">{bond.bondAmount} USDC</td>
                       <td>
@@ -520,18 +524,18 @@ export default function StakingPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             <div className="md:col-span-2">
               <label className="text-xs font-bold text-[#94A3B8] block mb-1">Manufacturer Address</label>
               <input
                 type="text"
                 value={manufacturerAddress}
                 onChange={(e) => setManufacturerAddress(e.target.value)}
+                placeholder="0x3C44... (Manufacturer Address)"
                 className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-transparent block mb-1">Action</label>
               <button
                 onClick={handleCheckIndemnity}
                 className="btn btn-sm w-full bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl"
@@ -542,7 +546,7 @@ export default function StakingPage() {
           </div>
 
           {manufacturerIndemnity != null && (
-            <div className="p-4 bg-[#0B1220] rounded-xl border border-[#304257] flex items-center justify-between">
+            <div className="p-4 bg-[#0B1220] rounded-xl border border-[#304257] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
               <span className="text-xs text-[#94A3B8]">Total Indemnity Compensated to Manufacturer:</span>
               <span className="text-lg font-black text-[#00D6B4] font-mono">
                 {manufacturerIndemnity.toLocaleString()} USDC
