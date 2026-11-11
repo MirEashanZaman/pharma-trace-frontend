@@ -128,7 +128,7 @@ export default function DispensePage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={handleSimulateNfc}
                 className="btn btn-sm bg-[#172638] hover:bg-[#243247] text-[#00D6B4] border border-[#243247] rounded-xl font-bold flex items-center gap-1.5"
@@ -171,7 +171,7 @@ export default function DispensePage() {
                     type="text"
                     value={inputGtin}
                     onChange={(e) => setInputGtin(e.target.value)}
-                    placeholder="Enter your GS1 GTIN (e.g. 00844514000015)"
+                    placeholder="e.g. 00844514000015"
                     className="w-full bg-[#0B1220] border border-[#243247] rounded-xl px-3.5 py-2.5 text-sm font-mono text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4]"
                   />
                 </div>
@@ -184,7 +184,7 @@ export default function DispensePage() {
                     type="text"
                     value={inputSerial}
                     onChange={(e) => setInputSerial(e.target.value)}
-                    placeholder="Enter your serial number (e.g. SN-TWIN-9901)"
+                    placeholder="e.g. SN-TWIN-9901"
                     className="w-full bg-[#0B1220] border border-[#243247] rounded-xl px-3.5 py-2.5 text-sm font-mono text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4]"
                   />
                 </div>
@@ -197,6 +197,7 @@ export default function DispensePage() {
                     type="text"
                     value={dispenserAddress}
                     onChange={(e) => setDispenserAddress(e.target.value)}
+                    placeholder="0x90F7... (Dispenser Wallet)"
                     className="w-full bg-[#0B1220] border border-[#243247] rounded-xl px-3.5 py-2.5 text-xs font-mono text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4]"
                   />
                 </div>
@@ -217,7 +218,7 @@ export default function DispensePage() {
             </div>
 
             {nfcState && (
-              <div className="bg-[#172638] border border-[#243247] rounded-2xl p-6">
+              <div className="bg-[#172638] border border-[#243247] rounded-2xl p-6 min-w-0">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2 text-sm font-bold text-[#00D6B4]">
                     <Cpu className="h-4 w-4" />
@@ -245,14 +246,14 @@ export default function DispensePage() {
                   </div>
                   <div className="flex justify-between">
                     <span>AES-128 CMAC:</span>
-                    <span className="text-[#F1F5F9]">{nfcState.cmac.slice(0, 10)}...</span>
+                    <span className="text-[#F1F5F9] truncate max-w-[150px]">{nfcState.cmac.slice(0, 10)}...</span>
                   </div>
                 </div>
               </div>
             )}
 
             {escrowCheck && (
-              <div className="bg-[#172638] border border-[#243247] rounded-2xl p-6">
+              <div className="bg-[#172638] border border-[#243247] rounded-2xl p-6 min-w-0">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2 text-sm font-bold text-[#00D6B4]">
                     <Activity className="h-4 w-4" />
@@ -262,15 +263,15 @@ export default function DispensePage() {
                     {escrowCheck.upkeepNeeded ? 'UPKEEP NEEDED' : 'IDLE'}
                   </span>
                 </div>
-                <div className="text-xs text-[#94A3B8]">
+                <div className="text-xs text-[#94A3B8] break-words">
                   {escrowCheck.reason || 'No active escrow requires settlement or refund'}
                 </div>
               </div>
             )}
           </div>
 
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-[#172638] border border-[#243247] rounded-2xl p-6 shadow-sm">
+          <div className="lg:col-span-2 space-y-6 min-w-0">
+            <div className="bg-[#172638] border border-[#243247] rounded-2xl p-6 shadow-sm min-w-0">
               <div className="flex items-center justify-between border-b border-[#243247] pb-4 mb-4">
                 <div className="flex items-center gap-2">
                   <Layers className="h-5 w-5 text-[#00D6B4]" />
@@ -294,21 +295,21 @@ export default function DispensePage() {
               {twinData?.exists ? (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-[#0B1220] p-4 rounded-xl border border-[#243247]">
+                    <div className="bg-[#0B1220] p-4 rounded-xl border border-[#243247] min-w-0">
                       <div className="text-xs text-[#94A3B8] mb-1">On-Chain Token ID</div>
                       <div className="text-xs font-mono text-[#00D6B4] truncate">
                         {twinData?.details?.tokenId || '0x...'}
                       </div>
                     </div>
 
-                    <div className="bg-[#0B1220] p-4 rounded-xl border border-[#243247]">
+                    <div className="bg-[#0B1220] p-4 rounded-xl border border-[#243247] min-w-0">
                       <div className="text-xs text-[#94A3B8] mb-1">Current Custodian</div>
                       <div className="text-xs font-mono text-[#F1F5F9] truncate">
                         {twinData?.holder || '0x0000000000000000000000000000000000000000'}
                       </div>
                     </div>
 
-                    <div className="bg-[#0B1220] p-4 rounded-xl border border-[#243247]">
+                    <div className="bg-[#0B1220] p-4 rounded-xl border border-[#243247] min-w-0">
                       <div className="text-xs text-[#94A3B8] mb-1">Authenticity & Expiry</div>
                       <div className="text-sm font-semibold text-[#F1F5F9] flex items-center gap-1.5">
                         {twinData?.isAuthentic ? (
@@ -325,7 +326,7 @@ export default function DispensePage() {
                       </div>
                     </div>
 
-                    <div className="bg-[#0B1220] p-4 rounded-xl border border-[#243247]">
+                    <div className="bg-[#0B1220] p-4 rounded-xl border border-[#243247] min-w-0">
                       <div className="text-xs text-[#94A3B8] mb-1">Anti-Recirculation Defense</div>
                       <div className="text-sm font-semibold flex items-center gap-1.5">
                         {twinData?.isBurned ? (
@@ -351,7 +352,7 @@ export default function DispensePage() {
                       <button
                         onClick={handleBurn}
                         disabled={loading || twinData?.isBurned}
-                        className={`btn btn-sm rounded-xl font-bold flex items-center gap-2 ${twinData?.isBurned ? 'bg-[#243247] text-[#94A3B8] cursor-not-allowed' : 'bg-rose-500 hover:bg-rose-600 text-[#F1F5F9] border-none'}`}
+                        className={`btn btn-sm rounded-xl font-bold flex items-center justify-center gap-2 shrink-0 ${twinData?.isBurned ? 'bg-[#243247] text-[#94A3B8] cursor-not-allowed' : 'bg-rose-500 hover:bg-rose-600 text-[#F1F5F9] border-none'}`}
                       >
                         <Flame className="h-4 w-4" />
                         <span>{twinData?.isBurned ? 'Already Burned' : 'Dispense & Burn Twin'}</span>
@@ -379,7 +380,7 @@ export default function DispensePage() {
             )}
 
             {linksetData && (
-              <div className="bg-[#172638] border border-[#243247] rounded-2xl p-6 shadow-sm">
+              <div className="bg-[#172638] border border-[#243247] rounded-2xl p-6 shadow-sm min-w-0">
                 <div className="flex items-center gap-2 border-b border-[#243247] pb-3 mb-4">
                   <Link2 className="h-4 w-4 text-[#00D6B4]" />
                   <h3 className="text-sm font-bold text-[#F1F5F9]">RFC 9264 GS1 Digital Linkset</h3>
@@ -391,28 +392,28 @@ export default function DispensePage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   {linksetData['gs1:pip'] && (
-                    <div className="bg-[#0B1220] p-3 rounded-xl border border-[#243247]">
+                    <div className="bg-[#0B1220] p-3 rounded-xl border border-[#243247] min-w-0">
                       <div className="text-[#00D6B4] font-bold mb-1">gs1:pip (Patient e-PIL)</div>
                       <div className="text-[#94A3B8] truncate">{linksetData['gs1:pip'][0]?.href}</div>
                     </div>
                   )}
 
                   {linksetData['gs1:hasBatchLot'] && (
-                    <div className="bg-[#0B1220] p-3 rounded-xl border border-[#243247]">
+                    <div className="bg-[#0B1220] p-3 rounded-xl border border-[#243247] min-w-0">
                       <div className="text-[#00D6B4] font-bold mb-1">gs1:hasBatchLot (CoA)</div>
                       <div className="text-[#94A3B8] truncate">{linksetData['gs1:hasBatchLot'][0]?.href}</div>
                     </div>
                   )}
 
                   {linksetData['gs1:epcis'] && (
-                    <div className="bg-[#0B1220] p-3 rounded-xl border border-[#243247]">
+                    <div className="bg-[#0B1220] p-3 rounded-xl border border-[#243247] min-w-0">
                       <div className="text-[#00D6B4] font-bold mb-1">gs1:epcis (EPCIS 2.0 Repository)</div>
                       <div className="text-[#94A3B8] truncate">{linksetData['gs1:epcis'][0]?.href}</div>
                     </div>
                   )}
 
                   {linksetData['gs1:certificationInfo'] && (
-                    <div className="bg-[#0B1220] p-3 rounded-xl border border-[#243247]">
+                    <div className="bg-[#0B1220] p-3 rounded-xl border border-[#243247] min-w-0">
                       <div className="text-[#00D6B4] font-bold mb-1">gs1:certificationInfo (FDA DSCSA)</div>
                       <div className="text-[#94A3B8] truncate">{linksetData['gs1:certificationInfo'][0]?.href}</div>
                     </div>
