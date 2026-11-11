@@ -16,20 +16,20 @@ export default function HomePage() {
             <span className="font-extrabold text-lg tracking-tight text-[#F1F5F9]">PharmaTrace-ES</span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Link
               href="/provenance"
-              className="text-xs font-semibold text-[#00D6B4] hover:text-[#00b89a] transition px-3 py-1.5 flex items-center gap-1"
+              className="text-xs font-semibold text-[#00D6B4] hover:text-[#00b89a] transition px-2 sm:px-3 py-1.5 flex items-center gap-1"
             >
               Provenance DAG
             </Link>
             <Link
               href="/verify"
-              className="text-xs font-semibold text-[#94A3B8] hover:text-[#F1F5F9] transition px-3 py-1.5 flex items-center gap-1"
+              className="text-xs font-semibold text-[#94A3B8] hover:text-[#F1F5F9] transition px-2 sm:px-3 py-1.5 flex items-center gap-1"
             >
               Public Verify
             </Link>
-            <Button asChild size="sm" className="bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] font-bold rounded-xl shadow-sm">
+            <Button asChild size="sm" className="bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] font-bold rounded-xl shadow-sm text-xs px-3 sm:px-4">
               <Link href="/dashboard">
                 Enterprise Portal
               </Link>
@@ -52,19 +52,19 @@ export default function HomePage() {
           Event Sourcing, CQRS, and Saga-validated custody transitions anchored immutably to Ethereum/EVM smart contracts with zero-overhead off-chain IoT telemetry.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
-          <Button asChild size="lg" className="bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] font-bold rounded-xl px-8 text-sm shadow-md">
-            <Link href="/dashboard" className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center max-w-2xl">
+          <Button asChild size="lg" className="w-full sm:w-auto bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] font-bold rounded-xl px-8 text-sm shadow-md">
+            <Link href="/dashboard" className="flex items-center justify-center gap-2">
               Enterprise Dashboard <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
-          <Button asChild variant="secondary" size="lg" className="border-[#00D6B4]/40 text-[#00D6B4] hover:bg-[#243247] px-8 text-sm shadow-sm">
-            <Link href="/provenance" className="flex items-center gap-2">
+          <Button asChild variant="secondary" size="lg" className="w-full sm:w-auto border-[#00D6B4]/40 text-[#00D6B4] hover:bg-[#243247] px-8 text-sm shadow-sm">
+            <Link href="/provenance" className="flex items-center justify-center gap-2">
               Audit Provenance DAG
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="border-[#304257] bg-[#243247] text-[#F1F5F9] hover:bg-[#172638] px-8 font-semibold text-sm shadow-sm">
-            <Link href="/verify">
+          <Button asChild variant="outline" size="lg" className="w-full sm:w-auto border-[#304257] bg-[#243247] text-[#F1F5F9] hover:bg-[#172638] px-8 font-semibold text-sm shadow-sm">
+            <Link href="/verify" className="flex items-center justify-center">
               Public Medicine Verification
             </Link>
           </Button>
