@@ -2905,7 +2905,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-inner">
                       <QRCodeSVG
-                        value={`https://pharmatrace.io/verify/${selectedSerial}`}
+                        value={typeof window !== 'undefined' ? `${window.location.origin}/verify/${selectedSerial}` : `/verify/${selectedSerial}`}
                         size={140}
                         bgColor={"#ffffff"}
                         fgColor={"#0B1220"}
@@ -7974,7 +7974,7 @@ export default function DashboardPage() {
               {bulkResultSerials.map((sn) => (
                 <div key={sn} className="p-3 bg-white rounded-lg flex flex-col items-center justify-center text-center text-[#0B1220]">
                   <QRCodeSVG
-                    value={`https://pharmatrace.io/verify/${sn}`}
+                    value={typeof window !== 'undefined' ? `${window.location.origin}/verify/${sn}` : `/verify/${sn}`}
                     size={90}
                     bgColor={"#ffffff"}
                     fgColor={"#0B1220"}
