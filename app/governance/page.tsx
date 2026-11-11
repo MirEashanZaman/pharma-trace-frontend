@@ -191,7 +191,7 @@ export default function GovernancePage() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="badge badge-sm bg-[#00D6B4]/20 text-[#00D6B4] border border-[#00D6B4]/30 font-mono font-bold">
-                  EVM CONTRACT: PharmaTimelockController.sol
+                  EVM CONTRACT: PharmaGovernanceTimelock.sol
                 </span>
                 <span className="badge badge-sm bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono font-bold">
                   MULTI-SIG REGULATORY TIMELOCK
@@ -305,7 +305,7 @@ export default function GovernancePage() {
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter your proposal directive description"
+                  placeholder="e.g. Emergency Recall: Contaminated Paracetamol Lot 2026-09"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -316,7 +316,7 @@ export default function GovernancePage() {
                   type="text"
                   value={targetAddress}
                   onChange={(e) => setTargetAddress(e.target.value)}
-                  placeholder="Enter your target contract address (0x...)"
+                  placeholder="0x... (Target Contract Address)"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -329,7 +329,7 @@ export default function GovernancePage() {
                   type="text"
                   value={callDataHex}
                   onChange={(e) => setCallDataHex(e.target.value)}
-                  placeholder="Enter your calldata payload (0x...)"
+                  placeholder="0x... (Encoded Calldata Payload)"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -340,7 +340,7 @@ export default function GovernancePage() {
                   type="number"
                   value={delaySeconds}
                   onChange={(e) => setDelaySeconds(e.target.value)}
-                  placeholder="Enter your timelock delay in seconds"
+                  placeholder="86400 (Delay in seconds)"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
