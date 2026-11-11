@@ -85,7 +85,8 @@ const FALLBACK_LEDGER: LedgerBatch[] = [
 
 async function getLiveLedgerData(): Promise<LedgerBatch[]> {
   try {
-    const res = await fetch('http://localhost:3001/api/drugs', {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3500';
+    const res = await fetch(`${apiBase}/drugs`, {
       cache: 'no-store',
     });
     if (!res.ok) {
