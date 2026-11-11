@@ -746,10 +746,10 @@ export function ProvenanceDagVisualizer({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-3 flex flex-col space-y-3">
+        <div className="lg:col-span-3 flex flex-col space-y-3 min-w-0">
           <div className="flex flex-wrap items-center justify-between gap-2 bg-[#243247] p-2.5 rounded-xl border border-[#304257] text-xs">
-            <div className="flex items-center gap-2 flex-1 max-w-sm">
-              <Search className="h-3.5 w-3.5 text-[#94A3B8]" />
+            <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-sm">
+              <Search className="h-3.5 w-3.5 text-[#94A3B8] shrink-0" />
               <input
                 type="text"
                 placeholder="Search node, hash, actor, or identifier..."
@@ -759,15 +759,15 @@ export function ProvenanceDagVisualizer({
               />
             </div>
 
-            <div className="flex items-center gap-1.5 overflow-x-auto">
-              <span className="text-[11px] font-semibold text-[#94A3B8] mr-1 flex items-center gap-1">
+            <div className="flex items-center gap-1.5 overflow-x-auto max-w-full">
+              <span className="text-[11px] font-semibold text-[#94A3B8] mr-1 flex items-center gap-1 shrink-0">
                 <Filter className="h-3 w-3" /> Filter:
               </span>
               {['ALL', 'MANUFACTURER', 'LOGISTICS', 'PHARMACY', 'PACKAGING'].map((role) => (
                 <button
                   key={role}
                   onClick={() => setFilterRole(role)}
-                  className={`btn btn-xs rounded-lg text-[10px] font-bold ${
+                  className={`btn btn-xs rounded-lg text-[10px] font-bold shrink-0 ${
                     filterRole === role
                       ? 'bg-[#00D6B4] text-[#0B1220]'
                       : 'bg-[#172638] text-[#94A3B8] border border-[#304257] hover:text-[#F1F5F9]'
@@ -778,7 +778,7 @@ export function ProvenanceDagVisualizer({
               ))}
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
               <button
                 onClick={() => handleZoom(0.15)}
                 className="btn btn-xs btn-square bg-[#172638] border-[#304257] text-[#94A3B8] hover:text-[#00D6B4]"
@@ -1090,7 +1090,7 @@ export function ProvenanceDagVisualizer({
               </g>
             </svg>
 
-            <div className="absolute bottom-3 left-3 bg-[#172638]/90 backdrop-blur border border-[#304257] px-3 py-1.5 rounded-xl text-[10px] text-[#94A3B8] flex items-center gap-4">
+            <div className="absolute bottom-3 left-3 bg-[#172638]/90 backdrop-blur border border-[#304257] px-3 py-1.5 rounded-xl text-[10px] text-[#94A3B8] flex flex-wrap items-center gap-2 sm:gap-4 max-w-[calc(100%-24px)]">
               <span className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-[#00D6B4]"></span> Acyclic DAG Verified
               </span>
@@ -1104,7 +1104,7 @@ export function ProvenanceDagVisualizer({
           </div>
         </div>
 
-        <div className="bg-[#243247] p-5 rounded-2xl border border-[#304257] shadow-sm flex flex-col justify-between space-y-4">
+        <div className="bg-[#243247] p-5 rounded-2xl border border-[#304257] shadow-sm flex flex-col justify-between space-y-4 min-w-0">
           <div className="space-y-4">
             <div className="border-b border-[#304257] pb-3">
               <div className="flex items-center justify-between">
