@@ -172,7 +172,7 @@ export function ESignatureModal({
                 type="password"
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
-                placeholder="Enter authorized signing PIN"
+                placeholder="Enter your authorized signing PIN"
                 className="w-full bg-[#243247] border border-[#304257] rounded-xl px-3.5 py-2 text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4] transition pl-9"
                 required
               />
