@@ -140,6 +140,9 @@ export function Navigation({
             <button
               type="button"
               onClick={() => setIsModulesOpen(!isModulesOpen)}
+              aria-label="Toggle modules navigation menu"
+              aria-expanded={isModulesOpen}
+              aria-haspopup="true"
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer select-none ${
                 isModuleActive
                   ? 'bg-[#172638] text-[#00D6B4] border border-[#00D6B4]/30'
@@ -178,10 +181,11 @@ export function Navigation({
           <button
             type="button"
             onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
+            aria-label="Open Command Palette"
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs bg-[#172638] border border-[#304257] text-[#94A3B8] hover:text-[#F1F5F9] hover:border-[#00D6B4]/40 transition shrink-0"
             title="Open Command Palette (Ctrl+K)"
           >
-            <Search className="h-3.5 w-3.5 text-[#00D6B4]" />
+            <Search className="h-3.5 w-3.5 text-[#00D6B4]" aria-hidden="true" />
             <span className="hidden sm:inline text-[11px]">Command</span>
             <kbd className="hidden sm:inline text-[10px] font-mono bg-[#243247] px-1 py-0.5 rounded text-[#94A3B8]">
               Ctrl K
@@ -195,7 +199,7 @@ export function Navigation({
 
           {walletAddress && (
             <Badge variant="teal" size="sm" className="hidden xl:flex shrink-0 gap-1 py-1 px-2 font-mono text-[10px]">
-              <CheckCircle2 className="h-3 w-3 text-[#00D6B4]" />
+              <CheckCircle2 className="h-3 w-3 text-[#00D6B4]" aria-hidden="true" />
               <span>{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
             </Badge>
           )}
@@ -206,9 +210,10 @@ export function Navigation({
                 href="/profile"
                 className="flex items-center gap-2 bg-[#172638] hover:bg-[#243247] px-2.5 py-1.5 rounded-xl border border-[#304257] hover:border-[#00D6B4]/50 transition shrink-0 group cursor-pointer"
                 title="Profile Editor"
+                aria-label={`View profile for ${user.fullName || user.email}`}
               >
                 <div className="h-6 w-6 rounded-lg bg-[#00D6B4]/15 text-[#00D6B4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                  <User className="h-3.5 w-3.5" />
+                  <User className="h-3.5 w-3.5" aria-hidden="true" />
                 </div>
                 <div className="flex flex-col text-left">
                   <span className="text-[11px] font-bold text-[#F1F5F9] leading-tight truncate max-w-[85px] sm:max-w-[120px]">
@@ -223,17 +228,18 @@ export function Navigation({
               <button
                 type="button"
                 onClick={handleLogout}
+                aria-label="Sign Out"
                 className="flex items-center gap-1.5 p-2 rounded-xl bg-[#172638] hover:bg-rose-500/15 border border-[#304257] hover:border-rose-500/40 text-[#94A3B8] hover:text-rose-400 transition shrink-0"
                 title="Sign Out"
               >
-                <LogOut className="h-3.5 w-3.5" />
+                <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
                 <span className="hidden 2xl:inline text-[11px] font-semibold">Sign Out</span>
               </button>
             </div>
           ) : (
             <Button asChild size="sm" className="bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold shadow-sm shrink-0 text-xs px-3">
               <Link href="/login" className="flex items-center gap-1.5">
-                <LogIn className="h-3.5 w-3.5" />
+                <LogIn className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Sign In</span>
               </Link>
             </Button>
@@ -243,10 +249,12 @@ export function Navigation({
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle navigation menu"
+              aria-expanded={isMobileMenuOpen}
               className="p-1.5 rounded-xl border border-[#304257] text-[#94A3B8] hover:text-[#F1F5F9] bg-[#172638] hover:bg-[#243247] transition"
               title="Toggle Menu"
             >
-              <Menu className="h-4 w-4" />
+              <Menu className="h-4 w-4" aria-hidden="true" />
             </button>
 
             {isMobileMenuOpen && (
