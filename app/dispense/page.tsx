@@ -27,6 +27,7 @@ import {
   verifyNfcTap,
   checkEscrowAutomation,
 } from '@/lib/api';
+import { ESignatureModal, ESignatureRecord } from '@/components/esignature-modal';
 
 export default function DispensePage() {
   const [inputGtin, setInputGtin] = useState('00844514000015');
@@ -45,6 +46,8 @@ export default function DispensePage() {
   } | null>(null);
   const [escrowCheck, setEscrowCheck] = useState<any>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSignatureOpen, setIsSignatureOpen] = useState(false);
+  const [signatureRecord, setSignatureRecord] = useState<ESignatureRecord | null>(null);
 
   const handleResolve = async () => {
     setLoading(true);
@@ -350,7 +353,7 @@ export default function DispensePage() {
                       </div>
 
                       <button
-                        onClick={handleBurn}
+                        onClick={() => setIsSignatureOpen(true)}
                         disabled={loading || twinData?.isBurned}
                         className={`btn btn-sm rounded-xl font-bold flex items-center justify-center gap-2 shrink-0 ${twinData?.isBurned ? 'bg-[#243247] text-[#94A3B8] cursor-not-allowed' : 'bg-rose-500 hover:bg-rose-600 text-[#F1F5F9] border-none'}`}
                       >
@@ -366,6 +369,19 @@ export default function DispensePage() {
                 </div>
               )}
             </div>
+
+            <ESignatureModal
+              isOpen={isSignatureOpen}
+              onClose={() => setIsSignatureOpen(false)}
+              onConfirm={(rec) => {
+                setSignatureRecord(rec);
+                setIsSignatureOpen(false);
+                handleBurn();
+              }}
+              actionTitle="CLINICAL_DISPENSE_TOKEN_BURN"
+              targetIdentifier={`${inputGtin} / ${inputSerial}`}
+              defaultReason="DISPENSE_POINT_OF_CARE"
+            />
 
             {burnResult && (
               <div className="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-6 space-y-2">
