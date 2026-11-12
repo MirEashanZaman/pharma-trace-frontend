@@ -177,24 +177,27 @@ export function CommandPalette() {
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-[#0B1220]/80 backdrop-blur-sm">
       <div className="bg-[#172638] border border-[#304257] rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl">
         <div className="p-4 border-b border-[#304257] flex items-center gap-3 bg-[#0B1220]/60">
-          <Search className="h-5 w-5 text-[#00D6B4] shrink-0" />
+          <Search className="h-5 w-5 text-[#00D6B4] shrink-0" aria-hidden="true" />
           <input
             ref={inputRef}
             type="text"
             value={query}
+            aria-label="Search commands, pages, batches, or actions"
             onChange={(e) => {
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
             onKeyDown={handleInputKeyDown}
             placeholder="Enter search query for commands, pages, batches, or actions..."
-            className="w-full bg-transparent text-[#F1F5F9] text-sm focus:outline-none placeholder-[#64748B]"
+            className="w-full bg-transparent text-[#F1F5F9] text-sm focus:outline-none placeholder-[#94A3B8]"
           />
           <button
+            type="button"
             onClick={() => setIsOpen(false)}
+            aria-label="Close command palette"
             className="text-[#94A3B8] hover:text-[#F1F5F9] p-1 rounded-md transition"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 
