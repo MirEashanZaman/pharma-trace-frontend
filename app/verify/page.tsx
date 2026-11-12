@@ -1336,7 +1336,7 @@ function VerifyContent() {
                       rows={3}
                       value={reportDescription}
                       onChange={(e) => setReportDescription(e.target.value)}
-                      placeholder="Describe the physical flaw observed, onset time, symptoms, or pharmacy purchase details..."
+                      placeholder="Enter your detailed description of the physical flaw or adverse event..."
                       className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
                       required
                     />
@@ -1348,7 +1348,7 @@ function VerifyContent() {
                       type="email"
                       value={reportEmail}
                       onChange={(e) => setReportEmail(e.target.value)}
-                      placeholder="patient@example.com"
+                      placeholder="Enter your contact email address"
                       className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
                     />
                   </div>
