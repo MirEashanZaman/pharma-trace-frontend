@@ -205,7 +205,7 @@ export function Navigation({
               <Link
                 href="/profile"
                 className="flex items-center gap-2 bg-[#172638] hover:bg-[#243247] px-2.5 py-1.5 rounded-xl border border-[#304257] hover:border-[#00D6B4]/50 transition shrink-0 group cursor-pointer"
-                title="Open Profile Editor"
+                title="Profile Editor"
               >
                 <div className="h-6 w-6 rounded-lg bg-[#00D6B4]/15 text-[#00D6B4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                   <User className="h-3.5 w-3.5" />
@@ -218,15 +218,6 @@ export function Navigation({
                     {user.role}
                   </span>
                 </div>
-              </Link>
-
-              <Link
-                href="/profile"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#172638] hover:bg-[#243247] border border-[#304257] hover:border-[#00D6B4]/50 text-[#00D6B4] transition shrink-0"
-                title="Profile Editor"
-              >
-                <UserCog className="h-3.5 w-3.5 text-[#00D6B4]" />
-                <span className="hidden sm:inline text-[11px] font-bold text-[#F1F5F9]">Profile Editor</span>
               </Link>
 
               <button
