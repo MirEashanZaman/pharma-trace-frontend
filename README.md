@@ -1,6 +1,12 @@
-# PharmaTrace-ES: Web3 Enterprise Frontend Client
+# PharmaTrace Web3 Enterprise Frontend Client
 
-PharmaTrace-ES Frontend is a responsive Next.js 14 (App Router) web application designed for pharmaceutical supply chain traceability, decentralized custody attestation, carrier collateral staking, and regulatory compliance inspection.
+[![License: MIT](https://img.shields.io/badge/License-MIT-00D6B4.svg)](../LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-14.2-black.svg)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC.svg)](https://tailwindcss.com/)
+[![DaisyUI](https://img.shields.io/badge/DaisyUI-4.12-570DF8.svg)](https://daisyui.com/)
+
+PharmaTrace Frontend is a responsive Next.js 14 (App Router) web application designed for pharmaceutical supply chain traceability, decentralized custody attestation, carrier collateral staking, and regulatory compliance inspection.
 
 The interface is built with Tailwind CSS, DaisyUI, and accessible component primitives following the Midnight Navy / Neon Teal design system (`#0B1220`, `#00D6B4`, `#243247`, `#172638`).
 
@@ -11,8 +17,9 @@ The interface is built with Tailwind CSS, DaisyUI, and accessible component prim
 ### 1. Modular Operations Dashboard (`/dashboard`)
 * **Real-Time Telemetry & Environmental Monitoring**: Live reefer temperature and relative humidity tracking with out-of-spec excursion alerts via the modular `OverviewTab` component.
 * **Smart Contract Telemetry Console**: Telemetry cards powered by `SmartContractTelemetry` providing visibility into Chainlink Automation Upkeep, CCIP Cross-Chain Bridge, Sparse Merkle Tree Rollup, and W3C DID cryptographic anchors.
+* **Role-Based Workflows**: Dynamically adapts interface forms and navigation tabs based on the authenticated stakeholder role (**Manufacturer, Distributor, Pharmacy, Regulator, Customer, Admin**).
 * **Dual-Custody Hospital Dispense Terminal**: Requires physician prescription registration and pharmacist digital signature verification.
-* **Administrative Compliance Console**: Live search, role filtering, operator warnings, and temporary account disablement with administrative self-protection safeguards.
+* **Administrative Governance Console**: Live stakeholder search, compliance warning flags, account suspension toggles, and system audit logs.
 * **Saga Custody State Transitions**: Real-time management across `MANUFACTURED` -> `SHIPPED` -> `RECEIVED` -> `DISPENSED` -> `RECALLED` lifecycle states.
 
 ### 2. Public Drug Authenticity Verification (`/verify`)
@@ -63,7 +70,7 @@ The interface is built with Tailwind CSS, DaisyUI, and accessible component prim
 
 ## Design System Architecture
 
-PharmaTrace-ES adheres strictly to the Midnight Navy / Neon Teal design system across all views:
+PharmaTrace adheres strictly to the Midnight Navy / Neon Teal design system across all views:
 
 * **Background Base**: `#0B1220` (Midnight Navy Dark)
 * **Surface Card & Panels**: `#172638` (Deep Slate Container)
@@ -80,50 +87,9 @@ PharmaTrace-ES adheres strictly to the Midnight Navy / Neon Teal design system a
 
 The global header in `components/navigation.tsx` implements responsive modular breakpoints:
 
-* **Screen Width >= 1536px (`2xl`)**: Full display of all 10 module links, wallet address badge, user profile badge, and sign-out controls.
-* **Screen Width 1280px - 1535px (`xl`)**: Displays 5 primary workflow links and groups secondary modules into a dropdown menu to prevent horizontal viewport overflow.
+* **Screen Width >= 1536px (`2xl`)**: Full display of primary module links, wallet address badge, user profile badge, and sign-out controls.
+* **Screen Width 1280px - 1535px (`xl`)**: Displays primary workflow links and groups secondary modules into a dropdown menu to prevent horizontal viewport overflow.
 * **Screen Width < 1280px (`<xl`)**: Consolidates navigation into a responsive slide-out drawer menu.
-
----
-
-## Project Structure
-
-```text
-pharma-trace-frontend/
-├── app/
-│   ├── catalog/page.tsx               # ISR Dynamic Pharmaceutical Catalog
-│   ├── dashboard/page.tsx             # Modular Custody Dashboard & Admin Console
-│   ├── dispense/page.tsx              # GS1 DataMatrix & Twin Burn Terminal
-│   ├── escrow/page.tsx                # Parametric Cold-Chain Escrow Portal
-│   ├── governance/page.tsx            # Multi-Sig Regulatory Timelock Governance
-│   ├── ledger/page.tsx                # SSR Immutable Cryptographic Ledger
-│   ├── login/page.tsx                 # Web3 MetaMask & Enterprise JWT Authentication
-│   ├── profile/page.tsx               # User Profile & Immutable Role Management
-│   ├── provenance/page.tsx            # Directed Acyclic Graph Lineage Visualizer
-│   ├── staking/page.tsx               # Carrier Collateral Staking & Slashing
-│   ├── standards/page.tsx             # Regulatory Framework Matrix (FDA, EU GMP, WHO)
-│   ├── verify/page.tsx                # Public Authenticity Verifier & QR Scanner
-│   ├── globals.css                    # Tailwind CSS & DaisyUI Stylesheet
-│   ├── layout.tsx                     # Root Application Layout & Metadata
-│   └── page.tsx                       # Hero Landing Page
-├── components/
-│   ├── dashboard/
-│   │   ├── smart-contract-telemetry.tsx # Web3 Settlement & Automation Telemetry
-│   │   └── tabs/
-│   │       └── overview-tab.tsx       # Registered Batches & Environmental Meters
-│   ├── navigation.tsx                 # Responsive Header with Enterprise Role Badges
-│   ├── provenance-dag.tsx             # Interactive SVG Provenance DAG Visualizer
-│   └── ui/                            # Accessible UI Component Primitives
-├── lib/
-│   ├── api.ts                         # Axios API Client SDK with Bearer Interceptor
-│   ├── compliance-report.ts           # PDF, CSV, and JSON Audit Package Generator
-│   ├── utils.ts                       # Class Name Merge Utility (clsx + tailwind-merge)
-│   └── web3.ts                        # Ethers.js Wallet Connection & EIP-191 Signer
-├── Dockerfile                         # Multi-Stage Non-Root Standalone Docker Build
-├── package.json
-├── tailwind.config.ts
-└── tsconfig.json
-```
 
 ---
 
@@ -135,7 +101,11 @@ pharma-trace-frontend/
 
 ### Environment Configuration
 
-Create a `.env.local` file in `pharma-trace-frontend`:
+Copy the example environment template:
+
+```bash
+cp .env.example .env.local
+```
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3500
@@ -153,7 +123,7 @@ Access the application in your browser at `http://localhost:3001`.
 ### Production Build Verification
 
 ```bash
-# Compile and verify all 21 static/dynamic pages
+# Compile and verify all static and dynamic routes
 npm run build
 
 # Start production server
@@ -162,6 +132,10 @@ npm run start -- -p 3001
 
 ---
 
+## Author & Engineering Credits
+
+Engineered by **Mir Eashan Zaman** as part of the PharmaTrace enterprise platform.
+
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License. See [LICENSE](../LICENSE) for details.
