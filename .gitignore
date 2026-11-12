@@ -24,6 +24,9 @@ Desktop.ini
 *.pem
 *.key
 *.cert
+*.pfx
+*.p12
+*.keystore
 
 # debug & logs
 logs
@@ -67,6 +70,7 @@ pids
 .turbo/
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .eslintcache
+.prettiercache
 test-results/
 playwright-report/
 blob-report/
