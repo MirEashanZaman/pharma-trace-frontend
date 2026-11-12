@@ -187,7 +187,7 @@ export function CommandPalette() {
               setSelectedIndex(0);
             }}
             onKeyDown={handleInputKeyDown}
-            placeholder="Search commands, pages, batches, or actions..."
+            placeholder="Enter search query for commands, pages, batches, or actions..."
             className="w-full bg-transparent text-[#F1F5F9] text-sm focus:outline-none placeholder-[#64748B]"
           />
           <button
