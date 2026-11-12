@@ -305,7 +305,7 @@ export default function GovernancePage() {
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="e.g. Emergency Recall: Contaminated Paracetamol Lot 2026-09"
+                  placeholder="Enter proposal description (e.g. Emergency Recall)"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -316,7 +316,7 @@ export default function GovernancePage() {
                   type="text"
                   value={targetAddress}
                   onChange={(e) => setTargetAddress(e.target.value)}
-                  placeholder="0x... (Target Contract Address)"
+                  placeholder="Enter target contract address (0x...)"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -329,7 +329,7 @@ export default function GovernancePage() {
                   type="text"
                   value={callDataHex}
                   onChange={(e) => setCallDataHex(e.target.value)}
-                  placeholder="0x... (Encoded Calldata Payload)"
+                  placeholder="Enter calldata payload (0x...)"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -340,7 +340,7 @@ export default function GovernancePage() {
                   type="number"
                   value={delaySeconds}
                   onChange={(e) => setDelaySeconds(e.target.value)}
-                  placeholder="86400 (Delay in seconds)"
+                  placeholder="Enter timelock delay in seconds (e.g. 86400)"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
