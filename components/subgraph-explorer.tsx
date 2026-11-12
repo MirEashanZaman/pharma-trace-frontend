@@ -216,7 +216,7 @@ export function SubgraphExplorer({ initialSerialNumber = 'SN-2026-AMOX-001' }: S
                   type="text"
                   value={targetId}
                   onChange={(e) => setTargetId(e.target.value)}
-                  placeholder="e.g. SN-2026-AMOX-001 or 0x..."
+                  placeholder="Enter serial number or hash (e.g. SN-2026-AMOX-001 or 0x...)"
                   className="w-full bg-[#243247] border border-[#304257] rounded-xl px-4 py-2 text-xs sm:text-sm text-[#F1F5F9] placeholder-[#64748B] focus:outline-none focus:border-[#00D6B4] transition font-mono pr-10"
                 />
                 <Search className="absolute right-3 top-2.5 h-4 w-4 text-[#94A3B8]" />
