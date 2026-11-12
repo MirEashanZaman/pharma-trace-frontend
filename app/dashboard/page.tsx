@@ -69,7 +69,6 @@ import {
   PlusCircle,
   FileCheck2,
   Lock,
-  GitPullRequest,
   CheckCircle,
   Shield,
   ArrowRight,
@@ -154,7 +153,13 @@ export default function DashboardPage() {
     setSwitchingNetwork(false);
   };
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'simulation' | 'transit-map' | 'provenance' | 'attestations' | 'github' | 'users' | 'logistics' | 'pharmacy' | 'regulator'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'drugs' | 'events' | 'simulation' | 'transit-map' | 'provenance' | 'attestations' | 'users' | 'logistics' | 'pharmacy' | 'regulator'>('overview');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [activeTab]);
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   const [userSearchTerm, setUserSearchTerm] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('ALL');
@@ -1769,18 +1774,6 @@ export default function DashboardPage() {
                 }`}
               >
                 <Lock className="h-4 w-4" /> Smart Contract Anchors
-              </button>
-            )}
-            {(currentRole === 'ADMIN' || currentRole === 'REGULATOR') && (
-              <button
-                onClick={() => setActiveTab('github')}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-                  activeTab === 'github'
-                    ? 'bg-[#00D6B4] text-[#0B1220] shadow-sm font-bold'
-                    : 'text-[#94A3B8] hover:bg-[#172638] hover:text-[#F1F5F9]'
-                }`}
-              >
-                <GitPullRequest className="h-4 w-4" /> GitHub & Audit Claims
               </button>
             )}
             {currentRole === 'ADMIN' && (
@@ -3742,21 +3735,6 @@ export default function DashboardPage() {
                     <FileJson className="h-3.5 w-3.5 text-[#00D6B4]" /> Export JSON
                   </button>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'github' && (
-            <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
-              <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
-                <GitPullRequest className="h-5 w-5 text-[#00D6B4]" /> GitHub Activity & Audit Claims
-              </h3>
-              <p className="text-xs text-[#94A3B8]">
-                Proof of authorship and verifiable code delivery tied to digital contributor signatures.
-              </p>
-              <div className="p-4 bg-[#172638] border border-[#304257] rounded-xl font-mono text-xs text-[#94A3B8] space-y-2">
-                <div>Repository: <span className="text-[#F1F5F9] font-bold">MirEashanZaman/pharma-trace</span></div>
-                <div>Status: <span className="text-[#A3E635] font-bold">Audited & Verified</span></div>
               </div>
             </div>
           )}
