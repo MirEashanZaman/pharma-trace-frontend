@@ -2361,7 +2361,7 @@ export default function DashboardPage() {
                           <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Drug Serial Number</label>
                           <input
                             type="text"
-                            placeholder="SN-2026-AMOX500"
+                            placeholder="Enter your serial number (e.g. SN-2026-AMOX500)"
                             value={newSerial}
                             onChange={(e) => setNewSerial(e.target.value)}
                             required
@@ -2372,7 +2372,7 @@ export default function DashboardPage() {
                           <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Formulation Name</label>
                           <input
                             type="text"
-                            placeholder="Amoxicillin 500mg Capsule"
+                            placeholder="Enter your formulation name (e.g. Amoxicillin 500mg)"
                             value={newName}
                             onChange={(e) => setNewName(e.target.value)}
                             required
@@ -2383,7 +2383,7 @@ export default function DashboardPage() {
                           <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Batch / Lot Identifier</label>
                           <input
                             type="text"
-                            placeholder="BATCH-2026-A1"
+                            placeholder="Enter your batch identifier (e.g. BATCH-2026-A1)"
                             value={newBatch}
                             onChange={(e) => setNewBatch(e.target.value)}
                             required
@@ -2411,7 +2411,7 @@ export default function DashboardPage() {
                           <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Strength / Potency</label>
                           <input
                             type="text"
-                            placeholder="500 mg"
+                            placeholder="Enter your potency (e.g. 500 mg)"
                             value={newStrength}
                             onChange={(e) => setNewStrength(e.target.value)}
                             className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
@@ -2421,7 +2421,7 @@ export default function DashboardPage() {
                           <label className="text-xs text-[#94A3B8] font-semibold block mb-1">API Supplier (Upstream)</label>
                           <input
                             type="text"
-                            placeholder="Lonza Fine Chemicals"
+                            placeholder="Enter your API supplier name"
                             value={newApiSupplier}
                             onChange={(e) => setNewApiSupplier(e.target.value)}
                             className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
@@ -2431,7 +2431,7 @@ export default function DashboardPage() {
                           <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Raw Material Lot #</label>
                           <input
                             type="text"
-                            placeholder="RM-LOT-8821"
+                            placeholder="Enter your raw material lot number"
                             value={newRawLot}
                             onChange={(e) => setNewRawLot(e.target.value)}
                             className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
@@ -2465,7 +2465,7 @@ export default function DashboardPage() {
                           <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Formulation Name</label>
                           <input
                             type="text"
-                            placeholder="Recombinant Insulin 100IU/ml"
+                            placeholder="Enter your formulation name (e.g. Recombinant Insulin)"
                             value={bulkName}
                             onChange={(e) => setBulkName(e.target.value)}
                             required
@@ -2476,7 +2476,7 @@ export default function DashboardPage() {
                           <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Batch / Master Lot Number</label>
                           <input
                             type="text"
-                            placeholder="BATCH-2026-INS9"
+                            placeholder="Enter your batch number (e.g. BATCH-2026-INS9)"
                             value={bulkBatch}
                             onChange={(e) => setBulkBatch(e.target.value)}
                             required
@@ -2740,7 +2740,7 @@ export default function DashboardPage() {
                           <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Target Batch Number</label>
                           <input
                             type="text"
-                            placeholder="BATCH-2026-A1"
+                            placeholder="Enter your target batch number (e.g. BATCH-2026-A1)"
                             value={mfgQuarantineBatch}
                             onChange={(e) => setMfgQuarantineBatch(e.target.value)}
                             required
@@ -4222,7 +4222,7 @@ export default function DashboardPage() {
                       required
                       value={newOrgName}
                       onChange={(e) => setNewOrgName(e.target.value)}
-                      placeholder="Enter organization name"
+                      placeholder="Enter your organization name"
                       className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                     />
                   </div>
@@ -4248,7 +4248,7 @@ export default function DashboardPage() {
                       type="email"
                       value={newRecipientEmail}
                       onChange={(e) => setNewRecipientEmail(e.target.value)}
-                      placeholder="recipient@enterprise.com"
+                      placeholder="Enter recipient email address"
                       className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                     />
                   </div>
