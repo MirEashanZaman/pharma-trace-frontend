@@ -525,7 +525,7 @@ function VerifyContent() {
 
           <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-[#94A3B8]">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] uppercase tracking-wider font-semibold text-[#64748B]">Try Sample:</span>
+              <span className="text-[11px] uppercase tracking-wider font-semibold text-[#94A3B8]">Try Sample:</span>
               {sampleSerials.map((serial) => (
                 <button
                   key={serial}
@@ -1029,9 +1029,10 @@ function VerifyContent() {
                 </div>
                 <button
                   onClick={() => setCabinetDrawerOpen(false)}
+                  aria-label="Close medicine cabinet drawer"
                   className="btn btn-sm btn-ghost btn-circle text-[#94A3B8] hover:text-[#F1F5F9]"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5" aria-hidden="true" />
                 </button>
               </div>
 
@@ -1121,9 +1122,10 @@ function VerifyContent() {
                 </div>
                 <button
                   onClick={() => setEPiModalOpen(false)}
+                  aria-label="Close product leaflet modal"
                   className="btn btn-sm btn-ghost btn-circle text-[#94A3B8] hover:text-[#F1F5F9]"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5" aria-hidden="true" />
                 </button>
               </div>
 
@@ -1213,9 +1215,10 @@ function VerifyContent() {
                 </div>
                 <button
                   onClick={() => setReportModalOpen(false)}
+                  aria-label="Close adverse report modal"
                   className="btn btn-sm btn-ghost btn-circle text-[#94A3B8] hover:text-[#F1F5F9]"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5" aria-hidden="true" />
                 </button>
               </div>
 
@@ -1385,9 +1388,10 @@ function VerifyContent() {
                 </div>
                 <button
                   onClick={() => setReturnModalOpen(false)}
+                  aria-label="Close return voucher modal"
                   className="btn btn-sm btn-ghost btn-circle text-[#94A3B8] hover:text-[#F1F5F9]"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5" aria-hidden="true" />
                 </button>
               </div>
 
