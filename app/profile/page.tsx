@@ -242,7 +242,7 @@ export default function ProfilePage() {
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Dr. Evelyn Vance"
+                    placeholder="Enter your name"
                     className="w-full h-11 bg-[#0B1220] border border-[#304257] rounded-xl px-4 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4] transition"
                   />
                 </div>
@@ -256,7 +256,7 @@ export default function ProfilePage() {
                     type="text"
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
-                    placeholder="e.g. BioGenix LifeSciences GmbH"
+                    placeholder="Enter your organization"
                     className="w-full h-11 bg-[#0B1220] border border-[#304257] rounded-xl px-4 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4] transition"
                   />
                 </div>
@@ -303,7 +303,7 @@ export default function ProfilePage() {
                     type="text"
                     value={walletAddress}
                     onChange={(e) => setWalletAddress(e.target.value)}
-                    placeholder="0x... (EVM Wallet Address)"
+                    placeholder="Enter your wallet address (0x...)"
                     className="w-full h-11 bg-[#0B1220] border border-[#304257] rounded-xl px-4 text-xs font-mono text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4] transition"
                   />
                 </div>
@@ -329,7 +329,7 @@ export default function ProfilePage() {
                         value={newPassword}
                         minLength={6}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="New password (min. 6 characters)"
+                        placeholder="Enter your new password (min. 6 characters)"
                         className="w-full h-11 bg-[#172638] border border-[#304257] rounded-xl pl-4 pr-10 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4] transition"
                       />
                       <button
@@ -351,7 +351,7 @@ export default function ProfilePage() {
                         value={confirmPassword}
                         minLength={6}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="Confirm new password"
+                        placeholder="Enter your confirm password"
                         className="w-full h-11 bg-[#172638] border border-[#304257] rounded-xl pl-4 pr-10 text-xs text-[#F1F5F9] focus:outline-none focus:border-[#00D6B4] transition"
                       />
                       <button
