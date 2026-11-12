@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import {
@@ -22,7 +22,6 @@ import {
   Menu,
   ChevronDown,
   UserCog,
-  Command,
 } from 'lucide-react';
 import { getStoredUser, logoutUser, UserProfile } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
@@ -40,6 +39,10 @@ export function Navigation({
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<UserProfile | null>(propUser || null);
+  const [isModulesOpen, setIsModulesOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const modulesRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (propUser !== undefined) {
@@ -57,27 +60,23 @@ export function Navigation({
     };
   }, [propUser]);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (modulesRef.current && !modulesRef.current.contains(e.target as Node)) {
+        setIsModulesOpen(false);
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleLogout = () => {
     logoutUser();
     setUser(null);
     router.push('/login');
-  };
-
-  const getRoleBadgeColor = (role?: string) => {
-    switch (role) {
-      case 'ADMIN':
-        return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
-      case 'MANUFACTURER':
-        return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
-      case 'DISTRIBUTOR':
-        return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
-      case 'PHARMACY':
-        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
-      case 'REGULATOR':
-        return 'bg-rose-500/20 text-rose-300 border-rose-500/30';
-      default:
-        return 'bg-[#00D6B4]/20 text-[#00D6B4] border-[#00D6B4]/30';
-    }
   };
 
   const primaryNavLinks = [
@@ -106,7 +105,7 @@ export function Navigation({
   const isModuleActive = moduleNavLinks.some((item) => isActive(item.href));
 
   return (
-    <header className="sticky top-0 z-50 bg-[#0B1220]/95 backdrop-blur-md border-b border-[#304257] text-[#F1F5F9] shadow-sm w-full overflow-hidden">
+    <header className="sticky top-0 z-50 bg-[#0B1220]/95 backdrop-blur-md border-b border-[#304257] text-[#F1F5F9] shadow-sm w-full">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
         <div className="flex items-center space-x-2.5 shrink-0">
           <div className="h-9 w-9 rounded-xl bg-[#00D6B4] flex items-center justify-center text-[#0B1220] font-black shadow-sm shrink-0">
@@ -137,9 +136,10 @@ export function Navigation({
             );
           })}
 
-          <div className="dropdown dropdown-bottom dropdown-end">
-            <label
-              tabIndex={0}
+          <div ref={modulesRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setIsModulesOpen(!isModulesOpen)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer select-none ${
                 isModuleActive
                   ? 'bg-[#172638] text-[#00D6B4] border border-[#00D6B4]/30'
@@ -147,35 +147,36 @@ export function Navigation({
               }`}
             >
               <span>Modules</span>
-              <ChevronDown className="h-3 w-3" />
-            </label>
-            <ul
-              tabIndex={0}
-              className="dropdown-content z-[100] menu p-2 shadow-2xl bg-[#172638] border border-[#304257] rounded-xl w-52 text-xs space-y-1 mt-2"
-            >
-              {moduleNavLinks.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.href);
-                return (
-                  <li key={item.href}>
+              <ChevronDown className={`h-3 w-3 transition-transform ${isModulesOpen ? 'rotate-180 text-[#00D6B4]' : ''}`} />
+            </button>
+
+            {isModulesOpen && (
+              <div className="absolute left-0 top-full mt-2 z-[100] p-2 shadow-2xl bg-[#172638] border border-[#304257] rounded-xl w-52 text-xs space-y-1">
+                {moduleNavLinks.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href);
+                  return (
                     <Link
+                      key={item.href}
                       href={item.href}
-                      className={`flex items-center gap-2 rounded-lg py-2 ${
-                        active ? 'bg-[#00D6B4]/15 text-[#00D6B4] font-bold' : 'text-[#94A3B8] hover:text-[#F1F5F9]'
+                      onClick={() => setIsModulesOpen(false)}
+                      className={`flex items-center gap-2 rounded-lg py-2 px-2.5 transition ${
+                        active ? 'bg-[#00D6B4]/15 text-[#00D6B4] font-bold' : 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#243247]'
                       }`}
                     >
                       <Icon className="h-3.5 w-3.5 text-[#00D6B4]" />
                       <span>{item.label}</span>
                     </Link>
-                  </li>
-                );
-              })}
-            </ul>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </nav>
 
         <div className="flex items-center gap-2 shrink-0">
           <button
+            type="button"
             onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs bg-[#172638] border border-[#304257] text-[#94A3B8] hover:text-[#F1F5F9] hover:border-[#00D6B4]/40 transition shrink-0"
             title="Open Command Palette (Ctrl+K)"
@@ -200,62 +201,43 @@ export function Navigation({
           )}
 
           {user ? (
-            <div className="dropdown dropdown-bottom dropdown-end shrink-0">
-              <label
-                tabIndex={0}
-                className="flex items-center gap-2 bg-[#172638] hover:bg-[#243247] px-2.5 py-1.5 rounded-xl border border-[#304257] hover:border-[#00D6B4]/50 transition shrink-0 cursor-pointer select-none"
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 bg-[#172638] hover:bg-[#243247] px-2.5 py-1.5 rounded-xl border border-[#304257] hover:border-[#00D6B4]/50 transition shrink-0 group cursor-pointer"
+                title="Open Profile Editor"
               >
-                <div className="h-6 w-6 rounded-lg bg-[#00D6B4]/15 text-[#00D6B4] flex items-center justify-center shrink-0">
+                <div className="h-6 w-6 rounded-lg bg-[#00D6B4]/15 text-[#00D6B4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                   <User className="h-3.5 w-3.5" />
                 </div>
                 <div className="flex flex-col text-left">
-                  <span className="text-[11px] font-bold text-[#F1F5F9] leading-tight truncate max-w-[90px] sm:max-w-[120px]">
+                  <span className="text-[11px] font-bold text-[#F1F5F9] leading-tight truncate max-w-[85px] sm:max-w-[120px]">
                     {user.fullName || user.email}
                   </span>
-                  <span className="text-[9px] text-[#94A3B8] leading-tight truncate max-w-[90px] sm:max-w-[120px]">
+                  <span className="text-[9px] text-[#94A3B8] leading-tight truncate max-w-[85px] sm:max-w-[120px]">
                     {user.role}
                   </span>
                 </div>
-                <ChevronDown className="h-3 w-3 text-[#94A3B8] shrink-0" />
-              </label>
+              </Link>
 
-              <ul
-                tabIndex={0}
-                className="dropdown-content z-[100] menu p-3 shadow-2xl bg-[#172638] border border-[#304257] rounded-2xl w-64 text-xs space-y-2 mt-2"
+              <Link
+                href="/profile"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#172638] hover:bg-[#243247] border border-[#304257] hover:border-[#00D6B4]/50 text-[#00D6B4] transition shrink-0"
+                title="Profile Editor"
               >
-                <li className="menu-title px-2 py-1 text-[#94A3B8] border-b border-[#304257] pb-2">
-                  <div className="font-bold text-[#F1F5F9] text-xs">{user.fullName || 'Enterprise User'}</div>
-                  <div className="font-mono text-[10px] text-[#94A3B8] truncate">{user.email}</div>
-                  {user.organization && (
-                    <div className="text-[10px] text-[#00D6B4] mt-0.5">{user.organization}</div>
-                  )}
-                  <div className="mt-1">
-                    <span className={`badge badge-xs font-bold uppercase border text-[9px] py-0.5 px-1.5 ${getRoleBadgeColor(user.role)}`}>
-                      {user.role}
-                    </span>
-                  </div>
-                </li>
+                <UserCog className="h-3.5 w-3.5 text-[#00D6B4]" />
+                <span className="hidden sm:inline text-[11px] font-bold text-[#F1F5F9]">Profile Editor</span>
+              </Link>
 
-                <li>
-                  <Link
-                    href="/profile"
-                    className="flex items-center gap-2 rounded-xl py-2 text-[#F1F5F9] hover:bg-[#243247] hover:text-[#00D6B4]"
-                  >
-                    <UserCog className="h-4 w-4 text-[#00D6B4]" />
-                    <span>Manage User Profile</span>
-                  </Link>
-                </li>
-
-                <li className="border-t border-[#304257] pt-2">
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 rounded-xl py-2 text-rose-400 hover:bg-rose-500/15 font-semibold"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span>Sign Out</span>
-                  </button>
-                </li>
-              </ul>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 p-2 rounded-xl bg-[#172638] hover:bg-rose-500/15 border border-[#304257] hover:border-rose-500/40 text-[#94A3B8] hover:text-rose-400 transition shrink-0"
+                title="Sign Out"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span className="hidden 2xl:inline text-[11px] font-semibold">Sign Out</span>
+              </button>
             </div>
           ) : (
             <Button asChild size="sm" className="bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold shadow-sm shrink-0 text-xs px-3">
@@ -266,29 +248,64 @@ export function Navigation({
             </Button>
           )}
 
-          <div className="dropdown dropdown-bottom dropdown-end lg:hidden">
-            <label tabIndex={0} className="btn btn-xs sm:btn-sm btn-ghost border border-[#304257] text-[#94A3B8] hover:text-[#F1F5F9] rounded-xl px-2">
+          <div ref={mobileMenuRef} className="relative lg:hidden">
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-1.5 rounded-xl border border-[#304257] text-[#94A3B8] hover:text-[#F1F5F9] bg-[#172638] hover:bg-[#243247] transition"
+              title="Toggle Menu"
+            >
               <Menu className="h-4 w-4" />
-            </label>
-            <ul tabIndex={0} className="dropdown-content z-[100] menu p-2 shadow-2xl bg-[#172638] border border-[#304257] rounded-2xl w-52 text-xs space-y-1 mt-2">
-              {allNavLinks.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.href);
-                return (
-                  <li key={item.href}>
+            </button>
+
+            {isMobileMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 z-[100] p-2 shadow-2xl bg-[#172638] border border-[#304257] rounded-2xl w-56 text-xs space-y-1">
+                {user && (
+                  <Link
+                    href="/profile"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-lg py-2 px-2.5 text-[#00D6B4] font-bold hover:bg-[#243247]"
+                  >
+                    <UserCog className="h-4 w-4" />
+                    <span>Profile Editor</span>
+                  </Link>
+                )}
+
+                {allNavLinks.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href);
+                  return (
                     <Link
+                      key={item.href}
                       href={item.href}
-                      className={`flex items-center gap-2 rounded-lg py-2 ${
-                        active ? 'bg-[#00D6B4]/15 text-[#00D6B4] font-bold' : 'text-[#94A3B8] hover:text-[#F1F5F9]'
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center gap-2 rounded-lg py-2 px-2.5 transition ${
+                        active ? 'bg-[#00D6B4]/15 text-[#00D6B4] font-bold' : 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#243247]'
                       }`}
                     >
                       <Icon className="h-3.5 w-3.5 text-[#00D6B4]" />
                       <span>{item.label}</span>
                     </Link>
-                  </li>
-                );
-              })}
-            </ul>
+                  );
+                })}
+
+                {user && (
+                  <div className="border-t border-[#304257] pt-1 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="w-full flex items-center gap-2 rounded-lg py-2 px-2.5 text-rose-400 hover:bg-rose-500/10 font-semibold"
+                    >
+                      <LogOut className="h-3.5 w-3.5" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
