@@ -195,6 +195,21 @@ export function Navigation({
         </nav>
 
         <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
+            className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-[#172638] border border-[#304257] text-[#94A3B8] hover:text-[#F1F5F9] transition"
+            title="Open Command Palette (Ctrl+K)"
+          >
+            <Search className="h-3 w-3 text-[#00D6B4]" />
+            <span className="text-[11px]">Command</span>
+            <kbd className="text-[10px] font-mono bg-[#243247] px-1 py-0.5 rounded text-[#94A3B8]">Ctrl K</kbd>
+          </button>
+
+          <Badge variant="teal" size="sm" className="hidden lg:flex shrink-0 gap-1.5 py-1 px-2 font-mono text-[10px]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#00D6B4] animate-pulse"></span>
+            <span>Sepolia Synced</span>
+          </Badge>
+
           {walletAddress && (
             <Badge variant="teal" size="sm" className="hidden 2xl:flex shrink-0 gap-1 py-1 px-2 font-mono">
               <CheckCircle2 className="h-3 w-3 text-[#00D6B4]" />
