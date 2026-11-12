@@ -402,7 +402,7 @@ export default function LoginPage() {
                         required
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
-                        placeholder="e.g. auditor@fda.gov"
+                        placeholder="Enter your registered email"
                         className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                       />
                       <Mail className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
@@ -428,7 +428,7 @@ export default function LoginPage() {
                       maxLength={6}
                       value={forgotOtp}
                       onChange={(e) => setForgotOtp(e.target.value.replace(/\D/g, ''))}
-                      placeholder="e.g. 123456"
+                      placeholder="Enter your 6-digit verification code"
                       className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-4 py-2 text-center font-mono text-base tracking-widest text-[#00D6B4] focus:border-[#00D6B4]"
                     />
                   </div>
@@ -442,7 +442,7 @@ export default function LoginPage() {
                         minLength={6}
                         value={forgotNewPassword}
                         onChange={(e) => setForgotNewPassword(e.target.value)}
-                        placeholder="New password (min. 6 characters)"
+                        placeholder="Enter your new password (min. 6 characters)"
                         className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-10 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                       />
                       <KeyRound className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -503,7 +503,7 @@ export default function LoginPage() {
                         required
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        placeholder="Dr. Evelyn Vance"
+                        placeholder="Enter your name"
                         className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                       />
                       <UserCheck className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
@@ -519,7 +519,7 @@ export default function LoginPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="name@organization.com"
+                      placeholder="Enter your email"
                       className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                     />
                     <Mail className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
@@ -550,7 +550,7 @@ export default function LoginPage() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Password"
+                      placeholder="Enter your password"
                       className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-10 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                     />
                     <KeyRound className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -588,7 +588,7 @@ export default function LoginPage() {
                           type="text"
                           value={organization}
                           onChange={(e) => setOrganization(e.target.value)}
-                          placeholder="e.g. BioGenix LifeSciences"
+                          placeholder="Enter your organization"
                           className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl px-3 py-2 text-xs text-[#F1F5F9]"
                         />
                       </div>
@@ -601,7 +601,7 @@ export default function LoginPage() {
                           type="text"
                           value={invitationToken}
                           onChange={(e) => setInvitationToken(e.target.value)}
-                          placeholder="e.g. TOK-ENTERPRISE-2026 (Optional)"
+                          placeholder="Enter your invitation token (optional)"
                           className="input input-bordered w-full bg-[#172638] border-[#304257] rounded-xl pl-10 pr-4 py-2 text-xs text-[#F1F5F9] focus:border-[#00D6B4]"
                         />
                         <ShieldCheck className="h-4 w-4 text-[#94A3B8] absolute left-3.5 top-3" />
