@@ -324,7 +324,7 @@ export default function StakingPage() {
                     type="text"
                     value={carrierAddress}
                     onChange={(e) => setCarrierAddress(e.target.value)}
-                    placeholder="0x7099... (Carrier Address)"
+                    placeholder="Enter carrier wallet address (0x...)"
                     className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                   <button
@@ -346,7 +346,7 @@ export default function StakingPage() {
                     type="number"
                     value={depositAmount}
                     onChange={(e) => setDepositAmount(e.target.value)}
-                    placeholder="e.g. 10000"
+                    placeholder="Enter stake amount (e.g. 10000)"
                     className="input input-sm w-full bg-[#172638] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                   <button
@@ -368,7 +368,7 @@ export default function StakingPage() {
                     type="number"
                     value={unstakeAmount}
                     onChange={(e) => setUnstakeAmount(e.target.value)}
-                    placeholder="e.g. 2000"
+                    placeholder="Enter unstake amount (e.g. 2000)"
                     className="input input-sm w-full bg-[#172638] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                   />
                   <button
@@ -398,7 +398,7 @@ export default function StakingPage() {
                   type="text"
                   value={shipmentId}
                   onChange={(e) => setShipmentId(e.target.value)}
-                  placeholder="e.g. SHIP-COLD-2026-08"
+                  placeholder="Enter shipment ID (e.g. SHIP-COLD-2026-08)"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -409,7 +409,7 @@ export default function StakingPage() {
                   type="number"
                   value={bondAmount}
                   onChange={(e) => setBondAmount(e.target.value)}
-                  placeholder="e.g. 3000"
+                  placeholder="Enter bond amount (e.g. 3000)"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -420,7 +420,7 @@ export default function StakingPage() {
                   type="text"
                   value={manufacturerAddress}
                   onChange={(e) => setManufacturerAddress(e.target.value)}
-                  placeholder="0x3C44... (Manufacturer Address)"
+                  placeholder="Enter manufacturer address (0x...)"
                   className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
                 />
               </div>
@@ -531,7 +531,7 @@ export default function StakingPage() {
                 type="text"
                 value={manufacturerAddress}
                 onChange={(e) => setManufacturerAddress(e.target.value)}
-                placeholder="0x3C44... (Manufacturer Address)"
+                placeholder="Enter manufacturer address (0x...)"
                 className="input input-sm w-full bg-[#0B1220] border-[#304257] text-[#F1F5F9] font-mono text-xs rounded-xl"
               />
             </div>
