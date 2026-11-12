@@ -1,5 +1,9 @@
 
 const nextConfig = {
+  compress: true,
+  poweredByHeader: false,
+  swcMinify: true,
+  reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,
   },
