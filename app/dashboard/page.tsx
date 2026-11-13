@@ -329,7 +329,7 @@ export default function DashboardPage() {
 
   const [adeSerial, setAdeSerial] = useState('');
   const [adeSeverity, setAdeSeverity] = useState<'LIFE_THREATENING' | 'HOSPITALIZATION' | 'DISABILITY' | 'MILD'>('LIFE_THREATENING');
-  const [adeReaction, setAdeReaction] = useState('Anaphylaxis reaction post-injection requiring epinephrine resuscitation');
+  const [adeReaction, setAdeReaction] = useState('');
   const [adeReporterRole, setAdeReporterRole] = useState('Attending Clinical Immunologist');
   const [adeLoading, setAdeLoading] = useState(false);
 
@@ -1525,6 +1525,101 @@ export default function DashboardPage() {
       });
     } finally {
       setInvLoading(false);
+    }
+  };
+
+  const handleAdeSerialSelect = (serial: string) => {
+    setAdeSerial(serial);
+    if (!serial) {
+      setAdeReaction('');
+      return;
+    }
+    const target = drugs.find((d) => d.serialNumber === serial);
+    if (!target) return;
+
+    if (target.adeReportId) {
+      setAdeSeverity((target.adeSeverity as any) || 'LIFE_THREATENING');
+      setAdeReaction(target.adeReactionDetails || '');
+    } else {
+      if (target.serialNumber === 'DRUG-001') {
+        setAdeSeverity('HOSPITALIZATION');
+        setAdeReporterRole('Clinical Pharmacist Specialist');
+        setAdeReaction('Severe cutaneous drug reaction with generalized urticaria and facial angioedema observed 2 hours post-oral administration.');
+      } else if (target.serialNumber === 'DRUG-002') {
+        setAdeSeverity('LIFE_THREATENING');
+        setAdeReporterRole('Attending Clinical Immunologist');
+        setAdeReaction('Acute anaphylactic shock and bronchospasm 15 minutes post-vaccination requiring emergency epinephrine resuscitation.');
+      } else if (target.serialNumber === 'SN-2026-AMOX500') {
+        setAdeSeverity('MILD');
+        setAdeReporterRole('Outpatient Dispensing Pharmacist');
+        setAdeReaction('Transient pruritic skin eruption and nausea without respiratory distress.');
+      } else if (target.serialNumber === 'SN-2026-INSULIN' || target.serialNumber === 'SN-2026-INSULIN100') {
+        setAdeSeverity('HOSPITALIZATION');
+        setAdeReporterRole('Emergency Department Physician');
+        setAdeReaction('Severe acute hypoglycemia (blood glucose < 35 mg/dL) following standard subcutaneous administration.');
+      } else {
+        setAdeSeverity('MILD');
+        setAdeReporterRole('Clinical Safety Officer');
+        setAdeReaction('');
+      }
+    }
+  };
+
+  const handleFedRecallTargetSelect = (target: string) => {
+    setFedRecallTarget(target);
+    if (!target) return;
+    const drug = drugs.find((d) => d.serialNumber === target || d.batchNumber === target);
+    if (drug?.isRecalled) {
+      setFedRecallReason(drug.recallReason || 'Federal Recall Directive active. Product quarantined across all distribution tiers.');
+      if (drug.recallClass) {
+        setFedRecallClass(drug.recallClass as any);
+      }
+      if (drug.recallDirectiveRef) {
+        setFedRecallDirectiveRef(drug.recallDirectiveRef);
+      }
+    } else {
+      if (target.includes('001') || target.includes('AMOX')) {
+        setFedRecallClass('CLASS_II');
+        setFedRecallDirectiveRef('FDA-DIR-2026-09A');
+        setFedRecallReason('Class II: Packaging seal defect and blister foil micro-perforation reported during hospital pharmacy intake.');
+      } else if (target.includes('002') || target.includes('INSULIN')) {
+        setFedRecallClass('CLASS_I');
+        setFedRecallDirectiveRef('FDA-DIR-2026-01B');
+        setFedRecallReason('Class I Emergency Directive: Cold-chain thermal excursion > 12°C during interstate transit.');
+      } else {
+        setFedRecallClass('CLASS_III');
+        setFedRecallDirectiveRef('FDA-DIR-2026-11C');
+        setFedRecallReason('Class III: Minor secondary carton packaging text misalignment not impacting formulation potency.');
+      }
+    }
+  };
+
+  const handleInvSerialSelect = (serial: string) => {
+    setInvSerial(serial);
+    if (!serial) return;
+    const drug = drugs.find((d) => d.serialNumber === serial);
+    if (drug?.regulatoryInvestigationDocket) {
+      setInvDocket(drug.regulatoryInvestigationDocket);
+      if (drug.regulatoryAssayFinding) setInvAssayFindings(drug.regulatoryAssayFinding);
+      if (drug.regulatoryForensicNotes) setInvForensicNotes(drug.regulatoryForensicNotes);
+      if (drug.regulatoryInvestigationStatus) setInvDisposition(drug.regulatoryInvestigationStatus as any);
+    } else {
+      if (serial === 'DRUG-001') {
+        setInvDocket('FDA-OC-CASE-2026-101');
+        setInvDisposition('UNDER_INVESTIGATION');
+        setInvAssayFindings('Raman spectroscopy confirms presence of authentic Amoxicillin API (99.1% potency). Excipient spectrum valid.');
+        setInvForensicNotes('Packaging tamper seal fully intact. Serial number matches manufacturer authorized dispatch cryptographic signature.');
+      } else if (serial === 'DRUG-002') {
+        setInvDocket('FDA-OC-CASE-2026-202');
+        setInvDisposition('SEIZED_CONFIRMED_COUNTERFEIT');
+        setInvAssayFindings('Raman spectroscopy analysis confirms excipient starch with absent active pharmaceutical ingredient (0% API).');
+        setInvForensicNotes('Physical packaging lacks hologram security thread. Packaging foil font discrepancy matches transshipment counterfeit pattern.');
+      } else {
+        setInvDocket(`FDA-OC-CASE-2026-${serial.slice(-3)}`);
+        setInvDisposition('CLEARED_LEGITIMATE');
+        setInvAssayFindings('Fourier-transform infrared spectroscopy (FTIR) matches reference standard library spectrum.');
+        setInvForensicNotes('2D DataMatrix cryptographic serial authenticated against manufacturer factory master ledger.');
+      }
     }
   };
 
@@ -7221,12 +7316,28 @@ export default function DashboardPage() {
                             </button>
                           </div>
 
-                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
-                            {fedRecallIsBatch ? 'Select Target Batch Number' : 'Select Target Serial Number'}
-                          </label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-xs text-[#94A3B8] font-semibold">
+                              {fedRecallIsBatch ? 'Select Target Batch Number' : 'Select Target Serial Number'}
+                            </label>
+                            {fedRecallTarget && (
+                              (() => {
+                                const drug = drugs.find((d) => d.serialNumber === fedRecallTarget || d.batchNumber === fedRecallTarget);
+                                return drug?.isRecalled ? (
+                                  <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/30 text-[10px] font-mono font-bold shrink-0 whitespace-nowrap px-2 py-0.5">
+                                    Active Recall Enforced
+                                  </span>
+                                ) : (
+                                  <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-mono font-bold shrink-0 whitespace-nowrap px-2 py-0.5">
+                                    Commercial Distribution Clear
+                                  </span>
+                                );
+                              })()
+                            )}
+                          </div>
                           <select
                             value={fedRecallTarget}
-                            onChange={(e) => setFedRecallTarget(e.target.value)}
+                            onChange={(e) => handleFedRecallTargetSelect(e.target.value)}
                             className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
                             required
                           >
@@ -7453,10 +7564,26 @@ export default function DashboardPage() {
                     <form onSubmit={handleSubmitMedWatchAde} className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Target Medicine Serial</label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-xs text-[#94A3B8] font-semibold">Target Medicine Serial</label>
+                            {adeSerial && (
+                              (() => {
+                                const target = drugs.find((d) => d.serialNumber === adeSerial);
+                                return target?.adeReportId ? (
+                                  <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/30 text-[10px] font-mono font-bold shrink-0 whitespace-nowrap px-2 py-0.5">
+                                    Report #{target.adeReportId} Anchored
+                                  </span>
+                                ) : (
+                                  <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-mono font-bold shrink-0 whitespace-nowrap px-2 py-0.5">
+                                    Clean Safety Record (No Reports)
+                                  </span>
+                                );
+                              })()
+                            )}
+                          </div>
                           <select
                             value={adeSerial}
-                            onChange={(e) => setAdeSerial(e.target.value)}
+                            onChange={(e) => handleAdeSerialSelect(e.target.value)}
                             className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
                             required
                           >
@@ -7551,13 +7678,23 @@ export default function DashboardPage() {
                         />
                       </div>
 
-                      <div className="flex justify-end pt-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                        <div className="text-[11px] text-[#94A3B8]">
+                          {(() => {
+                            const target = drugs.find((d) => d.serialNumber === adeSerial);
+                            if (!target) return 'Select a medicine above to initiate or view MedWatch triage';
+                            if (target.adeReportId) {
+                              return `Safety record anchored on ledger (${target.adeReportedAt ? new Date(target.adeReportedAt).toLocaleDateString() : 'Active'}). Supply quarantined.`;
+                            }
+                            return 'Drafting new adverse event report. Submission anchors on-chain and triggers GxP hold.';
+                          })()}
+                        </div>
                         <button
                           type="submit"
                           disabled={adeLoading || !adeSerial}
-                          className="btn btn-sm bg-amber-500 hover:bg-amber-600 text-[#0B1220] border-none rounded-xl font-bold text-xs px-6 shadow-md flex items-center gap-2"
+                          className="btn btn-sm bg-amber-500 hover:bg-amber-600 text-[#0B1220] border-none rounded-xl font-bold text-xs px-6 shadow-md flex items-center gap-2 shrink-0 whitespace-nowrap self-end sm:self-auto"
                         >
-                          <ShieldAlert className="h-4 w-4" />
+                          <ShieldAlert className="h-4 w-4 shrink-0" />
                           {adeLoading ? 'Anchoring MedWatch Report...' : 'Anchor MedWatch Adverse Event Report'}
                         </button>
                       </div>
@@ -7804,10 +7941,26 @@ export default function DashboardPage() {
                     <form onSubmit={handleUpdateInvestigationDocket} className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">Target Medicine Serial</label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-xs text-[#94A3B8] font-semibold">Target Medicine Serial</label>
+                            {invSerial && (
+                              (() => {
+                                const target = drugs.find((d) => d.serialNumber === invSerial);
+                                return target?.regulatoryInvestigationDocket ? (
+                                  <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/30 text-[10px] font-mono font-bold shrink-0 whitespace-nowrap px-2 py-0.5">
+                                    Docket #{target.regulatoryInvestigationDocket}
+                                  </span>
+                                ) : (
+                                  <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-mono font-bold shrink-0 whitespace-nowrap px-2 py-0.5">
+                                    Legitimate Chain Integrity
+                                  </span>
+                                );
+                              })()
+                            )}
+                          </div>
                           <select
                             value={invSerial}
-                            onChange={(e) => setInvSerial(e.target.value)}
+                            onChange={(e) => handleInvSerialSelect(e.target.value)}
                             className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
                             required
                           >
