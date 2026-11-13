@@ -2764,14 +2764,14 @@ export default function DashboardPage() {
                   )}
                 </div>
               ) : (
-                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4 flex flex-row items-center justify-between">
+                <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4 flex flex-row items-center justify-between gap-3">
                   <div className="space-y-0.5">
                     <h4 className="text-xs font-bold text-[#F1F5F9]">Verified Batch Inventory (Read-Only)</h4>
                     <p className="text-[11px] text-[#94A3B8]">
                       Your authenticated role ({currentRole}) can review registered batches and verify certificates. Only authorized Manufacturers and Admins can register new pharmaceutical batches.
                     </p>
                   </div>
-                  <span className="badge badge-sm bg-[#172638] text-[#94A3B8] font-mono border border-[#304257] text-[10px]">
+                  <span className="badge bg-[#172638] text-[#94A3B8] font-mono border border-[#304257] text-[10px] shrink-0 whitespace-nowrap px-2.5 py-1 h-auto">
                     Read-Only
                   </span>
                 </div>
@@ -3476,7 +3476,7 @@ export default function DashboardPage() {
                     </p>
                   </div>
                   {selectedSerial && (
-                    <span className="badge bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-mono font-bold text-xs">
+                    <span className="badge bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-mono font-bold text-xs shrink-0 whitespace-nowrap px-3 py-1.5 h-auto">
                       Tracking: {selectedSerial}
                     </span>
                   )}
@@ -6413,7 +6413,7 @@ export default function DashboardPage() {
               {pharmacySubTab === 'recalls' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   <div className="lg:col-span-7 card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-5">
-                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3 gap-3">
                       <div>
                         <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
                           <AlertOctagon className="h-5 w-5 text-amber-400" /> Patient Recall Contact Tracing Matrix
@@ -6422,7 +6422,7 @@ export default function DashboardPage() {
                           Instant lookup of patient prescription records for recalled batches to execute emergency safety outreach.
                         </p>
                       </div>
-                      <span className="badge bg-amber-500/20 text-amber-300 border-amber-500/30 text-[10px] font-mono">
+                      <span className="badge bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-mono shrink-0 whitespace-nowrap px-2.5 py-1 h-auto">
                         SAFETY TRACE
                       </span>
                     </div>
@@ -6653,7 +6653,7 @@ export default function DashboardPage() {
               {regulatorSubTab === 'inspection' && (
                 <div className="space-y-6">
                   <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl space-y-5">
-                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3 gap-3">
                       <div>
                         <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
                           <Building className="h-5 w-5 text-[#00D6B4]" /> Form 483 / Warning Inspection Terminal
@@ -6662,7 +6662,7 @@ export default function DashboardPage() {
                           Conduct unannounced or routine cGMP audits. Issue statutory observations under 21 CFR citations and mandate corrective actions.
                         </p>
                       </div>
-                      <span className="badge bg-[#243247] text-[#00D6B4] border-[#304257] text-xs font-mono font-bold">
+                      <span className="badge bg-[#243247] text-[#00D6B4] border border-[#304257] text-xs font-mono font-bold shrink-0 whitespace-nowrap px-3 py-1.5 h-auto">
                         Form FDA-483
                       </span>
                     </div>
@@ -7212,7 +7212,7 @@ export default function DashboardPage() {
               {regulatorSubTab === 'pharmacovigilance' && (
                 <div className="space-y-6">
                   <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl space-y-5">
-                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3 gap-3">
                       <div>
                         <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
                           <ShieldAlert className="h-5 w-5 text-amber-400" /> FDA MedWatch (Form 3500A) ADE Triage
@@ -7221,7 +7221,7 @@ export default function DashboardPage() {
                           Triage and register Adverse Drug Event (ADE) reports. Life-threatening events trigger automatic emergency quarantine across the supply chain.
                         </p>
                       </div>
-                      <span className="badge bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs font-mono font-bold">
+                      <span className="badge bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold shrink-0 whitespace-nowrap px-3 py-1.5 h-auto">
                         Form FDA-3500A
                       </span>
                     </div>
@@ -7562,7 +7562,7 @@ export default function DashboardPage() {
               {regulatorSubTab === 'investigations' && (
                 <div className="space-y-6">
                   <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl space-y-5">
-                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3 gap-3">
                       <div>
                         <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
                           <FlaskConical className="h-5 w-5 text-[#00D6B4]" /> DSCSA Section 582 Counterfeit Investigation Docket
@@ -7571,7 +7571,7 @@ export default function DashboardPage() {
                           Manage criminal and forensic investigations for suspect product notifications under DSCSA Section 582. Record forensic laboratory assays and legal dispositions.
                         </p>
                       </div>
-                      <span className="badge bg-[#243247] text-[#00D6B4] border-[#304257] text-xs font-mono font-bold">
+                      <span className="badge bg-[#243247] text-[#00D6B4] border border-[#304257] text-xs font-mono font-bold shrink-0 whitespace-nowrap px-3 py-1.5 h-auto">
                         DSCSA 582 Docket
                       </span>
                     </div>
