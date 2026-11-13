@@ -6463,8 +6463,19 @@ export default function DashboardPage() {
                             <tbody className="divide-y divide-[#304257]">
                               {drugs.filter((d) => !!d.dispensedAt || !!d.prescriptionNumber).length === 0 ? (
                                 <tr>
-                                  <td colSpan={6} className="text-center py-6 text-[#94A3B8] italic">
-                                    No active dispensed prescriptions found. Dispense medication in Tab 3 to watch here.
+                                  <td colSpan={6} className="text-center py-6">
+                                    <div className="space-y-3 max-w-md mx-auto">
+                                      <p className="text-xs text-[#94A3B8]">
+                                        Consignments in Vault inventory are ready to be dispensed to patients. Once dispensed in Tab 3, they will appear here under continuous safety surveillance.
+                                      </p>
+                                      <button
+                                        type="button"
+                                        onClick={() => setPharmacySubTab('dispense')}
+                                        className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] font-bold text-xs rounded-xl inline-flex items-center gap-2"
+                                      >
+                                        <FileText className="h-4 w-4" /> Go to Tab 3: Patient Prescription Dispensing
+                                      </button>
+                                    </div>
                                   </td>
                                 </tr>
                               ) : (
@@ -6499,7 +6510,7 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="lg:col-span-5 space-y-4">
-                    <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-4">
+                    <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-4 mb-20">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-2">
                         <AlertTriangle className="h-4 w-4 text-rose-400" /> Flag Suspected Counterfeit
                       </h4>
