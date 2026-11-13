@@ -821,6 +821,11 @@ export const pharmacyDispenseDrug = async (
   return res.data;
 };
 
+export const resetDrugDispense = async (serialNumber: string): Promise<Drug> => {
+  const res = await api.post(`/drugs/${serialNumber}/reset-dispense`);
+  return res.data;
+};
+
 export const pharmacyRetireDrug = async (
   serialNumber: string,
   data: {
