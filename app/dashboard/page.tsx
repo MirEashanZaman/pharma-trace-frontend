@@ -40,6 +40,7 @@ import {
   pharmacyReceiveDrug,
   pharmacyDispenseDrug,
   pharmacyRetireDrug,
+  resetDrugDispense,
   fetchPharmacyInventorySummary,
   PharmacyInventorySummary,
   regulatorIssueFacilityInspection,
@@ -6063,7 +6064,7 @@ export default function DashboardPage() {
                     </div>
 
                     {(() => {
-                      const effectiveDispenseSerial = rxDispenseSerial || drugs.find((d) => !d.dispensedAt)?.serialNumber || drugs[0]?.serialNumber || '';
+                      const effectiveDispenseSerial = rxDispenseSerial || drugs.find((d) => d.serialNumber === 'SN-2026-AMOX500' && !d.dispensedAt)?.serialNumber || drugs.find((d) => d.serialNumber === 'DRUG-002' && !d.dispensedAt)?.serialNumber || drugs.find((d) => !d.dispensedAt)?.serialNumber || drugs[0]?.serialNumber || '';
                       const target = drugs.find((d) => d.serialNumber === effectiveDispenseSerial);
                       const isExpired = target?.expiryDate ? new Date(target.expiryDate).getTime() < Date.now() : false;
                       const isDispensed = !!target?.dispensedAt;
@@ -6109,6 +6110,33 @@ export default function DashboardPage() {
                                   <strong>{isRecalled ? 'RECALLED' : 'CLEAR'}</strong>
                                 </div>
                               </div>
+                              {isDispensed && (
+                                <div className="flex items-center justify-between p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs mt-2">
+                                  <div className="text-amber-300">
+                                    <span className="font-semibold block text-[11px]">Anti-Double-Dispensing Interlock Active</span>
+                                    <span className="text-[10px] text-[#94A3B8]">Unit already dispensed. Reset state to re-record dispense flow.</span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={async () => {
+                                      try {
+                                        await resetDrugDispense(effectiveDispenseSerial);
+                                        await loadDrugs();
+                                        await loadPharmacySummary();
+                                        setPharmacyFeedback({
+                                          type: 'success',
+                                          message: `Consignment ${effectiveDispenseSerial} reset to READY TO DISPENSE state for demonstration.`,
+                                        });
+                                      } catch (err: any) {
+                                        console.error(err);
+                                      }
+                                    }}
+                                    className="btn btn-xs bg-amber-500 hover:bg-amber-600 text-[#0B1220] font-bold border-none rounded-lg text-[10px]"
+                                  >
+                                    Reset for Demo
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           )}
 
