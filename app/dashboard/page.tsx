@@ -1302,7 +1302,7 @@ export default function DashboardPage() {
       });
       setPharmacyFeedback({
         type: 'success',
-        message: `Medication ${updated.serialNumber} successfully dispensed under Rx #${updated.prescriptionNumber} to Patient Token ${updated.patientToken}. Anti-double-dispensing circuit breaker permanently engaged.`,
+        message: `Medication ${updated.serialNumber} successfully dispensed under Rx #${updated.prescriptionNumber} to Patient Token ${updated.patientToken}. On-Chain Digital Twin Decommissioned (Burned) & Anti-Double-Dispensing circuit breaker permanently engaged.`,
       });
       await loadDrugs();
       await loadPharmacySummary();
@@ -5550,7 +5550,7 @@ export default function DashboardPage() {
                 {[
                   { id: 'inbound', label: '1. Inbound 3Ts Receiving Dock', icon: Package },
                   { id: 'dispensary', label: '2. Dispensary Fridges & Shelves', icon: Snowflake },
-                  { id: 'dispense', label: '3. Clinical Rx Dispensing Terminal', icon: FileText },
+                  { id: 'dispense', label: '3. Patient Prescription Dispensing', icon: FileText },
                   { id: 'returns', label: '4. Returns & Hazardous Destruction', icon: Trash2 },
                   { id: 'recalls', label: '5. Patient Recall Tracing & Safety', icon: AlertOctagon },
                 ].map((tab) => {
@@ -6063,7 +6063,7 @@ export default function DashboardPage() {
                           <option value="">-- Choose Unit for Prescription --</option>
                           {drugs.map((d) => (
                             <option key={d.id} value={d.serialNumber}>
-                              {d.serialNumber} - {d.name} ({d.batchNumber}) | Loc: {d.pharmacyStorageLocation || 'Dispensary'} | {d.dispensedAt ? 'ALREADY DISPENSED' : 'AVAILABLE'}
+                              {d.serialNumber} - {d.drugName || d.name} ({d.batchNumber}) | Loc: {d.pharmacyStorageLocation || 'Dispensary'} | {d.dispensedAt ? 'ALREADY DISPENSED' : 'READY TO DISPENSE'}
                             </option>
                           ))}
                         </select>
@@ -6161,7 +6161,7 @@ export default function DashboardPage() {
                           disabled={rxDispenseLoading || !rxDispenseSerial}
                           className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs w-full flex items-center justify-center gap-2"
                         >
-                          <CheckCircle className="h-4 w-4" /> {rxDispenseLoading ? 'Dispensing...' : 'Verify & Complete Clinical Dispense'}
+                          <CheckCircle className="h-4 w-4" /> {rxDispenseLoading ? 'Decommissioning Digital Twin...' : 'Dispense Medication & Decommission Twin'}
                         </button>
                       </div>
                     </form>
@@ -6430,7 +6430,7 @@ export default function DashboardPage() {
                     <div className="space-y-4">
                       <div>
                         <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
-                          Dispensed Prescriptions Under Watch ({drugs.filter((d) => !!d.dispensedAt).length} units dispensed)
+                          Dispensed Prescriptions Under Watch ({drugs.filter((d) => !!d.dispensedAt || !!d.prescriptionNumber).length} units dispensed)
                         </label>
                         <div className="overflow-x-auto">
                           <table className="table table-sm w-full text-xs">
@@ -6445,28 +6445,36 @@ export default function DashboardPage() {
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-[#304257]">
-                              {drugs
-                                .filter((d) => !!d.dispensedAt)
-                                .map((d) => (
-                                  <tr key={d.id} className="hover:bg-[#243247]/50">
-                                    <td className="font-mono text-[#00D6B4] font-bold">{d.serialNumber}</td>
-                                    <td className="font-mono text-[#F1F5F9]">{d.prescriptionNumber}</td>
-                                    <td className="font-mono text-[#94A3B8]">{d.batchNumber}</td>
-                                    <td className="font-mono text-cyan-300">{d.patientToken}</td>
-                                    <td className="text-[#F1F5F9]">{d.prescribingDoctor}</td>
-                                    <td>
-                                      {d.isRecalled ? (
-                                        <span className="badge badge-xs bg-rose-500/20 text-rose-300 border-rose-500/30 font-bold">
-                                          RECALLED LOT
-                                        </span>
-                                      ) : (
-                                        <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-bold">
-                                          CLEAR
-                                        </span>
-                                      )}
-                                    </td>
-                                  </tr>
-                                ))}
+                              {drugs.filter((d) => !!d.dispensedAt || !!d.prescriptionNumber).length === 0 ? (
+                                <tr>
+                                  <td colSpan={6} className="text-center py-6 text-[#94A3B8] italic">
+                                    No active dispensed prescriptions found. Dispense medication in Tab 3 to watch here.
+                                  </td>
+                                </tr>
+                              ) : (
+                                drugs
+                                  .filter((d) => !!d.dispensedAt || !!d.prescriptionNumber)
+                                  .map((d) => (
+                                    <tr key={d.id} className="hover:bg-[#243247]/50">
+                                      <td className="font-mono text-[#00D6B4] font-bold">{d.serialNumber}</td>
+                                      <td className="font-mono text-[#F1F5F9]">{d.prescriptionNumber}</td>
+                                      <td className="font-mono text-[#94A3B8]">{d.batchNumber}</td>
+                                      <td className="font-mono text-cyan-300">{d.patientToken}</td>
+                                      <td className="text-[#F1F5F9]">{d.prescribingDoctor}</td>
+                                      <td>
+                                        {d.isRecalled ? (
+                                          <span className="badge badge-xs bg-rose-500/20 text-rose-300 border-rose-500/30 font-bold">
+                                            RECALLED LOT
+                                          </span>
+                                        ) : (
+                                          <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-bold">
+                                            CLEAR
+                                          </span>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))
+                              )}
                             </tbody>
                           </table>
                         </div>
