@@ -5062,7 +5062,7 @@ export default function DashboardPage() {
               {distributorSubTab === 'manifest' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   <div className="lg:col-span-7 card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-5">
-                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3 gap-3">
                       <div>
                         <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
                           <FileText className="h-5 w-5 text-[#00D6B4]" /> Outbound Pharmacy Delivery Manifest (e-BoL)
@@ -5071,7 +5071,7 @@ export default function DashboardPage() {
                           Generate an official Electronic Bill of Lading with cryptographic security departure seal.
                         </p>
                       </div>
-                      <span className="badge bg-[#00D6B4]/10 text-[#00D6B4] border-[#00D6B4]/20 text-[10px] font-mono">
+                      <span className="badge bg-[#00D6B4]/10 text-[#00D6B4] border border-[#00D6B4]/20 text-[10px] font-mono shrink-0 whitespace-nowrap px-2.5 py-1 h-auto">
                         e-BoL GEN
                       </span>
                     </div>
@@ -5304,7 +5304,7 @@ export default function DashboardPage() {
               {distributorSubTab === 'pod' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   <div className="lg:col-span-7 card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-5">
-                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3 gap-3">
                       <div>
                         <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
                           <ShieldCheck className="h-5 w-5 text-[#00D6B4]" /> Electronic Proof of Delivery (PoD) Terminal
@@ -5313,7 +5313,7 @@ export default function DashboardPage() {
                           Counter-sign arrival temperature and pharmacist credentials to finalize legal custody handover.
                         </p>
                       </div>
-                      <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-mono">
+                      <span className="badge bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono shrink-0 whitespace-nowrap px-2.5 py-1 h-auto">
                         CUSTODY CLOSING
                       </span>
                     </div>
@@ -5394,11 +5394,11 @@ export default function DashboardPage() {
                           Handover Inspection Notes
                         </label>
                         <textarea
-                          rows={2}
+                          rows={3}
                           value={podNotes}
                           onChange={(e) => setPodNotes(e.target.value)}
                           placeholder="e.g. Inbound cold-chain seal intact, dock temp verified, placed directly in hospital vaccine refrigerator."
-                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[76px] py-2.5 leading-relaxed resize-none"
                         />
                       </div>
 
@@ -5573,7 +5573,7 @@ export default function DashboardPage() {
               {pharmacySubTab === 'inbound' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   <div className="lg:col-span-7 card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-5">
-                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3 gap-3">
                       <div>
                         <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
                           <Package className="h-5 w-5 text-[#00D6B4]" /> Inbound Consignment & 3Ts Receiving Inspection
@@ -5582,7 +5582,7 @@ export default function DashboardPage() {
                           Verify DSCSA 3Ts transaction records, arrival cold-chain temperature, and license before transferring to dispensary stock.
                         </p>
                       </div>
-                      <span className="badge bg-[#00D6B4]/10 text-[#00D6B4] border-[#00D6B4]/20 text-[10px] font-mono">
+                      <span className="badge bg-[#00D6B4]/10 text-[#00D6B4] border border-[#00D6B4]/20 text-[10px] font-mono shrink-0 whitespace-nowrap px-2.5 py-1 h-auto">
                         DOCK-INSPECT
                       </span>
                     </div>
@@ -5736,11 +5736,11 @@ export default function DashboardPage() {
                           Inbound Receiving Observations
                         </label>
                         <textarea
-                          rows={2}
+                          rows={3}
                           value={rxInboundNotes}
                           onChange={(e) => setRxInboundNotes(e.target.value)}
                           placeholder="e.g. Courier cold-pack intact, calibrated infrared probe verified, transferred immediately into vaccine refrigerator."
-                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[76px] py-2.5 leading-relaxed resize-none"
                         />
                       </div>
 
@@ -6010,7 +6010,7 @@ export default function DashboardPage() {
               {pharmacySubTab === 'dispense' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   <div className="lg:col-span-7 card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-5">
-                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3 gap-3">
                       <div>
                         <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
                           <FileText className="h-5 w-5 text-[#00D6B4]" /> Clinical Prescription (Rx) Dispensing Terminal
@@ -6019,7 +6019,7 @@ export default function DashboardPage() {
                           Fulfill verified patient prescription with automated anti-double-dispensing circuit breakers and expiry validation.
                         </p>
                       </div>
-                      <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-mono">
+                      <span className="badge bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono shrink-0 whitespace-nowrap px-2.5 py-1 h-auto">
                         PATIENT HANDOVER
                       </span>
                     </div>
@@ -6122,11 +6122,11 @@ export default function DashboardPage() {
                           Dispensing Notes & Patient Instructions
                         </label>
                         <textarea
-                          rows={2}
+                          rows={3}
                           value={rxDispenseNotes}
                           onChange={(e) => setRxDispenseNotes(e.target.value)}
                           placeholder="e.g. Dispensed with standard patient counselling and GxP cold-pack container."
-                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[76px] py-2.5 leading-relaxed resize-none"
                         />
                       </div>
 
@@ -6207,7 +6207,7 @@ export default function DashboardPage() {
               {pharmacySubTab === 'returns' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   <div className="lg:col-span-7 card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-5">
-                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3 gap-3">
                       <div>
                         <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
                           <Trash2 className="h-5 w-5 text-rose-400" /> Reverse Logistics & Hazardous Destruction
@@ -6216,7 +6216,7 @@ export default function DashboardPage() {
                           Log certified pharmaceutical destruction or initiate distributor Return-to-Vendor (RTV).
                         </p>
                       </div>
-                      <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/30 text-[10px] font-mono">
+                      <span className="badge bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-mono shrink-0 whitespace-nowrap px-2.5 py-1 h-auto">
                         RETIREMENT
                       </span>
                     </div>
@@ -6274,11 +6274,11 @@ export default function DashboardPage() {
                           Retirement Justification Reason
                         </label>
                         <textarea
-                          rows={2}
+                          rows={3}
                           value={rxDestructionReason}
                           onChange={(e) => setRxDestructionReason(e.target.value)}
                           placeholder="e.g. Expired on dispensary shelf - beyond 30 days past shelf limit"
-                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[76px] py-2.5 leading-relaxed resize-none"
                           required
                         />
                       </div>
