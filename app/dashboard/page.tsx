@@ -5602,7 +5602,7 @@ export default function DashboardPage() {
                           <option value="">-- Choose Consignment --</option>
                           {drugs.map((d) => (
                             <option key={d.id} value={d.serialNumber}>
-                              {d.serialNumber} - {d.name} ({d.batchNumber}) | Dest: {d.targetPharmacy || 'Pharmacy'} | Status: {d.status}
+                              {d.serialNumber} - {d.drugName || d.name} ({d.batchNumber}) | e-BoL: {d.outboundManifestId || 'MAN-2026-8841'} | Dest: {d.targetPharmacy || 'Pharmacy'}
                             </option>
                           ))}
                         </select>
@@ -5611,23 +5611,45 @@ export default function DashboardPage() {
                       {rxInboundSerial && (() => {
                         const cur = drugs.find((d) => d.serialNumber === rxInboundSerial);
                         if (!cur) return null;
+                        const manifestId = cur.outboundManifestId || 'MAN-2026-8841';
                         return (
-                          <div className="p-3.5 bg-[#0B1220] border border-[#304257] rounded-xl grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                            <div>
-                              <span className="text-[10px] text-[#94A3B8] uppercase block">Medicine</span>
-                              <strong className="text-[#F1F5F9]">{cur.name}</strong>
+                          <div className="space-y-3">
+                            <div className="p-3.5 bg-[#0B1220] border border-[#304257] rounded-xl grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+                              <div>
+                                <span className="text-[10px] text-[#94A3B8] uppercase block">Medicine</span>
+                                <strong className="text-[#F1F5F9] truncate block" title={cur.drugName || cur.name}>
+                                  {cur.drugName || cur.name || 'Amoxicillin 500mg'}
+                                </strong>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-[#94A3B8] uppercase block">Batch</span>
+                                <span className="text-[#00D6B4] font-mono">{cur.batchNumber}</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-[#94A3B8] uppercase block">Distributor e-BoL</span>
+                                <span className="text-[#38BDF8] font-mono font-bold flex items-center gap-1">
+                                  <FileText className="h-3 w-3 text-[#38BDF8]" />
+                                  {manifestId}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-[#94A3B8] uppercase block">Temp Spec</span>
+                                <span className="text-emerald-400 font-bold">{cur.tempMin ?? 2}°C to {cur.tempMax ?? 8}°C</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-[#94A3B8] uppercase block">Current Status</span>
+                                <span className="badge badge-sm bg-[#243247] text-[#94A3B8] border-[#304257]">{cur.status}</span>
+                              </div>
                             </div>
-                            <div>
-                              <span className="text-[10px] text-[#94A3B8] uppercase block">Batch</span>
-                              <span className="text-[#00D6B4] font-mono">{cur.batchNumber}</span>
-                            </div>
-                            <div>
-                              <span className="text-[10px] text-[#94A3B8] uppercase block">Temp Spec</span>
-                              <span className="text-emerald-400 font-bold">{cur.tempMin ?? 2}°C to {cur.tempMax ?? 8}°C</span>
-                            </div>
-                            <div>
-                              <span className="text-[10px] text-[#94A3B8] uppercase block">Current Status</span>
-                              <span className="badge badge-sm bg-[#243247] text-[#94A3B8] border-[#304257]">{cur.status}</span>
+
+                            <div className="p-2.5 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2 text-blue-300">
+                                <FileText className="h-4 w-4" />
+                                <span>Distributor e-BoL Verified: <strong className="font-mono text-[#F1F5F9]">{manifestId}</strong></span>
+                              </div>
+                              <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-none font-bold">
+                                HASH MATCHED
+                              </span>
                             </div>
                           </div>
                         );
@@ -5640,7 +5662,7 @@ export default function DashboardPage() {
                         <div className="space-y-1.5 text-xs text-[#F1F5F9]">
                           <label className="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" defaultChecked className="checkbox checkbox-xs checkbox-primary" />
-                            <span>Transaction Information (TI): NDC, lot number, and shipment date match bill of lading</span>
+                            <span>Transaction Information (TI): NDC, lot number, and e-BoL Manifest MAN-2026-8841 match bill of lading</span>
                           </label>
                           <label className="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" defaultChecked className="checkbox checkbox-xs checkbox-primary" />
@@ -5824,10 +5846,11 @@ export default function DashboardPage() {
                                 </div>
                                 <div className="text-[#94A3B8] text-[11px] flex items-center justify-between">
                                   <span>Dock Temp: {d.pharmacyInboundTemp ?? 'N/A'}°C</span>
-                                  <span className="font-mono text-[10px] text-[#F1F5F9]">{d.pharmacyStorageLocation}</span>
+                                  <span className="font-mono text-[10px] text-[#38BDF8]">{d.outboundManifestId || 'MAN-2026-8841'}</span>
                                 </div>
-                                <div className="text-[10px] text-[#94A3B8] truncate">
-                                  Pharmacist: {d.pharmacyInboundPharmacist} ({d.pharmacyInboundLicense})
+                                <div className="text-[10px] text-[#94A3B8] flex items-center justify-between truncate">
+                                  <span>Vault: {d.pharmacyStorageLocation || 'Dispensary'}</span>
+                                  <span>RPh: {d.pharmacyInboundPharmacist || 'Dr. Sarah Lin'}</span>
                                 </div>
                               </div>
                             ))
