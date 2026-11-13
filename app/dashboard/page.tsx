@@ -6486,22 +6486,22 @@ export default function DashboardPage() {
                     <div className="space-y-4">
                       <div>
                         <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
-                          Dispensed Prescriptions Under Watch ({drugs.filter((d) => !!d.dispensedAt || !!d.prescriptionNumber).length} units dispensed)
+                          Dispensed Prescriptions Under Watch ({drugs.filter((d) => !!d.dispensedAt).length} units dispensed)
                         </label>
                         <div className="overflow-x-auto">
-                          <table className="table table-sm w-full text-xs">
+                          <table className="table table-sm min-w-full text-xs whitespace-nowrap">
                             <thead>
                               <tr className="border-b border-[#304257] text-[#94A3B8]">
-                                <th>Serial #</th>
-                                <th>Rx #</th>
-                                <th>Batch #</th>
-                                <th>Patient Token</th>
-                                <th>Prescribing Doctor</th>
-                                <th>Recall State</th>
+                                <th className="whitespace-nowrap px-3 py-2.5">Serial #</th>
+                                <th className="whitespace-nowrap px-3 py-2.5">Rx #</th>
+                                <th className="whitespace-nowrap px-3 py-2.5">Batch #</th>
+                                <th className="whitespace-nowrap px-3 py-2.5">Patient Token</th>
+                                <th className="whitespace-nowrap px-3 py-2.5">Prescribing Doctor</th>
+                                <th className="whitespace-nowrap px-3 py-2.5 text-center">Recall State</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-[#304257]">
-                              {drugs.filter((d) => !!d.dispensedAt || !!d.prescriptionNumber).length === 0 ? (
+                              {drugs.filter((d) => !!d.dispensedAt).length === 0 ? (
                                 <tr>
                                   <td colSpan={6} className="text-center py-6">
                                     <div className="space-y-3 max-w-md mx-auto">
@@ -6520,21 +6520,21 @@ export default function DashboardPage() {
                                 </tr>
                               ) : (
                                 drugs
-                                  .filter((d) => !!d.dispensedAt || !!d.prescriptionNumber)
+                                  .filter((d) => !!d.dispensedAt)
                                   .map((d) => (
                                     <tr key={d.id} className="hover:bg-[#243247]/50">
-                                      <td className="font-mono text-[#00D6B4] font-bold">{d.serialNumber}</td>
-                                      <td className="font-mono text-[#F1F5F9]">{d.prescriptionNumber}</td>
-                                      <td className="font-mono text-[#94A3B8]">{d.batchNumber}</td>
-                                      <td className="font-mono text-cyan-300">{d.patientToken}</td>
-                                      <td className="text-[#F1F5F9]">{d.prescribingDoctor}</td>
-                                      <td>
+                                      <td className="font-mono text-[#00D6B4] font-bold whitespace-nowrap px-3 py-2.5">{d.serialNumber}</td>
+                                      <td className="font-mono text-[#F1F5F9] whitespace-nowrap px-3 py-2.5">{d.prescriptionNumber}</td>
+                                      <td className="font-mono text-[#94A3B8] whitespace-nowrap px-3 py-2.5">{d.batchNumber}</td>
+                                      <td className="font-mono text-cyan-300 whitespace-nowrap px-3 py-2.5">{d.patientToken}</td>
+                                      <td className="text-[#F1F5F9] whitespace-nowrap px-3 py-2.5">{d.prescribingDoctor}</td>
+                                      <td className="whitespace-nowrap px-3 py-2.5 text-center">
                                         {d.isRecalled ? (
-                                          <span className="badge badge-xs bg-rose-500/20 text-rose-300 border-rose-500/30 font-bold">
+                                          <span className="badge badge-xs bg-rose-500/20 text-rose-300 border-rose-500/30 font-bold whitespace-nowrap">
                                             RECALLED LOT
                                           </span>
                                         ) : (
-                                          <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-bold">
+                                          <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-bold whitespace-nowrap">
                                             CLEAR
                                           </span>
                                         )}
