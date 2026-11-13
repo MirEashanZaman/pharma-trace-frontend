@@ -715,39 +715,64 @@ function VerifyContent() {
                   <div className="card bg-[#172638] border border-[#304257] p-5 rounded-2xl space-y-3">
                     <div className="flex items-center justify-between border-b border-[#304257] pb-2.5 gap-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <CheckCircle2 className="h-4 w-4 text-[#00D6B4] shrink-0" />
+                        {activeDrug?.dispensedAt ? (
+                          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                        ) : (
+                          <Clock className="h-4 w-4 text-cyan-400 shrink-0" />
+                        )}
                         <h3 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] truncate">
                           Dispensation Authenticity & Rx Provenance
                         </h3>
                       </div>
-                      <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-bold shrink-0 whitespace-nowrap px-2.5 py-0.5">
-                        Single-Use Verified
-                      </span>
+                      {activeDrug?.dispensedAt ? (
+                        <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-bold shrink-0 whitespace-nowrap px-2.5 py-0.5">
+                          Single-Use Verified
+                        </span>
+                      ) : (
+                        <span className="badge bg-cyan-500/20 text-cyan-300 border-cyan-500/30 text-[10px] font-bold shrink-0 whitespace-nowrap px-2.5 py-0.5">
+                          Vault Inventory (Undispensed)
+                        </span>
+                      )}
                     </div>
 
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between">
-                        <span className="text-[#94A3B8]">Dispensing Pharmacy:</span>
-                        <span className="font-semibold text-[#F1F5F9]">{activeDrug?.targetPharmacy || 'St. Jude Central Pharmacy'}</span>
+                        <span className="text-[#94A3B8]">Current Custodian / Vault:</span>
+                        <span className="font-semibold text-[#F1F5F9]">
+                          {activeDrug?.currentCustodian || activeDrug?.targetPharmacy || 'Dispensary Vault Stock'}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[#94A3B8]">Supervising Pharmacist:</span>
-                        <span className="font-semibold text-[#F1F5F9]">{activeDrug?.dispensedByPharmacist || activeDrug?.pharmacyInboundPharmacist || 'Sarah Jenkins, PharmD'}</span>
+                        <span className="font-semibold text-[#F1F5F9]">
+                          {activeDrug?.dispensedByPharmacist || activeDrug?.pharmacyInboundPharmacist || 'Pending Dispensing Handover'}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[#94A3B8]">Prescription Ref #:</span>
-                        <span className="font-mono text-[#00D6B4] font-bold">{activeDrug?.prescriptionNumber || 'RX-884920'}</span>
+                        <span className="font-mono text-[#00D6B4] font-bold">
+                          {activeDrug?.prescriptionNumber || 'Unassigned (Pre-Dispense)'}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[#94A3B8]">Prescribing Physician:</span>
-                        <span className="font-semibold text-[#F1F5F9]">{activeDrug?.prescribingDoctor || 'Dr. Robert Vance, MD'}</span>
+                        <span className="font-semibold text-[#F1F5F9]">
+                          {activeDrug?.prescribingDoctor || 'Awaiting Clinical Script'}
+                        </span>
                       </div>
                     </div>
 
-                    <div className="p-2.5 bg-[#0B1220] rounded-xl border border-[#304257] text-[11px] text-[#94A3B8] flex items-center gap-2">
-                      <ShieldCheck className="h-4 w-4 text-[#00D6B4] shrink-0" />
-                      <span>Single-Use Circuit Breaker engaged. This bottle cannot be re-dispensed or diverted.</span>
-                    </div>
+                    {activeDrug?.dispensedAt ? (
+                      <div className="p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/30 text-[11px] text-emerald-300 flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
+                        <span>Single-Use Circuit Breaker engaged. Digital twin decommissioned upon clinical handover.</span>
+                      </div>
+                    ) : (
+                      <div className="p-2.5 bg-cyan-500/10 rounded-xl border border-cyan-500/30 text-[11px] text-cyan-300 flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-cyan-400 shrink-0" />
+                        <span>Pre-Dispense Inventory: Unit is securely held in stock. Single-use lock activates upon patient dispense.</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="card bg-[#172638] border border-[#304257] p-5 rounded-2xl space-y-3">
@@ -1413,7 +1438,7 @@ function VerifyContent() {
               <div className="space-y-1.5 text-xs text-[#94A3B8]">
                 <div className="flex justify-between">
                   <span>Authorized Pharmacy:</span>
-                  <span className="text-[#F1F5F9] font-semibold">{activeDrug?.targetPharmacy || 'St. Jude Central Pharmacy'}</span>
+                  <span className="text-[#F1F5F9] font-semibold">{activeDrug?.targetPharmacy || activeDrug?.currentCustodian || 'Licensed Pharmacy'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Serial Code:</span>
