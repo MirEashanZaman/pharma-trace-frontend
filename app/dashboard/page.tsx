@@ -4517,7 +4517,7 @@ export default function DashboardPage() {
               {distributorSubTab === 'inbound' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   <div className="lg:col-span-7 card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-5">
-                    <div className="flex items-center justify-between border-b border-[#304257] pb-3">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-3 gap-3">
                       <div>
                         <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
                           <Package className="h-5 w-5 text-[#00D6B4]" /> Consignment Inbound Gateway
@@ -4526,7 +4526,7 @@ export default function DashboardPage() {
                           Inspect dockside temperature probe readings and verify seal integrity before entering cold vault.
                         </p>
                       </div>
-                      <span className="badge bg-[#00D6B4]/10 text-[#00D6B4] border-[#00D6B4]/20 text-[10px] font-mono">
+                      <span className="badge bg-[#00D6B4]/10 text-[#00D6B4] border border-[#00D6B4]/20 text-[10px] font-mono shrink-0 whitespace-nowrap px-2.5 py-1 h-auto">
                         BAY-4 ACTIVE
                       </span>
                     </div>
@@ -4649,11 +4649,11 @@ export default function DashboardPage() {
                           Dock Inspection Findings & Observations
                         </label>
                         <textarea
-                          rows={2}
+                          rows={3}
                           value={inboundNotes}
                           onChange={(e) => setInboundNotes(e.target.value)}
                           placeholder="e.g. Reefer compressor active upon arrival. Tamper seal validated against manufacturer manifest. No condensation or carton stress."
-                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[76px] py-2.5 leading-relaxed resize-none"
                         />
                       </div>
 
