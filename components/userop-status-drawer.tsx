@@ -29,6 +29,22 @@ export interface UserOpStatus {
 export function UserOpStatusDrawer() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isDismissed, setIsDismissed] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = sessionStorage.getItem('erc4337_drawer_dismissed');
+      if (stored === 'true') {
+        setIsDismissed(true);
+      }
+    }
+  }, []);
+
+  const handleDismiss = (dismissed: boolean) => {
+    setIsDismissed(dismissed);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('erc4337_drawer_dismissed', String(dismissed));
+    }
+  };
   const [activeOps, setActiveOps] = useState<UserOpStatus[]>([
     {
       userOpHash: '0xc1eb8539b388b6b2f3c57f96095d9441d590d6d058cf3f8dc9e8947d3986b456',
@@ -83,7 +99,7 @@ export function UserOpStatusDrawer() {
     return (
       <div className="fixed bottom-3 right-3 z-40">
         <button
-          onClick={() => setIsDismissed(false)}
+          onClick={() => handleDismiss(false)}
           className="h-8 w-8 rounded-full bg-[#172638] border border-[#00D6B4]/40 text-[#00D6B4] shadow-2xl flex items-center justify-center hover:bg-[#243247] hover:border-[#00D6B4] transition"
           title="Restore ERC-4337 Status Drawer"
         >
@@ -123,7 +139,7 @@ export function UserOpStatusDrawer() {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                setIsDismissed(true);
+                handleDismiss(true);
               }}
               className="p-1 hover:bg-[#243247] rounded-md text-[#94A3B8] hover:text-[#F1F5F9] transition"
               title="Minimize widget"
