@@ -633,7 +633,7 @@ function VerifyContent() {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span
-                            className={`badge text-[10px] font-bold uppercase tracking-wider ${
+                            className={`badge text-[10px] font-bold uppercase tracking-wider shrink-0 whitespace-nowrap px-2.5 py-0.5 ${
                               recallInfo?.isRecalled
                                 ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
                                 : result.exists && result.isValid
@@ -713,14 +713,14 @@ function VerifyContent() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="card bg-[#172638] border border-[#304257] p-5 rounded-2xl space-y-3">
-                    <div className="flex items-center justify-between border-b border-[#304257] pb-2.5">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-[#00D6B4]" />
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9]">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-2.5 gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <CheckCircle2 className="h-4 w-4 text-[#00D6B4] shrink-0" />
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] truncate">
                           Dispensation Authenticity & Rx Provenance
                         </h3>
                       </div>
-                      <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-bold">
+                      <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-bold shrink-0 whitespace-nowrap px-2.5 py-0.5">
                         Single-Use Verified
                       </span>
                     </div>
@@ -751,15 +751,15 @@ function VerifyContent() {
                   </div>
 
                   <div className="card bg-[#172638] border border-[#304257] p-5 rounded-2xl space-y-3">
-                    <div className="flex items-center justify-between border-b border-[#304257] pb-2.5">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-[#00D6B4]" />
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9]">
+                    <div className="flex items-center justify-between border-b border-[#304257] pb-2.5 gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Calendar className="h-4 w-4 text-[#00D6B4] shrink-0" />
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] truncate">
                           Shelf-Life & Cold-Chain Integrity
                         </h3>
                       </div>
                       <span
-                        className={`badge text-[10px] font-bold ${
+                        className={`badge text-[10px] font-bold shrink-0 whitespace-nowrap px-2.5 py-0.5 ${
                           daysUntilExpiry !== null && daysUntilExpiry < 0
                             ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
                             : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
@@ -1061,7 +1061,7 @@ function VerifyContent() {
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-xs">{item.drugName}</span>
                             {item.isRecalled && (
-                              <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/40 text-[9px] font-bold uppercase">
+                              <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/40 text-[9px] font-bold uppercase shrink-0 whitespace-nowrap px-2 py-0.5">
                                 Recalled
                               </span>
                             )}
