@@ -1114,11 +1114,12 @@ export default function DashboardPage() {
   };
 
   const handleInboundInspection = async (disposition: 'ACCEPTED' | 'REJECTED') => {
-    if (!inboundSerial) return;
+    const targetSerial = inboundSerial || (drugs[0]?.serialNumber ?? '');
+    if (!targetSerial) return;
     setInboundLoading(true);
     setDistributorFeedback(null);
     try {
-      const updated = await receiveInboundDrug(inboundSerial, {
+      const updated = await receiveInboundDrug(targetSerial, {
         inspectionDisposition: disposition,
         sealVerified: inboundSealVerified,
         receivingTemp: Number(inboundTemp),
@@ -1256,11 +1257,12 @@ export default function DashboardPage() {
   };
 
   const handlePharmacyReceiveInbound = async (disposition: 'ACCEPTED' | 'REJECTED') => {
-    if (!rxInboundSerial) return;
+    const targetSerial = rxInboundSerial || drugs.find((d) => !d.pharmacyInboundStatus)?.serialNumber || drugs[0]?.serialNumber;
+    if (!targetSerial) return;
     setRxInboundLoading(true);
     setPharmacyFeedback(null);
     try {
-      const updated = await pharmacyReceiveDrug(rxInboundSerial, {
+      const updated = await pharmacyReceiveDrug(targetSerial, {
         disposition,
         receivingTemp: Number(rxInboundTemp),
         storageLocation: rxInboundLocation,
@@ -1289,11 +1291,12 @@ export default function DashboardPage() {
 
   const handlePharmacyDispense = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!rxDispenseSerial) return;
+    const targetSerial = rxDispenseSerial || drugs.find((d) => !d.dispensedAt)?.serialNumber || drugs[0]?.serialNumber;
+    if (!targetSerial) return;
     setRxDispenseLoading(true);
     setPharmacyFeedback(null);
     try {
-      const updated = await pharmacyDispenseDrug(rxDispenseSerial, {
+      const updated = await pharmacyDispenseDrug(targetSerial, {
         prescriptionNumber: rxPrescriptionNumber,
         prescribingDoctor: rxDoctorName,
         patientToken: rxPatientToken,
@@ -1801,7 +1804,7 @@ export default function DashboardPage() {
           </div>
         </aside>
 
-        <main className="flex-1 space-y-6">
+        <main className="flex-1 space-y-6 pb-52">
           {currentUser?.warningCount ? (
             <div className="p-4 rounded-xl bg-amber-500/15 border-2 border-amber-500/40 text-amber-200 space-y-1">
               <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-300">
@@ -2771,7 +2774,7 @@ export default function DashboardPage() {
                       Your authenticated role ({currentRole}) can review registered batches and verify certificates. Only authorized Manufacturers and Admins can register new pharmaceutical batches.
                     </p>
                   </div>
-                  <span className="badge bg-[#172638] text-[#94A3B8] font-mono border border-[#304257] text-[10px] shrink-0 whitespace-nowrap px-2.5 py-1 h-auto">
+                  <span className="badge bg-[#172638] text-[#94A3B8] font-mono border border-[#304257] text-[10px] shrink-0 whitespace-nowrap px-3 py-1 h-auto leading-none">
                     Read-Only
                   </span>
                 </div>
@@ -4533,46 +4536,50 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="space-y-4">
-                      <div>
-                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
-                          Select Inbound Consignment / Medicine Serial
-                        </label>
-                        <select
-                          value={inboundSerial || (drugs[0]?.serialNumber ?? '')}
-                          onChange={(e) => setInboundSerial(e.target.value)}
-                          className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
-                        >
-                          <option value="">-- Choose Consignment --</option>
-                          {drugs.map((d) => (
-                            <option key={d.id} value={d.serialNumber}>
-                              {d.serialNumber} - {d.name} ({d.batchNumber}) | Status: {d.status} | Custodian: {d.currentCustodian || 'MANUFACTURER'}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {inboundSerial && (() => {
-                        const cur = drugs.find((d) => d.serialNumber === inboundSerial);
-                        if (!cur) return null;
+                      {(() => {
+                        const effectiveSerial = inboundSerial || (drugs[0]?.serialNumber ?? '');
+                        const cur = drugs.find((d) => d.serialNumber === effectiveSerial);
                         return (
-                          <div className="p-3.5 bg-[#0B1220] border border-[#304257] rounded-xl grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                          <>
                             <div>
-                              <span className="text-[10px] text-[#94A3B8] uppercase block">Medicine</span>
-                              <strong className="text-[#F1F5F9]">{cur.name}</strong>
+                              <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                                Select Inbound Consignment / Medicine Serial
+                              </label>
+                              <select
+                                value={effectiveSerial}
+                                onChange={(e) => setInboundSerial(e.target.value)}
+                                className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                              >
+                                <option value="">-- Choose Consignment --</option>
+                                {drugs.map((d) => (
+                                  <option key={d.id} value={d.serialNumber}>
+                                    {d.serialNumber} - {d.name} ({d.batchNumber}) | Status: {d.status} | Custodian: {d.currentCustodian || 'MANUFACTURER'}
+                                  </option>
+                                ))}
+                              </select>
                             </div>
-                            <div>
-                              <span className="text-[10px] text-[#94A3B8] uppercase block">Batch</span>
-                              <span className="text-[#00D6B4] font-mono">{cur.batchNumber}</span>
-                            </div>
-                            <div>
-                              <span className="text-[10px] text-[#94A3B8] uppercase block">Temp Spec</span>
-                              <span className="text-emerald-400 font-bold">{cur.tempMin ?? 2}°C to {cur.tempMax ?? 8}°C</span>
-                            </div>
-                            <div>
-                              <span className="text-[10px] text-[#94A3B8] uppercase block">Current Status</span>
-                              <span className="badge badge-sm bg-[#243247] text-[#94A3B8] border-[#304257]">{cur.status}</span>
-                            </div>
-                          </div>
+
+                            {cur && (
+                              <div className="p-3.5 bg-[#0B1220] border border-[#304257] rounded-xl grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                                <div>
+                                  <span className="text-[10px] text-[#94A3B8] uppercase block">Medicine</span>
+                                  <strong className="text-[#F1F5F9]">{cur.name}</strong>
+                                </div>
+                                <div>
+                                  <span className="text-[10px] text-[#94A3B8] uppercase block">Batch</span>
+                                  <span className="text-[#00D6B4] font-mono">{cur.batchNumber}</span>
+                                </div>
+                                <div>
+                                  <span className="text-[10px] text-[#94A3B8] uppercase block">Temp Spec</span>
+                                  <span className="text-emerald-400 font-bold">{cur.tempMin ?? 2}°C to {cur.tempMax ?? 8}°C</span>
+                                </div>
+                                <div>
+                                  <span className="text-[10px] text-[#94A3B8] uppercase block">Current Status</span>
+                                  <span className="badge badge-sm bg-[#243247] text-[#94A3B8] border-[#304257] shrink-0 whitespace-nowrap">{cur.status}</span>
+                                </div>
+                              </div>
+                            )}
+                          </>
                         );
                       })()}
 
@@ -4654,14 +4661,14 @@ export default function DashboardPage() {
                           value={inboundNotes}
                           onChange={(e) => setInboundNotes(e.target.value)}
                           placeholder="e.g. Reefer compressor active upon arrival. Tamper seal validated against manufacturer manifest. No condensation or carton stress."
-                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[76px] py-2.5 leading-relaxed resize-none"
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[96px] py-3 px-3 leading-relaxed resize-none"
                         />
                       </div>
 
                       <div className="grid grid-cols-2 gap-3 pt-2">
                         <button
                           type="button"
-                          disabled={inboundLoading || !inboundSerial}
+                          disabled={inboundLoading || !(inboundSerial || drugs[0]?.serialNumber)}
                           onClick={() => handleInboundInspection('ACCEPTED')}
                           className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs flex items-center justify-center gap-2"
                         >
@@ -4669,7 +4676,7 @@ export default function DashboardPage() {
                         </button>
                         <button
                           type="button"
-                          disabled={inboundLoading || !inboundSerial}
+                          disabled={inboundLoading || !(inboundSerial || drugs[0]?.serialNumber)}
                           onClick={() => handleInboundInspection('REJECTED')}
                           className="btn btn-sm bg-rose-600 hover:bg-rose-700 text-white border-none rounded-xl font-bold text-xs flex items-center justify-center gap-2"
                         >
@@ -5513,10 +5520,10 @@ export default function DashboardPage() {
                       loadDrugs();
                       loadPharmacySummary();
                     }}
-                    className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl font-bold text-xs flex items-center gap-2 shrink-0 whitespace-nowrap px-3"
+                    className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl font-bold text-xs flex items-center gap-2 shrink-0 whitespace-nowrap px-3.5 h-9 w-auto"
                   >
                     <RefreshCw className="h-4 w-4 shrink-0" />
-                    <span>Sync Dispensary Stats</span>
+                    <span className="whitespace-nowrap">Sync Dispensary Stats</span>
                   </button>
                 </div>
               </div>
@@ -5584,74 +5591,80 @@ export default function DashboardPage() {
                           Verify DSCSA 3Ts transaction records, arrival cold-chain temperature, and license before transferring to dispensary stock.
                         </p>
                       </div>
-                      <span className="badge bg-[#00D6B4]/10 text-[#00D6B4] border border-[#00D6B4]/20 text-[10px] font-mono shrink-0 whitespace-nowrap px-2.5 py-1 h-auto">
+                      <span className="badge bg-[#00D6B4]/10 text-[#00D6B4] border border-[#00D6B4]/20 text-[10px] font-mono shrink-0 whitespace-nowrap px-3 py-1 h-auto leading-none">
                         DOCK-INSPECT
                       </span>
                     </div>
 
                     <div className="space-y-4">
-                      <div>
-                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
-                          Select Arriving Consignment / Medicine Serial
-                        </label>
-                        <select
-                          value={rxInboundSerial || (drugs[0]?.serialNumber ?? '')}
-                          onChange={(e) => setRxInboundSerial(e.target.value)}
-                          className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
-                        >
-                          <option value="">-- Choose Consignment --</option>
-                          {drugs.map((d) => (
-                            <option key={d.id} value={d.serialNumber}>
-                              {d.serialNumber} - {d.drugName || d.name} ({d.batchNumber}) | e-BoL: {d.outboundManifestId || 'MAN-2026-8841'} | Dest: {d.targetPharmacy || 'Pharmacy'}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {rxInboundSerial && (() => {
-                        const cur = drugs.find((d) => d.serialNumber === rxInboundSerial);
-                        if (!cur) return null;
-                        const manifestId = cur.outboundManifestId || 'MAN-2026-8841';
+                      {(() => {
+                        const effectiveRxInboundSerial = rxInboundSerial || drugs.find((d) => !d.pharmacyInboundStatus)?.serialNumber || drugs[0]?.serialNumber || '';
+                        const cur = drugs.find((d) => d.serialNumber === effectiveRxInboundSerial);
+                        const manifestId = cur?.outboundManifestId || 'MAN-2026-8841';
                         return (
-                          <div className="space-y-3">
-                            <div className="p-3.5 bg-[#0B1220] border border-[#304257] rounded-xl grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
-                              <div>
-                                <span className="text-[10px] text-[#94A3B8] uppercase block">Medicine</span>
-                                <strong className="text-[#F1F5F9] truncate block" title={cur.drugName || cur.name}>
-                                  {cur.drugName || cur.name || 'Amoxicillin 500mg'}
-                                </strong>
-                              </div>
-                              <div>
-                                <span className="text-[10px] text-[#94A3B8] uppercase block">Batch</span>
-                                <span className="text-[#00D6B4] font-mono">{cur.batchNumber}</span>
-                              </div>
-                              <div>
-                                <span className="text-[10px] text-[#94A3B8] uppercase block">Distributor e-BoL</span>
-                                <span className="text-[#38BDF8] font-mono font-bold flex items-center gap-1">
-                                  <FileText className="h-3 w-3 text-[#38BDF8]" />
-                                  {manifestId}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-[10px] text-[#94A3B8] uppercase block">Temp Spec</span>
-                                <span className="text-emerald-400 font-bold">{cur.tempMin ?? 2}°C to {cur.tempMax ?? 8}°C</span>
-                              </div>
-                              <div>
-                                <span className="text-[10px] text-[#94A3B8] uppercase block">Current Status</span>
-                                <span className="badge badge-sm bg-[#243247] text-[#94A3B8] border-[#304257]">{cur.status}</span>
-                              </div>
+                          <>
+                            <div>
+                              <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                                Select Arriving Consignment / Medicine Serial
+                              </label>
+                              <select
+                                value={effectiveRxInboundSerial}
+                                onChange={(e) => setRxInboundSerial(e.target.value)}
+                                className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                              >
+                                <option value="">-- Choose Consignment --</option>
+                                {drugs.map((d) => (
+                                  <option key={d.id} value={d.serialNumber}>
+                                    {d.serialNumber} - {d.drugName || d.name} ({d.batchNumber}) | e-BoL: {d.outboundManifestId || 'MAN-2026-8841'} | Dest: {d.targetPharmacy || 'Pharmacy'}
+                                  </option>
+                                ))}
+                              </select>
                             </div>
 
-                            <div className="p-2.5 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-center justify-between text-xs">
-                              <div className="flex items-center gap-2 text-blue-300">
-                                <FileText className="h-4 w-4" />
-                                <span>Distributor e-BoL Verified: <strong className="font-mono text-[#F1F5F9]">{manifestId}</strong></span>
+                            {cur && (
+                              <div className="space-y-3">
+                                <div className="p-3.5 bg-[#0B1220] border border-[#304257] rounded-xl grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+                                  <div>
+                                    <span className="text-[10px] text-[#94A3B8] uppercase block">Medicine</span>
+                                    <strong className="text-[#F1F5F9] truncate block" title={cur.drugName || cur.name}>
+                                      {cur.drugName || cur.name || 'Amoxicillin 500mg'}
+                                    </strong>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-[#94A3B8] uppercase block">Batch</span>
+                                    <span className="text-[#00D6B4] font-mono">{cur.batchNumber}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-[#94A3B8] uppercase block">Distributor e-BoL</span>
+                                    <span className="text-[#38BDF8] font-mono font-bold flex items-center gap-1">
+                                      <FileText className="h-3 w-3 text-[#38BDF8]" />
+                                      {manifestId}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-[#94A3B8] uppercase block">Temp Spec</span>
+                                    <span className="text-emerald-400 font-bold">{cur.tempMin ?? 2}°C to {cur.tempMax ?? 8}°C</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-[#94A3B8] uppercase block">Inbound State</span>
+                                    <span className="badge badge-sm bg-[#243247] text-[#00D6B4] border-[#304257] shrink-0 whitespace-nowrap">
+                                      {cur.pharmacyInboundStatus || 'PENDING'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="p-2.5 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-center justify-between text-xs">
+                                  <div className="flex items-center gap-2 text-blue-300">
+                                    <FileText className="h-4 w-4" />
+                                    <span>Distributor e-BoL Verified: <strong className="font-mono text-[#F1F5F9]">{manifestId}</strong></span>
+                                  </div>
+                                  <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-none font-bold">
+                                    HASH MATCHED
+                                  </span>
+                                </div>
                               </div>
-                              <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-none font-bold">
-                                HASH MATCHED
-                              </span>
-                            </div>
-                          </div>
+                            )}
+                          </>
                         );
                       })()}
 
@@ -5764,14 +5777,14 @@ export default function DashboardPage() {
                           value={rxInboundNotes}
                           onChange={(e) => setRxInboundNotes(e.target.value)}
                           placeholder="e.g. Courier cold-pack intact, calibrated infrared probe verified, transferred immediately into vaccine refrigerator."
-                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[76px] py-2.5 leading-relaxed resize-none"
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[96px] py-3 px-3 leading-relaxed resize-none"
                         />
                       </div>
 
                       <div className="grid grid-cols-2 gap-3 pt-2">
                         <button
                           type="button"
-                          disabled={rxInboundLoading || !rxInboundSerial}
+                          disabled={rxInboundLoading || !(rxInboundSerial || drugs.find((d) => !d.pharmacyInboundStatus)?.serialNumber || drugs[0]?.serialNumber)}
                           onClick={() => handlePharmacyReceiveInbound('ACCEPTED')}
                           className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs flex items-center justify-center gap-2"
                         >
@@ -5779,7 +5792,7 @@ export default function DashboardPage() {
                         </button>
                         <button
                           type="button"
-                          disabled={rxInboundLoading || !rxInboundSerial}
+                          disabled={rxInboundLoading || !(rxInboundSerial || drugs.find((d) => !d.pharmacyInboundStatus)?.serialNumber || drugs[0]?.serialNumber)}
                           onClick={() => handlePharmacyReceiveInbound('REJECTED')}
                           className="btn btn-sm bg-rose-600 hover:bg-rose-700 text-white border-none rounded-xl font-bold text-xs flex items-center justify-center gap-2"
                         >
@@ -6044,127 +6057,130 @@ export default function DashboardPage() {
                           Fulfill verified patient prescription with automated anti-double-dispensing circuit breakers and expiry validation.
                         </p>
                       </div>
-                      <span className="badge bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono shrink-0 whitespace-nowrap px-2.5 py-1 h-auto">
+                      <span className="badge bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono shrink-0 whitespace-nowrap px-3 py-1 h-auto leading-none">
                         PATIENT HANDOVER
                       </span>
                     </div>
 
-                    <form onSubmit={handlePharmacyDispense} className="space-y-4">
-                      <div>
-                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
-                          Target Medicine Serial (Dispensing Unit)
-                        </label>
-                        <select
-                          value={rxDispenseSerial || (drugs.find((d) => !d.dispensedAt)?.serialNumber ?? '')}
-                          onChange={(e) => setRxDispenseSerial(e.target.value)}
-                          className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
-                          required
-                        >
-                          <option value="">-- Choose Unit for Prescription --</option>
-                          {drugs.map((d) => (
-                            <option key={d.id} value={d.serialNumber}>
-                              {d.serialNumber} - {d.drugName || d.name} ({d.batchNumber}) | Loc: {d.pharmacyStorageLocation || 'Dispensary'} | {d.dispensedAt ? 'ALREADY DISPENSED' : 'READY TO DISPENSE'}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                    {(() => {
+                      const effectiveDispenseSerial = rxDispenseSerial || drugs.find((d) => !d.dispensedAt)?.serialNumber || drugs[0]?.serialNumber || '';
+                      const target = drugs.find((d) => d.serialNumber === effectiveDispenseSerial);
+                      const isExpired = target?.expiryDate ? new Date(target.expiryDate).getTime() < Date.now() : false;
+                      const isDispensed = !!target?.dispensedAt;
+                      const isRecalled = !!target?.isRecalled;
 
-                      {rxDispenseSerial && (() => {
-                        const target = drugs.find((d) => d.serialNumber === rxDispenseSerial);
-                        if (!target) return null;
-                        const isExpired = target.expiryDate ? new Date(target.expiryDate).getTime() < Date.now() : false;
-                        const isDispensed = !!target.dispensedAt;
-                        const isRecalled = !!target.isRecalled;
-                        return (
-                          <div className="p-3.5 bg-[#0B1220] border border-[#304257] rounded-xl space-y-2">
-                            <span className="text-[10px] text-[#94A3B8] uppercase font-bold block">
-                              Automated Clinical Safety Interlocks
-                            </span>
-                            <div className="grid grid-cols-3 gap-2 text-xs">
-                              <div className={`p-2 rounded-lg border ${isDispensed ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'}`}>
-                                <span className="text-[9px] uppercase block">Double-Dispense</span>
-                                <strong>{isDispensed ? 'BLOCKED' : 'CLEAR'}</strong>
-                              </div>
-                              <div className={`p-2 rounded-lg border ${isExpired ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'}`}>
-                                <span className="text-[9px] uppercase block">Expiration Check</span>
-                                <strong>{isExpired ? 'EXPIRED' : 'VALID'}</strong>
-                              </div>
-                              <div className={`p-2 rounded-lg border ${isRecalled ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'}`}>
-                                <span className="text-[9px] uppercase block">Recall & Hold</span>
-                                <strong>{isRecalled ? 'RECALLED' : 'CLEAR'}</strong>
+                      return (
+                        <form onSubmit={handlePharmacyDispense} className="space-y-4">
+                          <div>
+                            <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                              Target Medicine Serial (Dispensing Unit)
+                            </label>
+                            <select
+                              value={effectiveDispenseSerial}
+                              onChange={(e) => setRxDispenseSerial(e.target.value)}
+                              className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                              required
+                            >
+                              <option value="">-- Choose Unit for Prescription --</option>
+                              {drugs.map((d) => (
+                                <option key={d.id} value={d.serialNumber}>
+                                  {d.serialNumber} - {d.drugName || d.name} ({d.batchNumber}) | Loc: {d.pharmacyStorageLocation || 'Dispensary'} | {d.dispensedAt ? 'ALREADY DISPENSED' : 'READY TO DISPENSE'}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {target && (
+                            <div className="p-3.5 bg-[#0B1220] border border-[#304257] rounded-xl space-y-2">
+                              <span className="text-[10px] text-[#94A3B8] uppercase font-bold block">
+                                Automated Clinical Safety Interlocks
+                              </span>
+                              <div className="grid grid-cols-3 gap-2 text-xs">
+                                <div className={`p-2 rounded-lg border ${isDispensed ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'}`}>
+                                  <span className="text-[9px] uppercase block">Double-Dispense</span>
+                                  <strong>{isDispensed ? 'BLOCKED' : 'CLEAR'}</strong>
+                                </div>
+                                <div className={`p-2 rounded-lg border ${isExpired ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'}`}>
+                                  <span className="text-[9px] uppercase block">Expiration Check</span>
+                                  <strong>{isExpired ? 'EXPIRED' : 'VALID'}</strong>
+                                </div>
+                                <div className={`p-2 rounded-lg border ${isRecalled ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'}`}>
+                                  <span className="text-[9px] uppercase block">Recall & Hold</span>
+                                  <strong>{isRecalled ? 'RECALLED' : 'CLEAR'}</strong>
+                                </div>
                               </div>
                             </div>
+                          )}
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                                Prescription Number (Rx ID)
+                              </label>
+                              <input
+                                type="text"
+                                value={rxPrescriptionNumber}
+                                onChange={(e) => setRxPrescriptionNumber(e.target.value)}
+                                placeholder="e.g. RX-2026-984421"
+                                className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] font-mono"
+                                required
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                                Prescribing Physician (MD)
+                              </label>
+                              <input
+                                type="text"
+                                value={rxDoctorName}
+                                onChange={(e) => setRxDoctorName(e.target.value)}
+                                placeholder="e.g. Dr. Robert Chen, MD"
+                                className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                                required
+                              />
+                            </div>
                           </div>
-                        );
-                      })()}
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
-                            Prescription Number (Rx ID)
-                          </label>
-                          <input
-                            type="text"
-                            value={rxPrescriptionNumber}
-                            onChange={(e) => setRxPrescriptionNumber(e.target.value)}
-                            placeholder="e.g. RX-2026-984421"
-                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] font-mono"
-                            required
-                          />
-                        </div>
+                          <div>
+                            <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                              Patient Identifier / Anonymized Token Hash
+                            </label>
+                            <input
+                              type="text"
+                              value={rxPatientToken}
+                              onChange={(e) => setRxPatientToken(e.target.value)}
+                              placeholder="e.g. PT-HASH-8831"
+                              className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] font-mono"
+                              required
+                            />
+                          </div>
 
-                        <div>
-                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
-                            Prescribing Physician (MD)
-                          </label>
-                          <input
-                            type="text"
-                            value={rxDoctorName}
-                            onChange={(e) => setRxDoctorName(e.target.value)}
-                            placeholder="e.g. Dr. Robert Chen, MD"
-                            className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
-                            required
-                          />
-                        </div>
-                      </div>
+                          <div>
+                            <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                              Dispensing Notes & Patient Instructions
+                            </label>
+                            <textarea
+                              rows={3}
+                              value={rxDispenseNotes}
+                              onChange={(e) => setRxDispenseNotes(e.target.value)}
+                              placeholder="e.g. Dispensed with standard patient counselling and GxP cold-pack container."
+                              className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[96px] py-3 px-3 leading-relaxed resize-none"
+                            />
+                          </div>
 
-                      <div>
-                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
-                          Patient Identifier / Anonymized Token Hash
-                        </label>
-                        <input
-                          type="text"
-                          value={rxPatientToken}
-                          onChange={(e) => setRxPatientToken(e.target.value)}
-                          placeholder="e.g. PT-HASH-8831"
-                          className="input input-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] font-mono"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
-                          Dispensing Notes & Patient Instructions
-                        </label>
-                        <textarea
-                          rows={3}
-                          value={rxDispenseNotes}
-                          onChange={(e) => setRxDispenseNotes(e.target.value)}
-                          placeholder="e.g. Dispensed with standard patient counselling and GxP cold-pack container."
-                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[76px] py-2.5 leading-relaxed resize-none"
-                        />
-                      </div>
-
-                      <div className="pt-2">
-                        <button
-                          type="submit"
-                          disabled={rxDispenseLoading || !rxDispenseSerial}
-                          className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs w-full flex items-center justify-center gap-2"
-                        >
-                          <CheckCircle className="h-4 w-4" /> {rxDispenseLoading ? 'Decommissioning Digital Twin...' : 'Dispense Medication & Decommission Twin'}
-                        </button>
-                      </div>
-                    </form>
+                          <div className="pt-2">
+                            <button
+                              type="submit"
+                              disabled={rxDispenseLoading || !effectiveDispenseSerial}
+                              className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs w-full flex items-center justify-center gap-2"
+                            >
+                              <CheckCircle className="h-4 w-4" /> {rxDispenseLoading ? 'Decommissioning Digital Twin...' : 'Dispense Medication & Decommission Twin'}
+                            </button>
+                          </div>
+                        </form>
+                      );
+                    })()}
                   </div>
 
                   <div className="lg:col-span-5 space-y-4">
@@ -6422,7 +6438,7 @@ export default function DashboardPage() {
                           Instant lookup of patient prescription records for recalled batches to execute emergency safety outreach.
                         </p>
                       </div>
-                      <span className="badge bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-mono shrink-0 whitespace-nowrap px-2.5 py-1 h-auto">
+                      <span className="badge bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-mono shrink-0 whitespace-nowrap px-3 py-1 h-auto leading-none">
                         SAFETY TRACE
                       </span>
                     </div>
@@ -6491,47 +6507,52 @@ export default function DashboardPage() {
                         Instantly isolate suspected illegitimate medicine units, notify regulatory watchdog, and lock ledger custody.
                       </p>
 
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
-                            Target Medicine Serial
-                          </label>
-                          <select
-                            value={rxAlertSerial || (drugs[0]?.serialNumber ?? '')}
-                            onChange={(e) => setRxAlertSerial(e.target.value)}
-                            className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
-                          >
-                            <option value="">-- Choose Consignment --</option>
-                            {drugs.map((d) => (
-                              <option key={d.id} value={d.serialNumber}>
-                                {d.serialNumber} - {d.name} ({d.batchNumber})
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                      {(() => {
+                        const effectiveAlertSerial = rxAlertSerial || (drugs[0]?.serialNumber ?? '');
+                        return (
+                          <div className="space-y-3">
+                            <div>
+                              <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                                Target Medicine Serial
+                              </label>
+                              <select
+                                value={effectiveAlertSerial}
+                                onChange={(e) => setRxAlertSerial(e.target.value)}
+                                className="select select-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                              >
+                                <option value="">-- Choose Consignment --</option>
+                                {drugs.map((d) => (
+                                  <option key={d.id} value={d.serialNumber}>
+                                    {d.serialNumber} - {d.drugName || d.name} ({d.batchNumber})
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
 
-                        <div>
-                          <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
-                            Security Anomaly Observed
-                          </label>
-                          <textarea
-                            rows={3}
-                            value={rxAlertNotes}
-                            onChange={(e) => setRxAlertNotes(e.target.value)}
-                            placeholder="Describe physical flaw (e.g. 2D DataMatrix code unreadable, duplicate serial, damaged foil seal)"
-                            className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
-                          />
-                        </div>
+                            <div>
+                              <label className="text-xs text-[#94A3B8] font-semibold block mb-1">
+                                Security Anomaly Observed
+                              </label>
+                              <textarea
+                                rows={3}
+                                value={rxAlertNotes}
+                                onChange={(e) => setRxAlertNotes(e.target.value)}
+                                placeholder="Describe physical flaw (e.g. 2D DataMatrix code unreadable, duplicate serial, damaged foil seal)"
+                                className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[96px] py-3 px-3 leading-relaxed resize-none"
+                              />
+                            </div>
 
-                        <button
-                          type="button"
-                          disabled={rxAlertLoading || !rxAlertSerial}
-                          onClick={() => handleReportSuspectedCounterfeit(rxAlertSerial || drugs[0]?.serialNumber)}
-                          className="btn btn-sm bg-rose-600 hover:bg-rose-700 text-white border-none rounded-xl font-bold text-xs w-full flex items-center justify-center gap-2"
-                        >
-                          <AlertTriangle className="h-4 w-4" /> {rxAlertLoading ? 'Flagging...' : 'Flag Suspected Counterfeit & Quarantine'}
-                        </button>
-                      </div>
+                            <button
+                              type="button"
+                              disabled={rxAlertLoading || !effectiveAlertSerial}
+                              onClick={() => handleReportSuspectedCounterfeit(effectiveAlertSerial)}
+                              className="btn btn-sm bg-rose-600 hover:bg-rose-700 text-white border-none rounded-xl font-bold text-xs w-full flex items-center justify-center gap-2"
+                            >
+                              <AlertTriangle className="h-4 w-4" /> {rxAlertLoading ? 'Flagging...' : 'Flag Suspected Counterfeit & Quarantine'}
+                            </button>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
