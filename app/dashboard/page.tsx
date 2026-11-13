@@ -641,7 +641,6 @@ export default function DashboardPage() {
       setCurrentUser(profile);
       setDefaultEventForRole(profile.role);
     } catch (e) {
-      // Preserved cached user session
     }
   };
 
