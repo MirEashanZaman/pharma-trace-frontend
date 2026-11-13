@@ -5648,8 +5648,20 @@ export default function DashboardPage() {
                                   </div>
                                   <div>
                                     <span className="text-[10px] text-[#94A3B8] uppercase block">Inbound State</span>
-                                    <span className="badge badge-sm bg-[#243247] text-[#00D6B4] border-[#304257] shrink-0 whitespace-nowrap">
-                                      {cur.pharmacyInboundStatus || 'PENDING'}
+                                    <span
+                                      className={`badge badge-sm font-bold text-[10px] border px-2 py-0.5 truncate max-w-full ${
+                                        cur.pharmacyInboundStatus === 'ACCEPTED'
+                                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                                          : cur.pharmacyInboundStatus === 'REJECTED'
+                                          ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                                          : 'bg-[#243247] text-[#00D6B4] border-[#304257]'
+                                      }`}
+                                    >
+                                      {cur.pharmacyInboundStatus === 'ACCEPTED'
+                                        ? 'ACCEPTED'
+                                        : cur.pharmacyInboundStatus === 'REJECTED'
+                                        ? 'REJECTED'
+                                        : 'PENDING'}
                                     </span>
                                   </div>
                                 </div>
@@ -5836,11 +5848,11 @@ export default function DashboardPage() {
                         <Activity className="h-4 w-4 text-[#00D6B4]" /> Recent Pharmacy Receiving Records
                       </h4>
                       <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                        {drugs.filter((d) => d.pharmacyInboundStatus).length === 0 ? (
+                        {drugs.filter((d) => d.pharmacyInboundStatus && d.pharmacyInboundStatus !== 'PENDING_PHARMACY').length === 0 ? (
                           <p className="text-xs text-[#94A3B8] italic">No pharmacy receiving records logged yet.</p>
                         ) : (
                           drugs
-                            .filter((d) => d.pharmacyInboundStatus)
+                            .filter((d) => d.pharmacyInboundStatus && d.pharmacyInboundStatus !== 'PENDING_PHARMACY')
                             .map((d) => (
                               <div
                                 key={d.id}
