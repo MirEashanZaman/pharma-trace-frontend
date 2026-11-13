@@ -4450,15 +4450,16 @@ export default function DashboardPage() {
                     End-to-end pharmaceutical logistics management: dock receiving inspection, cold-room vaults, FEFO cross-docking, fleet telemetry, and digital delivery handshakes.
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => {
                       loadDrugs();
                       loadFleetOverview();
                     }}
-                    className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl font-bold text-xs flex items-center gap-2"
+                    className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl font-bold text-xs flex items-center gap-2 shrink-0 whitespace-nowrap px-3"
                   >
-                    <RefreshCw className={`h-4 w-4 ${fleetLoading ? 'animate-spin' : ''}`} /> Sync Hub Telemetry
+                    <RefreshCw className={`h-4 w-4 shrink-0 ${fleetLoading ? 'animate-spin' : ''}`} />
+                    <span>Sync Hub Telemetry</span>
                   </button>
                 </div>
               </div>
@@ -5506,15 +5507,16 @@ export default function DashboardPage() {
                     Complete pharmacy operations suite: 3Ts inbound verification, cold-storage refrigerators, clinical prescription dispensing with anti-double-dispense circuit breakers, reverse logistics, and patient recall contact tracing.
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => {
                       loadDrugs();
                       loadPharmacySummary();
                     }}
-                    className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl font-bold text-xs flex items-center gap-2"
+                    className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl font-bold text-xs flex items-center gap-2 shrink-0 whitespace-nowrap px-3"
                   >
-                    <RefreshCw className="h-4 w-4" /> Sync Dispensary Stats
+                    <RefreshCw className="h-4 w-4 shrink-0" />
+                    <span>Sync Dispensary Stats</span>
                   </button>
                 </div>
               </div>
@@ -6525,15 +6527,16 @@ export default function DashboardPage() {
                     Federal oversight console for cGMP Form 483 facility audits, multi-tier federal recall matrices, MedWatch adverse drug event triage, 21 CFR Part 11 ALCOA+ data integrity certification, and DSCSA Section 582 counterfeit criminal dockets.
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 shrink-0">
                   <button
                     onClick={() => {
                       loadDrugs();
                       loadAlcoaAnalysis();
                     }}
-                    className="btn btn-sm bg-[#0B1220] hover:bg-[#243247] text-[#00D6B4] border border-[#304257] rounded-xl text-xs flex items-center gap-2"
+                    className="btn btn-sm bg-[#0B1220] hover:bg-[#243247] text-[#00D6B4] border border-[#304257] rounded-xl text-xs flex items-center gap-2 shrink-0 whitespace-nowrap px-3"
                   >
-                    <RefreshCw className={`h-3.5 w-3.5 ${alcoaLoading ? 'animate-spin' : ''}`} /> Refresh Regulatory Ledger
+                    <RefreshCw className={`h-3.5 w-3.5 shrink-0 ${alcoaLoading ? 'animate-spin' : ''}`} />
+                    <span>Refresh Regulatory Ledger</span>
                   </button>
                 </div>
               </div>
