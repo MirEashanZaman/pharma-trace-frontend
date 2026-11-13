@@ -6132,24 +6132,24 @@ export default function DashboardPage() {
                             <div className="p-3 bg-[#172638] border border-[#304257] rounded-xl space-y-1">
                               <span className="text-[10px] text-[#94A3B8] uppercase font-bold block">Decommissioned Medicine Serial</span>
                               <span className="font-mono text-[#00D6B4] font-bold block text-sm">{dispenseBurnConfirmation.serialNumber}</span>
-                              <span className="text-[11px] text-[#94A3B8] block truncate">{dispenseBurnConfirmation.drugName} (Lot: {dispenseBurnConfirmation.batchNumber})</span>
+                              <span className="text-[11px] text-[#94A3B8] block">{dispenseBurnConfirmation.drugName} (Lot: {dispenseBurnConfirmation.batchNumber})</span>
                             </div>
 
                             <div className="p-3 bg-[#172638] border border-[#304257] rounded-xl space-y-1">
                               <span className="text-[10px] text-[#94A3B8] uppercase font-bold block">Clinical Prescription Reference</span>
                               <span className="font-mono text-[#F1F5F9] font-bold block text-sm">{dispenseBurnConfirmation.prescriptionNumber}</span>
-                              <span className="text-[11px] text-[#94A3B8] block truncate">Physician: {dispenseBurnConfirmation.prescribingDoctor}</span>
+                              <span className="text-[11px] text-[#94A3B8] block">Physician: {dispenseBurnConfirmation.prescribingDoctor}</span>
                             </div>
 
                             <div className="p-3 bg-[#172638] border border-[#304257] rounded-xl space-y-1">
                               <span className="text-[10px] text-[#94A3B8] uppercase font-bold block">Anonymized Patient Token</span>
                               <span className="font-mono text-cyan-300 font-bold block text-sm">{dispenseBurnConfirmation.patientToken}</span>
-                              <span className="text-[11px] text-[#94A3B8] block truncate">Dispensed by: {dispenseBurnConfirmation.pharmacistName}</span>
+                              <span className="text-[11px] text-[#94A3B8] block">Dispensed by: {dispenseBurnConfirmation.pharmacistName}</span>
                             </div>
 
                             <div className="p-3 bg-[#172638] border border-[#304257] rounded-xl space-y-1">
                               <span className="text-[10px] text-[#94A3B8] uppercase font-bold block">On-Chain Burn Proof (Sepolia)</span>
-                              <span className="font-mono text-emerald-400 font-bold block text-xs truncate">{dispenseBurnConfirmation.burnTxHash}</span>
+                              <span className="font-mono text-emerald-400 font-bold block text-xs break-all">{dispenseBurnConfirmation.burnTxHash.slice(0, 24)}...</span>
                               <span className="text-[11px] text-[#94A3B8] block">Block #{dispenseBurnConfirmation.blockNumber} • ERC-4337 Sponsored Gasless</span>
                             </div>
                           </div>
@@ -6164,19 +6164,21 @@ export default function DashboardPage() {
                             </p>
                           </div>
 
-                          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                          <div className="space-y-2.5 pt-2">
                             <button
                               type="button"
                               onClick={() => {
                                 setPharmacySubTab('recall');
                                 setDispenseBurnConfirmation(null);
                               }}
-                              className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs w-full sm:w-auto px-4 inline-flex items-center justify-center gap-2"
+                              className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs w-full flex items-center justify-center gap-2 py-2.5 h-auto whitespace-nowrap shadow-sm"
                             >
-                              <FileText className="h-4 w-4" /> View in Patient Recall Tracing (Tab 5)
+                              <FileText className="h-4 w-4 shrink-0" />
+                              <span className="whitespace-nowrap">View in Patient Recall Tracing (Tab 5)</span>
+                              <ArrowRight className="h-4 w-4 shrink-0" />
                             </button>
 
-                            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                            <div className="flex items-center justify-between gap-3">
                               <button
                                 type="button"
                                 onClick={async () => {
@@ -6193,15 +6195,16 @@ export default function DashboardPage() {
                                     console.error(err);
                                   }
                                 }}
-                                className="btn btn-sm bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl font-bold text-xs px-3.5"
+                                className="btn btn-sm bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-xl font-bold text-xs px-3.5 py-2 h-auto flex items-center gap-1.5 whitespace-nowrap"
                               >
-                                <RefreshCw className="h-3.5 w-3.5 mr-1" /> Reset for Demo Recording
+                                <RefreshCw className="h-3.5 w-3.5 shrink-0" />
+                                <span className="whitespace-nowrap">Reset for Demo Recording</span>
                               </button>
 
                               <button
                                 type="button"
                                 onClick={() => setDispenseBurnConfirmation(null)}
-                                className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#94A3B8] border border-[#304257] rounded-xl font-semibold text-xs px-3.5"
+                                className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#94A3B8] border border-[#304257] rounded-xl font-semibold text-xs px-4 py-2 h-auto whitespace-nowrap"
                               >
                                 Dismiss
                               </button>
