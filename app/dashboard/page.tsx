@@ -7026,7 +7026,7 @@ export default function DashboardPage() {
                           value={inspNotes}
                           onChange={(e) => setInspNotes(e.target.value)}
                           placeholder="Describe specific cGMP deviations observed, batch impact, and required Corrective and Preventive Actions (CAPA)..."
-                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[96px] py-3 px-3.5 leading-relaxed resize-none"
                           required
                         />
                       </div>
@@ -7049,7 +7049,7 @@ export default function DashboardPage() {
                       <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
                         <FileCheck2 className="h-5 w-5 text-[#00D6B4]" /> Facility Audit & Observation Registry
                       </h3>
-                      <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono">
+                      <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
                         {drugs.filter((d) => d.inspectionObservationRef).length} Audited Units
                       </span>
                     </div>
@@ -7347,7 +7347,7 @@ export default function DashboardPage() {
                           value={fedRecallReason}
                           onChange={(e) => setFedRecallReason(e.target.value)}
                           placeholder="State root cause findings (e.g. Microbiological contamination, subpotent active ingredient, particulate matter)..."
-                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[96px] py-3 px-3.5 leading-relaxed resize-none"
                           required
                         />
                       </div>
@@ -7370,7 +7370,7 @@ export default function DashboardPage() {
                       <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
                         <AlertOctagon className="h-5 w-5 text-rose-400" /> Active Supply Chain Recall Directives
                       </h3>
-                      <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/30 text-xs font-mono">
+                      <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/30 text-xs font-mono shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
                         {drugs.filter((d) => d.isRecalled || d.recallDirectiveRef).length} Active Recalls
                       </span>
                     </div>
@@ -7546,7 +7546,7 @@ export default function DashboardPage() {
                           value={adeReaction}
                           onChange={(e) => setAdeReaction(e.target.value)}
                           placeholder="Detail onset time, symptoms, emergency interventions administered, and patient clinical status..."
-                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[96px] py-3 px-3.5 leading-relaxed resize-none"
                           required
                         />
                       </div>
@@ -7569,7 +7569,7 @@ export default function DashboardPage() {
                       <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
                         <ShieldAlert className="h-5 w-5 text-[#00D6B4]" /> Adverse Drug Event Safety Registry
                       </h3>
-                      <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono">
+                      <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
                         {drugs.filter((d) => d.adeReportId).length} Safety Reports
                       </span>
                     </div>
@@ -7644,10 +7644,10 @@ export default function DashboardPage() {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#304257] pb-4">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border-[#00D6B4]/30 text-xs font-bold uppercase">
+                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border-[#00D6B4]/30 text-xs font-bold uppercase shrink-0 whitespace-nowrap px-2.5 py-1 h-auto leading-none">
                             21 CFR Part 11 & GAMP 5
                           </span>
-                          <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono">
+                          <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono shrink-0 whitespace-nowrap px-2.5 py-1 h-auto leading-none">
                             ALCOA+ Framework
                           </span>
                         </div>
@@ -7884,7 +7884,7 @@ export default function DashboardPage() {
                           value={invAssayFindings}
                           onChange={(e) => setInvAssayFindings(e.target.value)}
                           placeholder="e.g. Raman spectroscopy analysis confirms excipient starch with absent active pharmaceutical ingredient (API)..."
-                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[80px] py-3 px-3.5 leading-relaxed resize-none"
                           required
                         />
                       </div>
@@ -7896,7 +7896,7 @@ export default function DashboardPage() {
                           value={invForensicNotes}
                           onChange={(e) => setInvForensicNotes(e.target.value)}
                           placeholder="e.g. Packaging foil font discrepancy verified matching known transshipment counterfeit pattern..."
-                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9]"
+                          className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[80px] py-3 px-3.5 leading-relaxed resize-none"
                           required
                         />
                       </div>
@@ -7919,7 +7919,7 @@ export default function DashboardPage() {
                       <h3 className="text-base font-bold text-[#F1F5F9] flex items-center gap-2">
                         <FlaskConical className="h-5 w-5 text-[#00D6B4]" /> Open Section 582 Investigation Dockets
                       </h3>
-                      <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono">
+                      <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
                         {drugs.filter((d) => d.regulatoryInvestigationDocket).length} Active Dockets
                       </span>
                     </div>
@@ -8141,7 +8141,7 @@ export default function DashboardPage() {
                   value={recallReason}
                   onChange={(e) => setRecallReason(e.target.value)}
                   placeholder="Enter your recall justification findings (e.g. Temperature excursion > 14°C, seal tampering, contamination)"
-                  className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] h-20"
+                  className="textarea textarea-bordered w-full bg-[#0B1220] border-[#304257] rounded-xl text-xs text-[#F1F5F9] min-h-[80px] py-3 px-3.5 leading-relaxed resize-none"
                   required
                 />
               </div>
