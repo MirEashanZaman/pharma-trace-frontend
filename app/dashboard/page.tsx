@@ -7659,23 +7659,24 @@ export default function DashboardPage() {
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
                         <button
                           type="button"
                           onClick={loadAlcoaAnalysis}
                           disabled={alcoaLoading}
-                          className="btn btn-sm bg-[#0B1220] hover:bg-[#243247] text-[#00D6B4] border border-[#304257] rounded-xl text-xs flex items-center gap-2"
+                          className="btn btn-sm bg-[#0B1220] hover:bg-[#243247] text-[#00D6B4] border border-[#304257] rounded-xl font-bold text-xs flex items-center gap-2 shrink-0 whitespace-nowrap px-3.5 h-9 w-auto"
                         >
-                          <RefreshCw className={`h-3.5 w-3.5 ${alcoaLoading ? 'animate-spin' : ''}`} />
-                          {alcoaLoading ? 'Auditing Ledger...' : 'Run Audit'}
+                          <RefreshCw className={`h-3.5 w-3.5 shrink-0 ${alcoaLoading ? 'animate-spin' : ''}`} />
+                          <span className="whitespace-nowrap">{alcoaLoading ? 'Auditing Ledger...' : 'Run Audit'}</span>
                         </button>
                         <button
                           type="button"
                           onClick={handleExportAlcoaPdf}
                           disabled={!alcoaData}
-                          className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-md"
+                          className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-md shrink-0 whitespace-nowrap px-3.5 h-9 w-auto"
                         >
-                          <Printer className="h-4 w-4" /> Export Certificate
+                          <Printer className="h-4 w-4 shrink-0" />
+                          <span className="whitespace-nowrap">Export Certificate</span>
                         </button>
                       </div>
                     </div>
@@ -7688,8 +7689,8 @@ export default function DashboardPage() {
                             {alcoaData?.compositeScore ?? 98.4}%
                           </div>
                         </div>
-                        <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs font-bold uppercase mt-3 w-fit">
-                          {alcoaData?.status ?? 'CERTIFIED_COMPLIANT'}
+                        <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 shrink-0 whitespace-nowrap mt-3 w-fit h-auto leading-none">
+                          {String(alcoaData?.status ?? 'CERTIFIED_COMPLIANT').replace(/_/g, ' ')}
                         </span>
                       </div>
 
@@ -7718,11 +7719,11 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 pt-2">
-                      <div className="bg-[#0B1220] p-4 rounded-xl border border-[#304257] space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-[#F1F5F9]">Attributable</span>
-                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] text-[10px] font-bold">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 pt-2">
+                      <div className="bg-[#0B1220] p-3.5 sm:p-4 rounded-xl border border-[#304257] space-y-2">
+                        <div className="flex items-center justify-between gap-1.5">
+                          <span className="font-bold text-xs text-[#F1F5F9] truncate">Attributable</span>
+                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border border-[#00D6B4]/30 text-[10px] font-mono font-bold shrink-0 whitespace-nowrap px-1.5 py-0.5">
                             {alcoaData?.principles.attributable.score ?? 100}%
                           </span>
                         </div>
@@ -7731,10 +7732,10 @@ export default function DashboardPage() {
                         </p>
                       </div>
 
-                      <div className="bg-[#0B1220] p-4 rounded-xl border border-[#304257] space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-[#F1F5F9]">Legible</span>
-                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] text-[10px] font-bold">
+                      <div className="bg-[#0B1220] p-3.5 sm:p-4 rounded-xl border border-[#304257] space-y-2">
+                        <div className="flex items-center justify-between gap-1.5">
+                          <span className="font-bold text-xs text-[#F1F5F9] truncate">Legible</span>
+                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border border-[#00D6B4]/30 text-[10px] font-mono font-bold shrink-0 whitespace-nowrap px-1.5 py-0.5">
                             {alcoaData?.principles.legible.score ?? 100}%
                           </span>
                         </div>
@@ -7743,10 +7744,10 @@ export default function DashboardPage() {
                         </p>
                       </div>
 
-                      <div className="bg-[#0B1220] p-4 rounded-xl border border-[#304257] space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-[#F1F5F9]">Contemporaneous</span>
-                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] text-[10px] font-bold">
+                      <div className="bg-[#0B1220] p-3.5 sm:p-4 rounded-xl border border-[#304257] space-y-2">
+                        <div className="flex items-center justify-between gap-1.5">
+                          <span className="font-bold text-xs text-[#F1F5F9] truncate" title="Contemporaneous">Contemporaneous</span>
+                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border border-[#00D6B4]/30 text-[10px] font-mono font-bold shrink-0 whitespace-nowrap px-1.5 py-0.5">
                             {alcoaData?.principles.contemporaneous.score ?? 96}%
                           </span>
                         </div>
@@ -7755,10 +7756,10 @@ export default function DashboardPage() {
                         </p>
                       </div>
 
-                      <div className="bg-[#0B1220] p-4 rounded-xl border border-[#304257] space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-[#F1F5F9]">Original</span>
-                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] text-[10px] font-bold">
+                      <div className="bg-[#0B1220] p-3.5 sm:p-4 rounded-xl border border-[#304257] space-y-2">
+                        <div className="flex items-center justify-between gap-1.5">
+                          <span className="font-bold text-xs text-[#F1F5F9] truncate">Original</span>
+                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border border-[#00D6B4]/30 text-[10px] font-mono font-bold shrink-0 whitespace-nowrap px-1.5 py-0.5">
                             {alcoaData?.principles.original.score ?? 100}%
                           </span>
                         </div>
@@ -7767,10 +7768,10 @@ export default function DashboardPage() {
                         </p>
                       </div>
 
-                      <div className="bg-[#0B1220] p-4 rounded-xl border border-[#304257] space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-[#F1F5F9]">Accurate</span>
-                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] text-[10px] font-bold">
+                      <div className="bg-[#0B1220] p-3.5 sm:p-4 rounded-xl border border-[#304257] space-y-2">
+                        <div className="flex items-center justify-between gap-1.5">
+                          <span className="font-bold text-xs text-[#F1F5F9] truncate">Accurate</span>
+                          <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border border-[#00D6B4]/30 text-[10px] font-mono font-bold shrink-0 whitespace-nowrap px-1.5 py-0.5">
                             {alcoaData?.principles.accurate.score ?? 96}%
                           </span>
                         </div>
