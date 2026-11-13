@@ -3629,7 +3629,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-[#94A3B8]">Connected Wallet:</span>
-                    <span className="badge badge-sm bg-[#172638] text-[#00D6B4] border-[#304257] font-mono">
+                    <span className="badge badge-sm bg-[#172638] text-[#00D6B4] border border-[#304257] font-mono shrink-0 whitespace-nowrap px-2.5 py-1 h-auto leading-none">
                       {wallet ? `${wallet.slice(0, 6)}...${wallet.slice(-4)}` : 'Enterprise Gasless Relay'}
                     </span>
                   </div>
@@ -4560,10 +4560,10 @@ export default function DashboardPage() {
               <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border-[#00D6B4]/30 text-xs font-bold uppercase tracking-wider">
+                    <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border border-[#00D6B4]/30 text-xs font-bold uppercase tracking-wider shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
                       Distributor GxP Operations
                     </span>
-                    <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono">
+                    <span className="badge bg-[#243247] text-[#94A3B8] border border-[#304257] text-xs font-mono shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
                       Bay Area Cold-Chain Hub
                     </span>
                   </div>
@@ -5621,10 +5621,10 @@ export default function DashboardPage() {
               <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border-[#00D6B4]/30 text-xs font-bold uppercase tracking-wider">
+                    <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border border-[#00D6B4]/30 text-xs font-bold uppercase tracking-wider shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
                       DSCSA Title II Compliant
                     </span>
-                    <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono">
+                    <span className="badge bg-[#243247] text-[#94A3B8] border border-[#304257] text-xs font-mono shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
                       Hospital Dispensary Bay 1
                     </span>
                   </div>
@@ -6855,10 +6855,10 @@ export default function DashboardPage() {
               <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border-[#00D6B4]/30 text-xs font-bold uppercase tracking-wider">
+                    <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border border-[#00D6B4]/30 text-xs font-bold uppercase tracking-wider shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
                       US FDA & EMA Oversight
                     </span>
-                    <span className="badge bg-[#243247] text-[#94A3B8] border-[#304257] text-xs font-mono">
+                    <span className="badge bg-[#243247] text-[#94A3B8] border border-[#304257] text-xs font-mono shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
                       21 CFR Part 11 & DSCSA 582
                     </span>
                   </div>
