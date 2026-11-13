@@ -1319,7 +1319,7 @@ export default function DashboardPage() {
       const burnTx = '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
       setDispenseBurnConfirmation({
         serialNumber: updated.serialNumber,
-        drugName: updated.drugName || updated.name,
+        drugName: updated.drugName || updated.name || updated.serialNumber,
         batchNumber: updated.batchNumber,
         prescriptionNumber: updated.prescriptionNumber || rxPrescriptionNumber,
         prescribingDoctor: updated.prescribingDoctor || rxDoctorName,
@@ -6168,7 +6168,7 @@ export default function DashboardPage() {
                             <button
                               type="button"
                               onClick={() => {
-                                setPharmacySubTab('recall');
+                                setPharmacySubTab('recalls');
                                 setDispenseBurnConfirmation(null);
                               }}
                               className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold text-xs w-full flex items-center justify-center gap-2 py-2.5 h-auto whitespace-nowrap shadow-sm"
