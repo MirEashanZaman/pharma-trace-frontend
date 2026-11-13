@@ -28,6 +28,7 @@ export interface UserOpStatus {
 
 export function UserOpStatusDrawer() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isDismissed, setIsDismissed] = useState<boolean>(false);
   const [activeOps, setActiveOps] = useState<UserOpStatus[]>([
     {
       userOpHash: '0xc1eb8539b388b6b2f3c57f96095d9441d590d6d058cf3f8dc9e8947d3986b456',
@@ -78,32 +79,57 @@ export function UserOpStatusDrawer() {
     }
   };
 
+  if (isDismissed) {
+    return (
+      <div className="fixed bottom-3 right-3 z-40">
+        <button
+          onClick={() => setIsDismissed(false)}
+          className="h-8 w-8 rounded-full bg-[#172638] border border-[#00D6B4]/40 text-[#00D6B4] shadow-2xl flex items-center justify-center hover:bg-[#243247] hover:border-[#00D6B4] transition"
+          title="Restore ERC-4337 Status Drawer"
+        >
+          <Fuel className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed bottom-4 right-4 z-40 max-w-sm sm:max-w-md w-full">
-      <div className="bg-[#172638] border border-[#304257] rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
+    <div className={`fixed bottom-3 right-3 z-40 transition-all duration-300 ${isOpen ? 'max-w-md w-full' : 'max-w-xs sm:max-w-sm w-auto'}`}>
+      <div className="bg-[#172638] border border-[#304257] rounded-xl shadow-2xl overflow-hidden transition-all duration-300">
         <div
           onClick={() => setIsOpen(!isOpen)}
-          className="p-3.5 bg-[#0B1220] flex items-center justify-between cursor-pointer hover:bg-[#0B1220]/80 transition select-none"
+          className="p-2.5 px-3 bg-[#0B1220] flex items-center justify-between cursor-pointer hover:bg-[#0B1220]/80 transition select-none"
         >
-          <div className="flex items-center gap-2.5">
-            <div className="h-6 w-6 rounded-lg bg-[#00D6B4]/15 text-[#00D6B4] flex items-center justify-center">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-[#00D6B4]/15 text-[#00D6B4] flex items-center justify-center shrink-0">
               <Fuel className="h-3.5 w-3.5" />
             </div>
             <div>
-              <span className="text-xs font-bold text-[#F1F5F9]">ERC-4337 Account Abstraction</span>
-              <span className="text-[10px] text-[#00D6B4] block font-mono">
+              <span className="text-xs font-bold text-[#F1F5F9] whitespace-nowrap">ERC-4337 Account Abstraction</span>
+              <span className="text-[10px] text-[#00D6B4] block font-mono whitespace-nowrap">
                 Gasless &bull; Sponsored by PharmaPaymaster
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono text-[#94A3B8]">{activeOps.length} Active</span>
+          <div className="flex items-center gap-1.5 ml-2 shrink-0">
+            <span className="text-[10px] font-mono text-[#94A3B8] whitespace-nowrap">{activeOps.length} Active</span>
             {isOpen ? (
-              <ChevronDown className="h-4 w-4 text-[#94A3B8]" />
+              <ChevronDown className="h-3.5 w-3.5 text-[#94A3B8]" />
             ) : (
-              <ChevronUp className="h-4 w-4 text-[#94A3B8]" />
+              <ChevronUp className="h-3.5 w-3.5 text-[#94A3B8]" />
             )}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsDismissed(true);
+              }}
+              className="p-1 hover:bg-[#243247] rounded-md text-[#94A3B8] hover:text-[#F1F5F9] transition"
+              title="Minimize widget"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
           </div>
         </div>
 
