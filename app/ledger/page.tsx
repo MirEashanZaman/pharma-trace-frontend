@@ -97,18 +97,50 @@ async function getLiveLedgerData(): Promise<LedgerBatch[]> {
       return FALLBACK_LEDGER;
     }
     return drugs.map((d: any, idx: number) => {
+      const isDispensed = !!d.dispensedAt;
+      const isPharmacyReceived = d.pharmacyInboundStatus === 'ACCEPTED';
+      const isDistributorReceived = d.inboundInspectionStatus === 'ACCEPTED_AT_DOCK' || d.inboundInspectionStatus === 'ACCEPTED';
+      const isTransit = d.qcStatus === 'RELEASED_FOR_TRANSIT' || !!d.outboundManifestId;
+      const isRecalled = !!d.isRecalled;
+      const isQuarantined = d.qcStatus === 'QUARANTINED';
+
+      let latestEvent = 'MANUFACTURED';
+      if (isRecalled) {
+        latestEvent = 'RECALLED';
+      } else if (isDispensed) {
+        latestEvent = 'DISPENSED';
+      } else if (isPharmacyReceived) {
+        latestEvent = 'IN_PHARMACY';
+      } else if (isDistributorReceived) {
+        latestEvent = 'DISTRIBUTOR';
+      } else if (isTransit) {
+        latestEvent = 'IN_TRANSIT';
+      }
+
+      let auditStatus = 'PENDING AUDIT';
+      if (isRecalled) {
+        auditStatus = 'RECALLED';
+      } else if (isQuarantined) {
+        auditStatus = 'QUARANTINED';
+      } else if (isDispensed || isPharmacyReceived || isDistributorReceived) {
+        auditStatus = 'AUTHENTIC';
+      }
+
       const fb = FALLBACK_LEDGER[idx % FALLBACK_LEDGER.length];
+      const temp = d.pharmacyInboundTemp ?? d.inboundInspectionTemp ?? (isDispensed ? 21.4 : isPharmacyReceived ? 4.2 : fb.temperature);
+      const humidity = fb.humidity;
+
       return {
         serialNumber: d.serialNumber || fb.serialNumber,
-        name: d.name || fb.name,
+        name: d.drugName || d.name || fb.name,
         manufacturer: d.manufacturer || fb.manufacturer,
         batchNumber: d.batchNumber || fb.batchNumber,
         createdAt: d.createdAt || fb.createdAt,
-        latestEvent: d.status || fb.latestEvent,
-        temperature: fb.temperature,
-        humidity: fb.humidity,
+        latestEvent,
+        temperature: Number(temp),
+        humidity: Number(humidity),
         isExcursion: false,
-        status: (d.status === 'RECALLED' || d.status === 'QUARANTINED') ? d.status : 'AUTHENTIC',
+        status: auditStatus,
       };
     });
   } catch {
@@ -246,12 +278,20 @@ export default async function LiveLedgerPage() {
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold border ${
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold border shrink-0 whitespace-nowrap ${
                         batch.status === 'AUTHENTIC' || batch.status === 'COLD_SECURE' || batch.status === 'CERTIFIED'
-                          ? 'bg-[#A3E635]/15 text-[#A3E635] border-[#A3E635]/30'
+                          ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                          : batch.status === 'RECALLED' || batch.status === 'QUARANTINED'
+                          ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
                           : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
                       }`}>
-                        <CheckCircle2 className="h-3 w-3" />
+                        {batch.status === 'AUTHENTIC' || batch.status === 'COLD_SECURE' || batch.status === 'CERTIFIED' ? (
+                          <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                        ) : batch.status === 'RECALLED' || batch.status === 'QUARANTINED' ? (
+                          <ShieldAlert className="h-3 w-3 text-rose-400" />
+                        ) : (
+                          <Clock className="h-3 w-3 text-amber-400" />
+                        )}
                         {batch.status}
                       </span>
                     </td>
