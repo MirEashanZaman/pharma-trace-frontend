@@ -57,8 +57,8 @@ export default function HomePage() {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center text-center px-4 py-20 max-w-5xl mx-auto">
-        <Badge variant="teal" size="lg" className="tracking-wide mb-6 py-2 px-4 gap-2">
-          <Cpu className="h-4 w-4 text-[#00D6B4]" aria-hidden="true" /> Event-Driven & Web3 Traceability Architecture
+        <Badge variant="teal" size="lg" className="mb-6 py-1.5 px-3.5 gap-2 text-xs font-medium">
+          <Cpu className="h-4 w-4 text-[#00D6B4]" aria-hidden="true" /> Event-driven & Web3 traceability architecture
         </Badge>
 
         <h1 className="text-4xl sm:text-6xl font-black text-[#F1F5F9] tracking-tight leading-tight mb-6">
@@ -123,14 +123,14 @@ export default function HomePage() {
         <div className="w-full mt-16 space-y-6 text-left">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#304257] pb-4">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[#00D6B4]">
-                Enterprise Supply Chain Architecture
+              <span className="text-xs font-medium text-[#00D6B4]">
+                Enterprise supply chain architecture
               </span>
               <h2 className="text-2xl font-black text-[#F1F5F9] mt-0.5">
                 Core Tracking & Verification Modules
               </h2>
             </div>
-            <Badge variant="secondary" size="sm" className="font-mono text-[10px]">
+            <Badge variant="secondary" size="sm" className="font-mono text-xs">
               Production Suite
             </Badge>
           </div>
@@ -141,7 +141,7 @@ export default function HomePage() {
               className="rounded-2xl border border-[#304257] bg-[#243247] hover:border-[#00D6B4] p-5 transition shadow-sm space-y-3 group block"
             >
               <div className="flex items-center justify-between">
-                <Badge variant="teal" size="sm" className="font-bold">
+                <Badge variant="teal" size="sm" className="font-medium text-xs">
                   Live Audit Feed
                 </Badge>
                 <ArrowRight className="h-4 w-4 text-[#94A3B8] group-hover:text-[#00D6B4] transition" aria-hidden="true" />
@@ -161,7 +161,7 @@ export default function HomePage() {
               className="rounded-2xl border border-[#304257] bg-[#243247] hover:border-[#00D6B4] p-5 transition shadow-sm space-y-3 group block"
             >
               <div className="flex items-center justify-between">
-                <Badge variant="secondary" size="sm" className="bg-purple-500/15 text-purple-300 border-purple-500/40 font-mono font-bold">
+                <Badge variant="secondary" size="sm" className="font-mono font-medium text-xs">
                   Enterprise Portal
                 </Badge>
                 <ArrowRight className="h-4 w-4 text-[#94A3B8] group-hover:text-[#00D6B4] transition" aria-hidden="true" />
@@ -181,7 +181,7 @@ export default function HomePage() {
               className="rounded-2xl border border-[#304257] bg-[#243247] hover:border-[#00D6B4] p-5 transition shadow-sm space-y-3 group block"
             >
               <div className="flex items-center justify-between">
-                <Badge variant="secondary" size="sm" className="bg-blue-500/15 text-blue-300 border-blue-500/40 font-mono font-bold">
+                <Badge variant="secondary" size="sm" className="font-mono font-medium text-xs">
                   Global Standards
                 </Badge>
                 <ArrowRight className="h-4 w-4 text-[#94A3B8] group-hover:text-[#00D6B4] transition" aria-hidden="true" />
@@ -201,7 +201,7 @@ export default function HomePage() {
               className="rounded-2xl border border-[#304257] bg-[#243247] hover:border-[#00D6B4] p-5 transition shadow-sm space-y-3 group block"
             >
               <div className="flex items-center justify-between">
-                <Badge variant="secondary" size="sm" className="bg-amber-500/15 text-amber-300 border-amber-500/40 font-mono font-bold">
+                <Badge variant="secondary" size="sm" className="font-mono font-medium text-xs">
                   Master Directory
                 </Badge>
                 <ArrowRight className="h-4 w-4 text-[#94A3B8] group-hover:text-[#00D6B4] transition" aria-hidden="true" />
