@@ -113,7 +113,7 @@ export function ESignatureModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="font-semibold text-[#94A3B8] uppercase tracking-wider text-[11px]">
+            <label className="font-semibold text-[#94A3B8] text-xs">
               Full Legal Signer Name
             </label>
             <input
@@ -126,7 +126,7 @@ export function ESignatureModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="font-semibold text-[#94A3B8] uppercase tracking-wider text-[11px]">
+            <label className="font-semibold text-[#94A3B8] text-xs">
               GxP Delegated Authority / Role
             </label>
             <input
@@ -139,7 +139,7 @@ export function ESignatureModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="font-semibold text-[#94A3B8] uppercase tracking-wider text-[11px]">
+            <label className="font-semibold text-[#94A3B8] text-xs">
               Standardized Regulatory Reason
             </label>
             <select
@@ -163,7 +163,7 @@ export function ESignatureModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="font-semibold text-[#94A3B8] uppercase tracking-wider text-[11px] flex items-center justify-between">
+            <label className="font-semibold text-[#94A3B8] text-xs flex items-center justify-between">
               <span>Cryptographic Signature PIN / Key</span>
               <span className="text-[#00D6B4] font-normal lowercase">EIP-712 backed</span>
             </label>
