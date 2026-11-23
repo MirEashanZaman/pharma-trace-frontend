@@ -25,7 +25,6 @@ import {
   UserCog,
 } from 'lucide-react';
 import { getStoredUser, logoutUser, UserProfile } from '@/lib/api';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 export function Navigation({
@@ -106,21 +105,16 @@ export function Navigation({
   const isModuleActive = moduleNavLinks.some((item) => isActive(item.href));
 
   return (
-    <header className="sticky top-0 z-50 bg-[#0B1220]/95 backdrop-blur-md border-b border-[#304257] text-[#F1F5F9] shadow-sm w-full">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
-        <div className="flex items-center space-x-2.5 shrink-0">
-          <motion.div
-            whileHover={{ scale: 1.05, rotate: 6 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            className="h-9 w-9 rounded-xl bg-[#00D6B4] flex items-center justify-center text-[#0B1220] font-black shadow-sm shrink-0 cursor-pointer"
-          >
-            <ShieldCheck className="h-5 w-5" />
-          </motion.div>
-          <Link href="/" className="text-lg font-bold tracking-tight text-[#F1F5F9] whitespace-nowrap">
+    <header className="sticky top-0 z-50 bg-[#07080d]/90 backdrop-blur-md border-b border-white/[0.08] text-[#eef0f5] w-full">
+      <div className="w-full max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
+        <Link href="/" className="flex items-center gap-2.5 shrink-0">
+          <div className="h-7 w-7 rounded-md bg-[#00D6B4] flex items-center justify-center text-[#07080d]">
+            <ShieldCheck className="h-4 w-4" />
+          </div>
+          <span className="text-sm font-medium tracking-tight text-[#eef0f5] whitespace-nowrap">
             PharmaTrace
-          </Link>
-        </div>
+          </span>
+        </Link>
 
         <nav className="hidden lg:flex items-center gap-1 shrink-0">
           {primaryNavLinks.map((item) => {
@@ -130,20 +124,20 @@ export function Navigation({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+                className={`relative px-3 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                   active
-                    ? 'text-[#00D6B4]'
-                    : 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#172638]/60'
+                    ? 'text-[#eef0f5]'
+                    : 'text-[#a3a9b8] hover:text-[#eef0f5] hover:bg-[#11141c]'
                 }`}
               >
                 {active && (
                   <motion.div
                     layoutId="activeNavIndicator"
-                    className="absolute inset-0 bg-[#172638] border border-[#00D6B4]/30 rounded-lg -z-10 shadow-xs"
-                    transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                    className="absolute inset-0 bg-[#1a1e28] border border-white/[0.08] rounded-md -z-10"
+                    transition={{ type: 'spring', stiffness: 380, damping: 28 }}
                   />
                 )}
-                <Icon className={`h-3.5 w-3.5 ${active ? 'text-[#00D6B4]' : 'text-[#94A3B8]'}`} />
+                <Icon className={`h-3.5 w-3.5 ${active ? 'text-[#00D6B4]' : 'text-[#7a8296]'}`} />
                 <span>{item.label}</span>
               </Link>
             );
@@ -156,31 +150,31 @@ export function Navigation({
               aria-label="Toggle modules navigation menu"
               aria-expanded={isModulesOpen}
               aria-haspopup="true"
-              className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer select-none ${
+              className={`relative px-3 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer select-none ${
                 isModuleActive
-                  ? 'text-[#00D6B4]'
-                  : 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#172638]/60'
+                  ? 'text-[#eef0f5]'
+                  : 'text-[#a3a9b8] hover:text-[#eef0f5] hover:bg-[#11141c]'
               }`}
             >
               {isModuleActive && (
                 <motion.div
                   layoutId="activeNavIndicator"
-                  className="absolute inset-0 bg-[#172638] border border-[#00D6B4]/30 rounded-lg -z-10 shadow-xs"
-                  transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                  className="absolute inset-0 bg-[#1a1e28] border border-white/[0.08] rounded-md -z-10"
+                  transition={{ type: 'spring', stiffness: 380, damping: 28 }}
                 />
               )}
               <span>Modules</span>
-              <ChevronDown className={`h-3 w-3 transition-transform ${isModulesOpen ? 'rotate-180 text-[#00D6B4]' : ''}`} />
+              <ChevronDown className={`h-3 w-3 transition-transform ${isModulesOpen ? 'rotate-180 text-[#eef0f5]' : 'text-[#7a8296]'}`} />
             </button>
 
             <AnimatePresence>
               {isModulesOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 4, scale: 0.96 }}
-                  transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-                  className="absolute left-0 top-full mt-2 z-[100] p-2 shadow-2xl bg-[#172638]/95 backdrop-blur-xl border border-[#304257] rounded-xl w-52 text-xs space-y-1"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={{ duration: 0.12 }}
+                  className="absolute left-0 top-full mt-1.5 z-[100] p-1.5 shadow-xl bg-[#11141c] border border-white/[0.08] rounded-lg w-48 text-xs space-y-0.5"
                 >
                   {moduleNavLinks.map((item) => {
                     const Icon = item.icon;
@@ -190,8 +184,8 @@ export function Navigation({
                         key={item.href}
                         href={item.href}
                         onClick={() => setIsModulesOpen(false)}
-                        className={`flex items-center gap-2 rounded-lg py-2 px-2.5 transition ${
-                          active ? 'bg-[#00D6B4]/15 text-[#00D6B4] font-bold' : 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#243247]'
+                        className={`flex items-center gap-2 rounded-md py-1.5 px-2.5 transition-colors ${
+                          active ? 'bg-[#1a1e28] text-[#eef0f5] font-medium' : 'text-[#a3a9b8] hover:text-[#eef0f5] hover:bg-[#1a1e28]/60'
                         }`}
                       >
                         <Icon className="h-3.5 w-3.5 text-[#00D6B4]" />
@@ -205,49 +199,49 @@ export function Navigation({
           </div>
         </nav>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
           <button
             type="button"
             onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
             aria-label="Open Command Palette"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs bg-[#172638] border border-[#304257] text-[#94A3B8] hover:text-[#F1F5F9] hover:border-[#00D6B4]/40 transition shrink-0"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-[#11141c] border border-white/[0.08] text-[#a3a9b8] hover:text-[#eef0f5] hover:border-white/20 transition-colors shrink-0"
             title="Open Command Palette (Ctrl+K)"
           >
-            <Search className="h-3.5 w-3.5 text-[#00D6B4]" aria-hidden="true" />
+            <Search className="h-3.5 w-3.5 text-[#7a8296]" aria-hidden="true" />
             <span className="hidden sm:inline text-[11px]">Command</span>
-            <kbd className="hidden sm:inline text-[10px] font-mono bg-[#243247] px-1 py-0.5 rounded text-[#94A3B8]">
+            <kbd className="hidden sm:inline text-[10px] font-mono bg-[#1a1e28] px-1 py-0.5 rounded text-[#a3a9b8]">
               Ctrl K
             </kbd>
           </button>
 
-          <Badge variant="teal" size="sm" className="hidden md:flex shrink-0 gap-1.5 py-1 px-2 font-mono text-[10px]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#00D6B4] animate-pulse"></span>
+          <div className="hidden md:flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#11141c] border border-white/[0.06] text-[11px] font-mono text-[#a3a9b8]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#4cc38a]"></span>
             <span>Sepolia</span>
-          </Badge>
+          </div>
 
           {walletAddress && (
-            <Badge variant="teal" size="sm" className="hidden xl:flex shrink-0 gap-1 py-1 px-2 font-mono text-[10px]">
-              <CheckCircle2 className="h-3 w-3 text-[#00D6B4]" aria-hidden="true" />
+            <div className="hidden xl:flex items-center gap-1 px-2 py-0.5 rounded bg-[#11141c] border border-white/[0.06] text-[11px] font-mono text-[#a3a9b8]">
+              <CheckCircle2 className="h-3 w-3 text-[#4cc38a]" aria-hidden="true" />
               <span>{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
-            </Badge>
+            </div>
           )}
 
           {user ? (
             <div className="flex items-center gap-1.5 shrink-0">
               <Link
                 href="/profile"
-                className="flex items-center gap-2 bg-[#172638] hover:bg-[#243247] px-2.5 py-1.5 rounded-xl border border-[#304257] hover:border-[#00D6B4]/50 transition shrink-0 group cursor-pointer"
+                className="flex items-center gap-2 bg-[#11141c] hover:bg-[#1a1e28] px-2.5 py-1 rounded-lg border border-white/[0.08] transition-colors shrink-0"
                 title="Profile Editor"
                 aria-label={`View profile for ${user.fullName || user.email}`}
               >
-                <div className="h-6 w-6 rounded-lg bg-[#00D6B4]/15 text-[#00D6B4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                  <User className="h-3.5 w-3.5" aria-hidden="true" />
+                <div className="h-5 w-5 rounded bg-[#1a1e28] text-[#a3a9b8] flex items-center justify-center shrink-0">
+                  <User className="h-3 w-3" aria-hidden="true" />
                 </div>
                 <div className="flex flex-col text-left">
-                  <span className="text-[11px] font-bold text-[#F1F5F9] leading-tight truncate max-w-[85px] sm:max-w-[120px]">
+                  <span className="text-[11px] font-medium text-[#eef0f5] leading-tight truncate max-w-[85px] sm:max-w-[120px]">
                     {user.fullName || user.email}
                   </span>
-                  <span className="text-[9px] text-[#94A3B8] leading-tight truncate max-w-[85px] sm:max-w-[120px]">
+                  <span className="text-[9px] text-[#7a8296] leading-tight truncate max-w-[85px] sm:max-w-[120px]">
                     {user.role}
                   </span>
                 </div>
@@ -257,20 +251,20 @@ export function Navigation({
                 type="button"
                 onClick={handleLogout}
                 aria-label="Sign Out"
-                className="flex items-center gap-1.5 p-2 rounded-xl bg-[#172638] hover:bg-rose-500/15 border border-[#304257] hover:border-rose-500/40 text-[#94A3B8] hover:text-rose-400 transition shrink-0"
+                className="p-1.5 rounded-lg bg-[#11141c] hover:bg-rose-500/10 border border-white/[0.08] hover:border-rose-500/30 text-[#a3a9b8] hover:text-rose-400 transition-colors shrink-0"
                 title="Sign Out"
               >
                 <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
-                <span className="hidden 2xl:inline text-[11px] font-semibold">Sign Out</span>
               </button>
             </div>
           ) : (
-            <Button asChild size="sm" className="bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none rounded-xl font-bold shadow-sm shrink-0 text-xs px-3">
-              <Link href="/login" className="flex items-center gap-1.5">
-                <LogIn className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Sign In</span>
-              </Link>
-            </Button>
+            <Link
+              href="/login"
+              className="h-8 px-3 rounded-lg bg-white text-[#0b0d14] font-medium text-xs hover:bg-[#eef0f5] transition-colors flex items-center gap-1.5 shrink-0"
+            >
+              <LogIn className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Sign in</span>
+            </Link>
           )}
 
           <div ref={mobileMenuRef} className="relative lg:hidden">
@@ -279,7 +273,7 @@ export function Navigation({
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle navigation menu"
               aria-expanded={isMobileMenuOpen}
-              className="p-1.5 rounded-xl border border-[#304257] text-[#94A3B8] hover:text-[#F1F5F9] bg-[#172638] hover:bg-[#243247] transition"
+              className="p-1.5 rounded-lg border border-white/[0.08] text-[#a3a9b8] hover:text-[#eef0f5] bg-[#11141c] hover:bg-[#1a1e28] transition-colors"
               title="Toggle Menu"
             >
               <Menu className="h-4 w-4" aria-hidden="true" />
@@ -288,19 +282,19 @@ export function Navigation({
             <AnimatePresence>
               {isMobileMenuOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                  transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-                  className="absolute right-0 top-full mt-2 z-[100] p-2 shadow-2xl bg-[#172638]/95 backdrop-blur-xl border border-[#304257] rounded-2xl w-56 text-xs space-y-1"
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.12 }}
+                  className="absolute right-0 top-full mt-1.5 z-[100] p-1.5 shadow-xl bg-[#11141c] border border-white/[0.08] rounded-lg w-52 text-xs space-y-0.5"
                 >
                   {user && (
                     <Link
                       href="/profile"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-lg py-2 px-2.5 text-[#00D6B4] font-bold hover:bg-[#243247]"
+                      className="flex items-center gap-2 rounded-md py-1.5 px-2.5 text-[#eef0f5] font-medium hover:bg-[#1a1e28]"
                     >
-                      <UserCog className="h-4 w-4" />
+                      <UserCog className="h-4 w-4 text-[#a3a9b8]" />
                       <span>Profile Editor</span>
                     </Link>
                   )}
@@ -313,28 +307,28 @@ export function Navigation({
                         key={item.href}
                         href={item.href}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center gap-2 rounded-lg py-2 px-2.5 transition ${
-                          active ? 'bg-[#00D6B4]/15 text-[#00D6B4] font-bold' : 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#243247]'
+                        className={`flex items-center gap-2 rounded-md py-1.5 px-2.5 transition-colors ${
+                          active ? 'bg-[#1a1e28] text-[#eef0f5] font-medium' : 'text-[#a3a9b8] hover:text-[#eef0f5] hover:bg-[#1a1e28]/60'
                         }`}
                       >
-                        <Icon className="h-3.5 w-3.5 text-[#00D6B4]" />
+                        <Icon className="h-3.5 w-3.5 text-[#7a8296]" />
                         <span>{item.label}</span>
                       </Link>
                     );
                   })}
 
                   {user && (
-                    <div className="border-t border-[#304257] pt-1 mt-1">
+                    <div className="border-t border-white/[0.08] pt-1 mt-1">
                       <button
                         type="button"
                         onClick={() => {
                           setIsMobileMenuOpen(false);
                           handleLogout();
                         }}
-                        className="w-full flex items-center gap-2 rounded-lg py-2 px-2.5 text-rose-400 hover:bg-rose-500/10 font-semibold"
+                        className="w-full flex items-center gap-2 rounded-md py-1.5 px-2.5 text-rose-400 hover:bg-rose-500/10 font-medium"
                       >
                         <LogOut className="h-3.5 w-3.5" />
-                        <span>Sign Out</span>
+                        <span>Sign out</span>
                       </button>
                     </div>
                   )}
