@@ -340,22 +340,22 @@ export default function EscrowPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-[#0B1220] border border-[#304257] rounded-xl p-4 min-w-0">
-              <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Keeper Upkeep Needed</span>
+              <span className="text-xs text-[#94A3B8] font-medium">Keeper upkeep status</span>
               <div className="mt-2 flex items-center gap-2">
                 <span
-                  className={`badge badge-sm font-bold uppercase ${
+                  className={`badge badge-sm font-medium ${
                     upkeepStatus?.upkeepNeeded
                       ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                       : 'bg-slate-700 text-[#94A3B8] border-transparent'
                   }`}
                 >
-                  {upkeepStatus?.upkeepNeeded ? 'Pending Execution' : 'Idle (Optimal)'}
+                  {upkeepStatus?.upkeepNeeded ? 'Pending execution' : 'Idle (optimal)'}
                 </span>
               </div>
             </div>
 
             <div className="bg-[#0B1220] border border-[#304257] rounded-xl p-4 min-w-0">
-              <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Upkeep Perform Bytes</span>
+              <span className="text-xs text-[#94A3B8] font-medium">Upkeep perform bytes</span>
               <div className="text-xs font-mono text-[#00D6B4] mt-2 truncate">
                 {upkeepStatus?.performData && upkeepStatus.performData !== '0x'
                   ? upkeepStatus.performData
@@ -364,7 +364,7 @@ export default function EscrowPage() {
             </div>
 
             <div className="bg-[#0B1220] border border-[#304257] rounded-xl p-4 min-w-0">
-              <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Last Relayer Execution</span>
+              <span className="text-xs text-[#94A3B8] font-medium">Last relayer execution</span>
               <div className="text-xs font-mono text-cyan-300 mt-2 truncate">
                 {pollResult?.executedOrders?.length
                   ? `${pollResult.executedOrders.length} Order(s) Processed`
