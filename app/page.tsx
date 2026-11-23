@@ -1,13 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'motion/react';
+import { motion, type Variants } from 'motion/react';
 import { ShieldCheck, Lock, Activity, ArrowRight, CheckCircle2, Cpu, Sparkles, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardTitle, CardDescription } from '@/components/ui/card';
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -18,12 +18,12 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 18 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.45, ease: 'easeOut' },
   },
 };
 
