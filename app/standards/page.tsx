@@ -70,8 +70,8 @@ export default function StandardsIndexPage() {
 
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
         <div className="text-center space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 badge badge-lg bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-semibold uppercase tracking-wider py-3 px-4">
-            <BookOpen className="h-4 w-4 text-[#00D6B4]" /> Global Compliance Frameworks
+          <div className="inline-flex items-center gap-2 badge badge-lg bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-medium py-2 px-3.5 text-xs">
+            <BookOpen className="h-4 w-4 text-[#00D6B4]" /> Global compliance frameworks
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#F1F5F9]">
             Regulatory Standards & GxP Compliance
@@ -128,8 +128,8 @@ export default function StandardsIndexPage() {
         </div>
 
         <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-3">
-          <div className="flex items-center gap-2 text-[#00D6B4] text-xs font-bold uppercase tracking-wider">
-            <Cpu className="h-4 w-4" /> Validated Electronic Records
+          <div className="flex items-center gap-2 text-[#00D6B4] text-xs font-medium">
+            <Cpu className="h-4 w-4" /> Validated electronic records
           </div>
           <h3 className="text-base font-bold text-[#F1F5F9]">
             Regulatory Authority Compliance Architecture
