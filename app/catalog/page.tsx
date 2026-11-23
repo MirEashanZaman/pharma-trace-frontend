@@ -148,35 +148,35 @@ export default async function CatalogPage() {
           </div>
 
           <div className="bg-[#172638] border border-[#304257] rounded-xl px-4 py-3 text-right">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] block">
-              Catalog Verification State
+            <span className="text-xs font-medium text-[#94A3B8] block">
+              Catalog verification state
             </span>
-            <span className="text-xs font-mono text-[#00D6B4]">
+            <span className="text-xs font-mono tabular-nums text-[#00D6B4]">
               {generationTime}
             </span>
-            <span className="text-[10px] text-[#94A3B8] block mt-0.5">
-              Continuous Regulatory Sync
+            <span className="text-xs text-[#94A3B8] block mt-0.5">
+              Continuous regulatory sync
             </span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="card bg-[#243247] border border-[#304257] p-4 rounded-xl shadow-sm">
-            <span className="text-xs text-[#94A3B8] uppercase font-bold">Registered Formulations</span>
-            <span className="text-2xl font-black text-[#F1F5F9] mt-1">{drugs.length}</span>
-            <span className="text-[11px] text-[#00D6B4] mt-1">Serialized with GS1 DataMatrix</span>
+            <span className="text-xs text-[#94A3B8] font-medium">Registered formulations</span>
+            <span className="text-2xl font-bold tabular-nums text-[#F1F5F9] mt-1">{drugs.length}</span>
+            <span className="text-xs text-[#00D6B4] mt-1">Serialized with GS1 DataMatrix</span>
           </div>
           <div className="card bg-[#243247] border border-[#304257] p-4 rounded-xl shadow-sm">
-            <span className="text-xs text-[#94A3B8] uppercase font-bold">Cold-Chain Monitored</span>
-            <span className="text-2xl font-black text-[#00D6B4] mt-1">
+            <span className="text-xs text-[#94A3B8] font-medium">Cold-chain monitored</span>
+            <span className="text-2xl font-bold tabular-nums text-[#00D6B4] mt-1">
               {drugs.filter((d) => d.storageTemp.includes('Cold')).length}
             </span>
-            <span className="text-[11px] text-[#94A3B8] mt-1">Continuous IoT Telemetry</span>
+            <span className="text-xs text-[#94A3B8] mt-1">Continuous IoT telemetry</span>
           </div>
           <div className="card bg-[#243247] border border-[#304257] p-4 rounded-xl shadow-sm">
-            <span className="text-xs text-[#94A3B8] uppercase font-bold">Regulatory Status</span>
-            <span className="text-2xl font-black text-[#A3E635] mt-1">100% Certified</span>
-            <span className="text-[11px] text-[#94A3B8] mt-1">WHO / FDA / EMA Approved</span>
+            <span className="text-xs text-[#94A3B8] font-medium">Regulatory status</span>
+            <span className="text-2xl font-bold tabular-nums text-emerald-400 mt-1">100% Certified</span>
+            <span className="text-xs text-[#94A3B8] mt-1">WHO / FDA / EMA approved</span>
           </div>
         </div>
 
@@ -200,13 +200,13 @@ export default async function CatalogPage() {
 
           <div className="overflow-x-auto">
             <table className="table w-full text-left text-xs">
-              <thead className="bg-[#172638] text-[#94A3B8] uppercase font-mono text-[10px] tracking-wider border-b border-[#304257]">
+              <thead className="bg-[#172638] text-[#94A3B8] text-xs font-medium border-b border-[#304257]">
                 <tr>
                   <th className="py-3 px-4">Serial / GS1 GTIN</th>
-                  <th className="py-3 px-4">Brand & Generic Name</th>
+                  <th className="py-3 px-4">Brand & generic name</th>
                   <th className="py-3 px-4">Manufacturer</th>
                   <th className="py-3 px-4">Batch #</th>
-                  <th className="py-3 px-4">Storage Band</th>
+                  <th className="py-3 px-4">Storage band</th>
                   <th className="py-3 px-4">Action</th>
                 </tr>
               </thead>
@@ -214,24 +214,24 @@ export default async function CatalogPage() {
                 {drugs.map((drug) => (
                   <tr key={drug.serialNumber} className="hover:bg-[#1E2E44]/50 transition">
                     <td className="py-3.5 px-4 font-mono">
-                      <div className="font-bold text-[#F1F5F9]">{drug.serialNumber}</div>
-                      <div className="text-[10px] text-[#94A3B8]">GTIN: {drug.gs1Gtin}</div>
+                      <div className="font-semibold text-[#F1F5F9]">{drug.serialNumber}</div>
+                      <div className="text-xs text-[#94A3B8]">GTIN: {drug.gs1Gtin}</div>
                     </td>
                     <td className="py-3.5 px-4">
-                      <div className="font-bold text-[#F1F5F9]">{drug.name}</div>
-                      <div className="text-[11px] text-[#94A3B8]">{drug.genericName} &bull; {drug.dosage}</div>
+                      <div className="font-semibold text-[#F1F5F9]">{drug.name}</div>
+                      <div className="text-xs text-[#94A3B8]">{drug.genericName} &bull; {drug.dosage}</div>
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="font-medium text-[#F1F5F9] flex items-center gap-1.5">
                         <Building className="h-3.5 w-3.5 text-[#00D6B4]" /> {drug.manufacturer}
                       </div>
-                      <div className="text-[10px] text-[#94A3B8]">{drug.approvalAuthority}</div>
+                      <div className="text-xs text-[#94A3B8]">{drug.approvalAuthority}</div>
                     </td>
                     <td className="py-3.5 px-4 font-mono text-[#00D6B4]">
                       {drug.batchNumber}
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono border ${
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono border ${
                         drug.storageTemp.includes('Cold')
                           ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
                           : 'bg-[#172638] text-[#94A3B8] border-[#304257]'
@@ -243,7 +243,7 @@ export default async function CatalogPage() {
                     <td className="py-3.5 px-4">
                       <Link
                         href={`/verify?serial=${encodeURIComponent(drug.serialNumber)}`}
-                        className="btn btn-xs bg-[#172638] hover:bg-[#1E2E44] text-[#00D6B4] border border-[#00D6B4]/30 rounded-lg font-bold"
+                        className="btn btn-xs bg-[#172638] hover:bg-[#1E2E44] text-[#00D6B4] border border-[#00D6B4]/30 rounded-lg font-medium"
                       >
                         Verify Hash
                       </Link>
@@ -256,8 +256,8 @@ export default async function CatalogPage() {
         </div>
 
         <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-3">
-          <div className="flex items-center gap-2 text-[#00D6B4] text-xs font-bold uppercase tracking-wider">
-            <Clock className="h-4 w-4" /> Global Medicine Master Index
+          <div className="flex items-center gap-2 text-[#00D6B4] text-xs font-medium">
+            <Clock className="h-4 w-4" /> Global medicine master index
           </div>
           <h3 className="text-base font-bold text-[#F1F5F9]">
             Continuous Pharmacovigilance & Batch Synchronization
