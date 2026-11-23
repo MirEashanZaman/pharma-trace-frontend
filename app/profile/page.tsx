@@ -184,7 +184,7 @@ export default function ProfilePage() {
           <CardContent className="pt-6">
             {currentUser?.warningCount ? (
               <div className="mb-6 p-4 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-xs space-y-1">
-                <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-300">
+                <div className="flex items-center gap-2 font-medium text-xs text-amber-300">
                   <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0" />
                   <span>Administrative Warning Active ({currentUser.warningCount} Issued)</span>
                 </div>
@@ -193,14 +193,14 @@ export default function ProfilePage() {
             ) : null}
 
             {successMessage && (
-              <div className="mb-6 p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2.5">
+              <div className="mb-6 p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-medium flex items-center gap-2.5">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
                 <span>{successMessage}</span>
               </div>
             )}
 
             {errorMessage && (
-              <div className="mb-6 p-4 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs font-bold flex items-center gap-2.5">
+              <div className="mb-6 p-4 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs font-medium flex items-center gap-2.5">
                 <AlertTriangle className="h-4 w-4 text-rose-400 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
@@ -209,12 +209,12 @@ export default function ProfilePage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="p-4 rounded-xl bg-[#0B1220] border border-[#304257] space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-[#F1F5F9] flex items-center gap-2">
+                  <label className="text-xs font-semibold text-[#F1F5F9] flex items-center gap-2">
                     <Mail className="h-4 w-4 text-[#00D6B4]" />
                     <span>Email Address</span>
                   </label>
-                  <span className="inline-flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-[#94A3B8] bg-[#172638] px-2 py-0.5 rounded border border-[#304257]">
-                    <Lock className="h-3 w-3 text-[#00D6B4]" /> Unique & Immutable
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-[#94A3B8] bg-[#172638] px-2.5 py-0.5 rounded-full border border-[#304257]">
+                    <Lock className="h-3 w-3 text-[#00D6B4]" /> Unique & immutable
                   </span>
                 </div>
                 <div className="relative">
@@ -233,7 +233,7 @@ export default function ProfilePage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#F1F5F9] flex items-center gap-2">
+                  <label className="text-xs font-semibold text-[#F1F5F9] flex items-center gap-2">
                     <User className="h-4 w-4 text-[#00D6B4]" />
                     <span>Full Name</span>
                   </label>
@@ -248,7 +248,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#F1F5F9] flex items-center gap-2">
+                  <label className="text-xs font-semibold text-[#F1F5F9] flex items-center gap-2">
                     <Building2 className="h-4 w-4 text-[#00D6B4]" />
                     <span>Organization</span>
                   </label>
@@ -265,12 +265,12 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-[#F1F5F9] flex items-center gap-2">
+                    <label className="text-xs font-semibold text-[#F1F5F9] flex items-center gap-2">
                       <ShieldCheck className="h-4 w-4 text-[#00D6B4]" />
                       <span>Supply Chain Role</span>
                     </label>
-                    <span className="inline-flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-[#94A3B8] bg-[#0B1220] px-2 py-0.5 rounded border border-[#304257]">
-                      <Lock className="h-3 w-3 text-[#00D6B4]" /> Fixed Role
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-[#94A3B8] bg-[#0B1220] px-2.5 py-0.5 rounded-full border border-[#304257]">
+                      <Lock className="h-3 w-3 text-[#00D6B4]" /> Fixed role
                     </span>
                   </div>
                   <input
@@ -278,7 +278,7 @@ export default function ProfilePage() {
                     value={role}
                     disabled
                     readOnly
-                    className="w-full h-11 bg-[#172638]/70 border border-[#304257] rounded-xl px-4 text-xs font-bold text-[#00D6B4] cursor-not-allowed opacity-90 select-none uppercase tracking-wider"
+                    className="w-full h-11 bg-[#172638]/70 border border-[#304257] rounded-xl px-4 text-xs font-medium text-[#00D6B4] cursor-not-allowed opacity-90 select-none"
                   />
                   <p className="text-[11px] text-[#94A3B8]">
                     Your role is fixed upon registration and cannot be modified.
