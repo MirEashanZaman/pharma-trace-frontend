@@ -1108,7 +1108,7 @@ export function ProvenanceDagVisualizer({
           <div className="space-y-4">
             <div className="border-b border-[#304257] pb-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#00D6B4]">
+                <span className="text-xs font-medium text-[#00D6B4]">
                   Node Cryptographic Inspector
                 </span>
                 <span
@@ -1130,7 +1130,7 @@ export function ProvenanceDagVisualizer({
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] block">
+                <label className="text-xs font-medium text-[#94A3B8] block">
                   Stakeholder Identity
                 </label>
                 <div className="font-semibold text-[#F1F5F9] mt-0.5">
@@ -1142,7 +1142,7 @@ export function ProvenanceDagVisualizer({
               </div>
 
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] block">
+                <label className="text-xs font-medium text-[#94A3B8] block">
                   Attestation SHA-256 Digest
                 </label>
                 <div className="p-2 bg-[#172638] rounded-lg border border-[#304257] font-mono text-[10px] text-[#94A3B8] break-all select-all">
@@ -1152,7 +1152,7 @@ export function ProvenanceDagVisualizer({
 
               {selectedNode.details.merkleRoot && (
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] block">
+                  <label className="text-xs font-medium text-[#94A3B8] block">
                     Merkle Batch Tree Root
                   </label>
                   <div className="font-mono text-[10px] text-[#38BDF8] break-all">
@@ -1163,7 +1163,7 @@ export function ProvenanceDagVisualizer({
 
               {selectedNode.details.ipfsCid && (
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] block">
+                  <label className="text-xs font-medium text-[#94A3B8] block">
                     Decentralized IPFS Dossier CID
                   </label>
                   <div className="font-mono text-[10px] text-[#A3E635] break-all">
@@ -1174,7 +1174,7 @@ export function ProvenanceDagVisualizer({
 
               {selectedNode.details.kmsKeyId && (
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] block">
+                  <label className="text-xs font-medium text-[#94A3B8] block">
                     Hardware HSM KMS Signer Key
                   </label>
                   <div className="font-mono text-[11px] text-[#C084FC]">
@@ -1200,7 +1200,7 @@ export function ProvenanceDagVisualizer({
 
               {selectedNode.details.sscc && (
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] block">
+                  <label className="text-xs font-medium text-[#94A3B8] block">
                     GS1 Serial Shipping Container Code (SSCC)
                   </label>
                   <div className="font-mono text-[11px] text-[#38BDF8]">
@@ -1220,7 +1220,7 @@ export function ProvenanceDagVisualizer({
 
               {selectedNode.details.contractAnchor && (
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] block">
+                  <label className="text-xs font-medium text-[#94A3B8] block">
                     EVM Smart Contract Anchor
                   </label>
                   <div className="font-mono text-[10px] text-[#94A3B8] truncate">
