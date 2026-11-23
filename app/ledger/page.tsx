@@ -173,53 +173,53 @@ export default async function LiveLedgerPage() {
           </div>
 
           <div className="bg-[#172638] border border-[#304257] rounded-xl px-4 py-3 text-right">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#00D6B4] flex items-center justify-end gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#00D6B4] animate-ping" /> Live Synchronization
+            <span className="text-xs font-medium text-[#00D6B4] flex items-center justify-end gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-[#00D6B4] animate-ping" /> Live synchronization
             </span>
-            <span className="text-xs font-mono text-[#F1F5F9] block mt-0.5">
+            <span className="text-xs font-mono tabular-nums text-[#F1F5F9] block mt-0.5">
               {renderTimestamp}
             </span>
-            <span className="text-[10px] text-[#94A3B8] block">
-              Verification Response: {renderDurationMs}ms
+            <span className="text-xs text-[#94A3B8] block">
+              Verification response: {renderDurationMs}ms
             </span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="card bg-[#243247] border border-[#304257] p-5 rounded-2xl shadow-sm space-y-1">
-            <div className="flex items-center justify-between text-xs text-[#94A3B8] font-bold uppercase">
-              <span>Security Protocol</span>
+            <div className="flex items-center justify-between text-xs text-[#94A3B8] font-medium">
+              <span>Security protocol</span>
               <Server className="h-4 w-4 text-[#00D6B4]" />
             </div>
             <p className="text-xl font-mono font-bold text-[#F1F5F9]">Enterprise TLS</p>
-            <p className="text-[11px] text-[#00D6B4]">Zero Stale Data</p>
+            <p className="text-xs text-[#00D6B4]">Zero stale data</p>
           </div>
 
           <div className="card bg-[#243247] border border-[#304257] p-5 rounded-2xl shadow-sm space-y-1">
-            <div className="flex items-center justify-between text-xs text-[#94A3B8] font-bold uppercase">
-              <span>Active Node Batches</span>
+            <div className="flex items-center justify-between text-xs text-[#94A3B8] font-medium">
+              <span>Active node batches</span>
               <Database className="h-4 w-4 text-[#00D6B4]" />
             </div>
             <p className="text-xl font-mono font-bold text-[#F1F5F9]">{batches.length} Tracked</p>
-            <p className="text-[11px] text-[#94A3B8]">PostgreSQL Event Store</p>
+            <p className="text-xs text-[#94A3B8]">PostgreSQL Event Store</p>
           </div>
 
           <div className="card bg-[#243247] border border-[#304257] p-5 rounded-2xl shadow-sm space-y-1">
-            <div className="flex items-center justify-between text-xs text-[#94A3B8] font-bold uppercase">
-              <span>EVM Smart Contract</span>
-              <Lock className="h-4 w-4 text-[#A3E635]" />
+            <div className="flex items-center justify-between text-xs text-[#94A3B8] font-medium">
+              <span>EVM smart contract</span>
+              <Lock className="h-4 w-4 text-emerald-400" />
             </div>
-            <p className="text-xl font-mono font-bold text-[#A3E635]">Block Confirmed</p>
-            <p className="text-[11px] text-[#94A3B8]">SHA-256 Merkle Roots</p>
+            <p className="text-xl font-mono font-bold text-emerald-400">Block Confirmed</p>
+            <p className="text-xs text-[#94A3B8]">SHA-256 Merkle Roots</p>
           </div>
 
           <div className="card bg-[#243247] border border-[#304257] p-5 rounded-2xl shadow-sm space-y-1">
-            <div className="flex items-center justify-between text-xs text-[#94A3B8] font-bold uppercase">
-              <span>Cold-Chain Integrity</span>
+            <div className="flex items-center justify-between text-xs text-[#94A3B8] font-medium">
+              <span>Cold-chain integrity</span>
               <Thermometer className="h-4 w-4 text-[#00D6B4]" />
             </div>
             <p className="text-xl font-mono font-bold text-[#00D6B4]">Nominal</p>
-            <p className="text-[11px] text-[#94A3B8]">0 Unhandled Excursions</p>
+            <p className="text-xs text-[#94A3B8]">0 unhandled excursions</p>
           </div>
         </div>
 
@@ -243,14 +243,14 @@ export default async function LiveLedgerPage() {
 
           <div className="overflow-x-auto">
             <table className="table w-full text-left text-xs">
-              <thead className="bg-[#172638] text-[#94A3B8] uppercase font-mono text-[10px] tracking-wider border-b border-[#304257]">
+              <thead className="bg-[#172638] text-[#94A3B8] text-xs font-medium border-b border-[#304257]">
                 <tr>
-                  <th className="py-3 px-4">Serial Number</th>
-                  <th className="py-3 px-4">Medicine & Formulation</th>
+                  <th className="py-3 px-4">Serial number</th>
+                  <th className="py-3 px-4">Medicine & formulation</th>
                   <th className="py-3 px-4">Manufacturer</th>
-                  <th className="py-3 px-4">Live IoT Temp</th>
-                  <th className="py-3 px-4">Custody Lifecycle</th>
-                  <th className="py-3 px-4">Audit Status</th>
+                  <th className="py-3 px-4">Live IoT temp</th>
+                  <th className="py-3 px-4">Custody lifecycle</th>
+                  <th className="py-3 px-4">Audit status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#304257]">
@@ -260,25 +260,25 @@ export default async function LiveLedgerPage() {
                       {batch.serialNumber}
                     </td>
                     <td className="py-3.5 px-4">
-                      <div className="font-bold text-[#F1F5F9]">{batch.name}</div>
-                      <div className="text-[10px] font-mono text-[#94A3B8]">Batch: {batch.batchNumber}</div>
+                      <div className="font-semibold text-[#F1F5F9]">{batch.name}</div>
+                      <div className="text-xs font-mono text-[#94A3B8]">Batch: {batch.batchNumber}</div>
                     </td>
                     <td className="py-3.5 px-4 text-[#F1F5F9]">
                       {batch.manufacturer}
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono bg-[#172638] border border-[#304257] text-[#00D6B4]">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono bg-[#172638] border border-[#304257] text-[#00D6B4]">
                         <Thermometer className="h-3 w-3" />
                         {batch.temperature.toFixed(1)}°C ({batch.humidity}%)
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="badge badge-sm bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-bold font-mono text-[10px]">
+                      <span className="badge badge-sm bg-[#00D6B4]/15 text-[#00D6B4] border border-[#00D6B4]/30 font-medium font-mono text-xs">
                         {batch.latestEvent}
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold border shrink-0 whitespace-nowrap ${
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border shrink-0 whitespace-nowrap ${
                         batch.status === 'AUTHENTIC' || batch.status === 'COLD_SECURE' || batch.status === 'CERTIFIED'
                           ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
                           : batch.status === 'RECALLED' || batch.status === 'QUARANTINED'
@@ -303,8 +303,8 @@ export default async function LiveLedgerPage() {
         </div>
 
         <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-6 space-y-3">
-          <div className="flex items-center gap-2 text-[#00D6B4] text-xs font-bold uppercase tracking-wider">
-            <Radio className="h-4 w-4" /> Regulatory Audit Transparency
+          <div className="flex items-center gap-2 text-[#00D6B4] text-xs font-medium">
+            <Radio className="h-4 w-4" /> Regulatory audit transparency
           </div>
           <h3 className="text-base font-bold text-[#F1F5F9]">
             Tamper-Evident Ledger Integrity
