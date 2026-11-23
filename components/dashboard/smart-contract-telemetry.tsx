@@ -8,7 +8,7 @@ export function SmartContractTelemetry() {
     <>
       <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Chainlink Automation</span>
+          <span className="text-xs font-medium text-[#94A3B8]">Chainlink Automation</span>
           <span className="badge badge-xs bg-[#00D6B4] text-[#0B1220] font-bold border-none">AutomationOracle</span>
         </div>
         <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
@@ -32,7 +32,7 @@ export function SmartContractTelemetry() {
 
       <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Cross-Chain Bridge</span>
+          <span className="text-xs font-medium text-[#94A3B8]">Cross-Chain Bridge</span>
           <span className="badge badge-xs bg-[#00D6B4] text-[#0B1220] font-bold border-none">CCIP / L2</span>
         </div>
         <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
@@ -56,7 +56,7 @@ export function SmartContractTelemetry() {
 
       <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Sparse Merkle Tree</span>
+          <span className="text-xs font-medium text-[#94A3B8]">Sparse Merkle Tree</span>
           <span className="badge badge-xs bg-[#00D6B4] text-[#0B1220] font-bold border-none">BatchRollup</span>
         </div>
         <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
@@ -80,7 +80,7 @@ export function SmartContractTelemetry() {
 
       <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">W3C DIDs & VCs</span>
+          <span className="text-xs font-medium text-[#94A3B8]">W3C DIDs & VCs</span>
           <span className="badge badge-xs bg-[#A3E635] text-[#0B1220] font-bold border-none">did:ethr</span>
         </div>
         <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
