@@ -82,8 +82,8 @@ export default function TransitMap({ serialNumber, currentTemp = 4.2, isExcursio
     return (
       <div className="h-[480px] w-full rounded-2xl bg-[#0B1220] border border-[#304257] flex flex-col items-center justify-center text-slate-400 gap-3">
         <div className="loading loading-spinner text-[#00D6B4] loading-lg"></div>
-        <span className="text-xs font-mono tracking-wider uppercase text-slate-400">
-          Initializing Uber-Style Dark Cartography...
+        <span className="text-xs font-mono text-slate-400">
+          Initializing transit cartography...
         </span>
       </div>
     );
@@ -128,41 +128,41 @@ export default function TransitMap({ serialNumber, currentTemp = 4.2, isExcursio
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00D6B4] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00D6B4]"></span>
             </span>
-            <span className="text-xs font-black tracking-wider uppercase text-[#00D6B4]">
-              Uber-Style Live Dispatch
+            <span className="text-xs font-medium text-[#00D6B4]">
+              Live fleet dispatch
             </span>
           </div>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#172638] text-slate-300 border border-[#304257]">
+          <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-[#172638] text-slate-300 border border-[#304257]">
             {serialNumber || 'RX-994821'}
           </span>
         </div>
 
         <div className="bg-[#172638]/90 rounded-lg p-3 border border-[#304257] flex items-center justify-between">
           <div>
-            <div className="text-[10px] uppercase font-bold text-slate-400">Live Cold-Chain Temp</div>
-            <div className="text-lg font-black font-mono text-[#F1F5F9] flex items-center gap-1.5">
+            <div className="text-xs font-medium text-slate-400">Live cold-chain temp</div>
+            <div className="text-lg font-bold font-mono tabular-nums text-[#F1F5F9] flex items-center gap-1.5">
               <Thermometer className={`h-4 w-4 ${isExcursion ? 'text-rose-400' : 'text-[#00D6B4]'}`} />
               {currentTemp.toFixed(1)}°C
             </div>
           </div>
           <div className="text-right">
-            <div className="text-[10px] uppercase font-bold text-slate-400">Excursion Status</div>
+            <div className="text-xs font-medium text-slate-400">Excursion status</div>
             <span
-              className={`badge badge-sm font-bold text-[10px] border-none ${
+              className={`badge badge-sm font-medium text-xs border-none rounded-full ${
                 isExcursion ? 'bg-rose-500/20 text-rose-300' : 'bg-[#00D6B4]/20 text-[#00D6B4]'
               }`}
             >
-              {isExcursion ? 'ALERT OUT-OF-SPEC' : 'OPTIMAL (2°-8°C)'}
+              {isExcursion ? 'Excursion alert' : 'Optimal (2°-8°C)'}
             </span>
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current Waypoint</div>
-          <div className="text-xs font-bold text-[#F1F5F9] truncate">{activePoint.name}</div>
-          <div className="text-[11px] text-slate-400 flex items-center justify-between">
+          <div className="text-xs font-medium text-slate-400">Current waypoint</div>
+          <div className="text-xs font-semibold text-[#F1F5F9] truncate">{activePoint.name}</div>
+          <div className="text-xs text-slate-400 flex items-center justify-between">
             <span>{activePoint.handler}</span>
-            <span className="font-mono text-[#00D6B4]">{activePoint.temp}°C</span>
+            <span className="font-mono tabular-nums text-[#00D6B4]">{activePoint.temp}°C</span>
           </div>
         </div>
       </div>
