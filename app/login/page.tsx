@@ -330,10 +330,10 @@ export default function LoginPage() {
         {!isRegister && !isForgotPassword && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">
-                Select Your Stakeholder Persona (1-Click Enterprise Access)
+              <span className="text-xs font-medium text-[#94A3B8]">
+                Select your stakeholder persona (one-click access)
               </span>
-              <span className="text-[11px] text-[#00D6B4] font-mono">Demo Accounts Ready</span>
+              <span className="text-xs text-[#00D6B4] font-mono">Demo accounts ready</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -345,20 +345,20 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => handlePersonaLogin(p)}
                     disabled={loading}
-                    className={`text-left p-4 rounded-2xl border transition-all hover:scale-[1.02] flex flex-col justify-between ${p.color} hover:bg-slate-800/40`}
+                    className={`text-left p-4 rounded-2xl border transition-all hover:border-[#00D6B4]/60 flex flex-col justify-between ${p.color} hover:bg-slate-800/40`}
                   >
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className={`badge badge-xs font-black uppercase tracking-wider py-2 px-2 border-none ${p.badge}`}>
+                        <span className={`badge badge-xs font-medium py-1 px-2 rounded-full border-none ${p.badge}`}>
                           {p.role}
                         </span>
-                        <IconComponent className="h-5 w-5 opacity-80" />
+                        <IconComponent className="h-4 w-4 opacity-80" />
                       </div>
-                      <h4 className="text-sm font-bold text-[#F1F5F9]">{p.name}</h4>
-                      <p className="text-[11px] text-[#94A3B8] mb-2">{p.org}</p>
-                      <p className="text-[10px] text-slate-400 line-clamp-2 leading-relaxed">{p.desc}</p>
+                      <h4 className="text-sm font-semibold text-[#F1F5F9]">{p.name}</h4>
+                      <p className="text-xs text-[#94A3B8] mb-1.5">{p.org}</p>
+                      <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{p.desc}</p>
                     </div>
-                    <div className="mt-3 pt-2 border-t border-slate-700/50 flex items-center justify-between text-[11px] font-bold text-[#00D6B4]">
+                    <div className="mt-3 pt-2 border-t border-slate-700/50 flex items-center justify-between text-xs font-medium text-[#00D6B4]">
                       <span>Sign in as {p.role}</span>
                       <ArrowRight className="h-3.5 w-3.5" />
                     </div>
@@ -412,7 +412,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-3 rounded-xl font-bold text-xs tracking-wider transition shadow-sm flex items-center justify-center gap-1.5"
+                    className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-3 rounded-xl font-medium text-xs transition shadow-sm flex items-center justify-center gap-1.5"
                   >
                     {loading ? 'Dispatching OTP...' : 'Send Verification OTP'}
                     <ArrowRight className="h-4 w-4" />
@@ -460,7 +460,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-3 rounded-xl font-bold text-xs tracking-wider transition shadow-sm flex items-center justify-center gap-1.5"
+                    className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-3 rounded-xl font-medium text-xs transition shadow-sm flex items-center justify-center gap-1.5"
                   >
                     {loading ? 'Verifying...' : 'Verify OTP & Reset Password'}
                     <CheckCircle2 className="h-4 w-4" />
@@ -613,15 +613,15 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-3 rounded-xl font-bold text-xs tracking-wider transition shadow-sm flex items-center justify-center gap-1.5"
+                  className="btn bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none w-full py-3 rounded-xl font-medium text-xs transition shadow-sm flex items-center justify-center gap-1.5"
                 >
                   {loading ? 'Processing...' : isRegister ? 'Register Facility' : 'Sign In With Email'}
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </form>
 
-              <div className="divider text-[10px] uppercase tracking-wider text-[#94A3B8] font-bold before:bg-[#304257] after:bg-[#304257]">
-                Or Authenticate with Web3
+              <div className="divider text-xs text-[#94A3B8] font-medium before:bg-[#304257] after:bg-[#304257]">
+                Or authenticate with Web3
               </div>
 
               <button
