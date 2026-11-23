@@ -162,7 +162,7 @@ export function Gs1BarcodeSuite() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">
+              <label className="text-xs font-medium text-[#94A3B8]">
                 Raw GS1-128 / DataMatrix Application Identifier String
               </label>
               <input
