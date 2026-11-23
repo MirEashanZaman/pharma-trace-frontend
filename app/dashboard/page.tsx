@@ -1734,7 +1734,7 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 flex flex-col md:flex-row gap-8">
         <aside className="w-full md:w-64 space-y-3 bg-[#243247] p-4 rounded-2xl border border-[#304257] text-[#F1F5F9] shadow-sm self-start">
           <div className="p-3.5 bg-[#172638] rounded-xl border border-[#304257] space-y-2">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] flex items-center justify-between">
+            <div className="text-xs font-medium text-[#94A3B8] flex items-center justify-between">
               <span>Active Stakeholder</span>
               <span className="badge badge-sm bg-[#00D6B4] text-[#0B1220] font-black border-none text-[10px]">
                 {currentRole}
@@ -1772,7 +1772,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-1">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] px-3 py-1">
+            <div className="text-xs font-medium text-[#94A3B8] px-3 py-1">
               Navigation Menu
             </div>
             <button
@@ -1927,7 +1927,7 @@ export default function DashboardPage() {
         <main className="flex-1 space-y-6 pb-52">
           {currentUser?.warningCount ? (
             <div className="p-4 rounded-xl bg-amber-500/15 border-2 border-amber-500/40 text-amber-200 space-y-1">
-              <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-300">
+              <div className="flex items-center gap-2 font-medium text-xs text-amber-300">
                 <AlertOctagon className="h-4 w-4 text-amber-400 shrink-0" />
                 <span>Administrative Compliance Warning Issued ({currentUser.warningCount} Active)</span>
               </div>
@@ -1946,7 +1946,7 @@ export default function DashboardPage() {
               <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div>
-                    <span className="text-xs text-[#00D6B4] font-bold uppercase tracking-wider">Role-Specific Workspace</span>
+                    <span className="text-xs text-[#00D6B4] font-medium">Role-Specific Workspace</span>
                     <h2 className="text-xl font-black text-[#F1F5F9] mt-0.5">
                       {currentRole === 'MANUFACTURER' && 'Manufacturer Production Desk'}
                       {currentRole === 'DISTRIBUTOR' && 'Distributor Transit & Logistics Hub'}
@@ -2126,7 +2126,7 @@ export default function DashboardPage() {
               <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div>
-                    <span className="text-xs text-[#00D6B4] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-xs text-[#00D6B4] font-medium flex items-center gap-1.5">
                       <Sliders className="h-4 w-4" /> Live IoT Cold-Chain Simulation Deck
                     </span>
                     <h3 className="text-base font-bold text-[#F1F5F9] mt-0.5">
@@ -2274,7 +2274,7 @@ export default function DashboardPage() {
               <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#304257] pb-4">
                   <div>
-                    <span className="text-xs text-[#00D6B4] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-xs text-[#00D6B4] font-medium flex items-center gap-1.5">
                       <Award className="h-4 w-4" /> Regulatory Audit Package & Inspection Dossier
                     </span>
                     <h3 className="text-base font-bold text-[#F1F5F9] mt-0.5">
@@ -3016,7 +3016,7 @@ export default function DashboardPage() {
 
                 {selectedSerial && (
                   <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 flex flex-col items-center justify-center text-center space-y-4">
-                    <div className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">
+                    <div className="text-xs font-medium text-[#94A3B8]">
                       GS1 2D DataMatrix Package QR
                     </div>
                     <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-inner">
@@ -3089,8 +3089,8 @@ export default function DashboardPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                     <h3 className="text-base font-bold text-[#F1F5F9]">Record Lifecycle Event & Digital Sign</h3>
                     {isSelectedBatchRecalled && (
-                      <span className="badge bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold text-xs uppercase py-3 px-3 flex items-center gap-1.5 animate-pulse">
-                        <AlertOctagon className="h-4 w-4 text-rose-400" /> BATCH RECALLED &mdash; TRANSFERS FROZEN
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 px-3 py-1 text-xs font-medium text-rose-300">
+                        <AlertOctagon className="h-4 w-4 text-rose-400" /> Batch recalled &mdash; transfers frozen
                       </span>
                     )}
                   </div>
@@ -3153,7 +3153,7 @@ export default function DashboardPage() {
                   {selectedEventType === 'SOLD' && (
                     <div className="p-4 rounded-xl bg-[#172638] border border-[#00D6B4]/30 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#00D6B4] uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="text-xs text-[#00D6B4] font-medium flex items-center gap-1.5">
                           <ShieldCheck className="h-4 w-4" /> Dual Multi-Signature Dispensing Requirement
                         </span>
                         <span className="badge badge-xs bg-[#00D6B4]/20 text-[#00D6B4] border-none font-mono">2-of-2 Required</span>
@@ -3239,7 +3239,7 @@ export default function DashboardPage() {
               <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-6 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <span className="text-xs text-[#00D6B4] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-xs text-[#00D6B4] font-medium flex items-center gap-1.5">
                       <Sliders className="h-4 w-4" /> Real-Time Telemetry Cockpit
                     </span>
                     <h2 className="text-xl font-black text-[#F1F5F9] mt-0.5">
@@ -3292,7 +3292,7 @@ export default function DashboardPage() {
                   <div className="lg:col-span-7 space-y-5">
                     <div className="bg-[#172638] border border-[#304257] rounded-xl p-5 space-y-4">
                       <div className="flex items-center justify-between border-b border-[#304257] pb-3">
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                        <span className="text-xs font-medium text-[#F1F5F9] flex items-center gap-2">
                           <Zap className="h-4 w-4 text-[#00D6B4]" /> One-Click Scenario Presets
                         </span>
                         <span className="text-[11px] font-mono text-[#94A3B8]">
@@ -3337,7 +3337,7 @@ export default function DashboardPage() {
 
                     <div className="bg-[#172638] border border-[#304257] rounded-xl p-5 space-y-5">
                       <div className="flex items-center justify-between border-b border-[#304257] pb-3">
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                        <span className="text-xs font-medium text-[#F1F5F9] flex items-center gap-2">
                           <Sliders className="h-4 w-4 text-[#00D6B4]" /> Precision Manual Tuning Deck
                         </span>
                         <span className="font-mono text-xs font-black text-[#00D6B4]">
@@ -3455,7 +3455,7 @@ export default function DashboardPage() {
                         : 'bg-[#172638] border-[#304257]'
                     }`}>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-black uppercase tracking-wider text-[#F1F5F9] flex items-center gap-1.5">
+                        <span className="text-xs font-semibold text-[#F1F5F9] flex items-center gap-1.5">
                           <Activity className={`h-4 w-4 ${tempExcursion ? 'text-[#F87171]' : 'text-[#00D6B4]'}`} />
                           Live Environmental State
                         </span>
@@ -3519,7 +3519,7 @@ export default function DashboardPage() {
 
                     <div className="bg-[#172638] border border-[#304257] rounded-xl p-4 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-1.5">
+                        <span className="text-xs font-medium text-[#F1F5F9] flex items-center gap-1.5">
                           <Navigation2 className="h-4 w-4 text-[#00D6B4]" /> Cartography Dispatch Link
                         </span>
                         <span className="text-[10px] font-mono text-[#94A3B8]">
@@ -3537,7 +3537,7 @@ export default function DashboardPage() {
 
                 <div className="bg-[#172638] border border-[#304257] rounded-xl p-5 space-y-3">
                   <div className="flex items-center justify-between border-b border-[#304257] pb-3">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                    <span className="text-xs font-medium text-[#F1F5F9] flex items-center gap-2">
                       <Activity className="h-4 w-4 text-[#00D6B4]" /> Simulated Telemetry Stream Log
                     </span>
                     <span className="text-[11px] font-mono text-[#94A3B8]">
@@ -3666,7 +3666,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">ERC-1155 Multi-Token</span>
+                    <span className="text-xs font-medium text-[#94A3B8]">ERC-1155 Multi-Token</span>
                     <span className="badge badge-xs bg-[#00D6B4] text-[#0B1220] font-bold border-none">PharmaDigitalTwin</span>
                   </div>
                   <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
@@ -3690,7 +3690,7 @@ export default function DashboardPage() {
 
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">ERC-5192 Soulbound</span>
+                    <span className="text-xs font-medium text-[#94A3B8]">ERC-5192 Soulbound</span>
                     <span className="badge badge-xs bg-[#A3E635] text-[#0B1220] font-bold border-none">Locked(uint256)</span>
                   </div>
                   <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
@@ -3714,7 +3714,7 @@ export default function DashboardPage() {
 
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Carrier Escrow</span>
+                    <span className="text-xs font-medium text-[#94A3B8]">Carrier Escrow</span>
                     <span className="badge badge-xs bg-[#00D6B4] text-[#0B1220] font-bold border-none">Multi-Oracle</span>
                   </div>
                   <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
@@ -3738,7 +3738,7 @@ export default function DashboardPage() {
 
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">ERC-4337 v0.7</span>
+                    <span className="text-xs font-medium text-[#94A3B8]">ERC-4337 v0.7</span>
                     <span className="badge badge-xs bg-[#00D6B4] text-[#0B1220] font-bold border-none">Paymaster</span>
                   </div>
                   <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
@@ -3762,7 +3762,7 @@ export default function DashboardPage() {
 
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Groth16 SNARK</span>
+                    <span className="text-xs font-medium text-[#94A3B8]">Groth16 SNARK</span>
                     <span className="badge badge-xs bg-[#00D6B4] text-[#0B1220] font-bold border-none">ZkColdChain</span>
                   </div>
                   <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
@@ -3786,7 +3786,7 @@ export default function DashboardPage() {
 
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Timelock Governance</span>
+                    <span className="text-xs font-medium text-[#94A3B8]">Timelock Governance</span>
                     <span className="badge badge-xs bg-[#00D6B4] text-[#0B1220] font-bold border-none">PharmaGovernance</span>
                   </div>
                   <div className="text-sm font-bold text-[#F1F5F9] flex items-center gap-2">
@@ -4028,7 +4028,7 @@ export default function DashboardPage() {
                 <div className="overflow-x-auto">
                   <table className="table w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-[#304257] bg-[#172638] text-[#94A3B8] uppercase text-[10px] tracking-wider font-bold">
+                      <tr className="border-b border-[#304257] bg-[#172638] text-[#94A3B8] text-xs font-medium">
                         <th className="py-3.5 px-4">Participant</th>
                         <th className="py-3.5 px-4">Role</th>
                         <th className="py-3.5 px-4">Status</th>
@@ -4216,7 +4216,7 @@ export default function DashboardPage() {
                 <div className="overflow-x-auto">
                   <table className="table w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-[#304257] bg-[#172638] text-[#94A3B8] uppercase text-[10px] tracking-wider font-bold">
+                      <tr className="border-b border-[#304257] bg-[#172638] text-[#94A3B8] text-xs font-medium">
                         <th className="py-3 px-4">Timestamp</th>
                         <th className="py-3 px-4">Method & Route</th>
                         <th className="py-3 px-4">Status</th>
@@ -4381,7 +4381,7 @@ export default function DashboardPage() {
                 <div className="overflow-x-auto">
                   <table className="table w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-[#304257] bg-[#172638] text-[#94A3B8] uppercase text-[10px] tracking-wider font-bold">
+                      <tr className="border-b border-[#304257] bg-[#172638] text-[#94A3B8] text-xs font-medium">
                         <th className="py-3 px-4">Organization</th>
                         <th className="py-3 px-4">Role</th>
                         <th className="py-3 px-4">Invitation Token</th>
@@ -4499,7 +4499,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4 space-y-2">
                   <div className="flex items-center justify-between text-[#94A3B8]">
-                    <span className="text-[10px] uppercase font-bold tracking-wider">PostgreSQL Database</span>
+                    <span className="text-xs font-medium text-[#94A3B8]">PostgreSQL Database</span>
                     <Database className="h-4 w-4 text-[#00D6B4]" />
                   </div>
                   <div className="text-xl font-black text-[#F1F5F9]">
@@ -4512,7 +4512,7 @@ export default function DashboardPage() {
 
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4 space-y-2">
                   <div className="flex items-center justify-between text-[#94A3B8]">
-                    <span className="text-[10px] uppercase font-bold tracking-wider">Redis Session Store</span>
+                    <span className="text-xs font-medium text-[#94A3B8]">Redis Session Store</span>
                     <Cpu className="h-4 w-4 text-[#00D6B4]" />
                   </div>
                   <div className="text-xl font-black text-[#A3E635]">
@@ -4525,7 +4525,7 @@ export default function DashboardPage() {
 
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4 space-y-2">
                   <div className="flex items-center justify-between text-[#94A3B8]">
-                    <span className="text-[10px] uppercase font-bold tracking-wider">Blockchain EVM Node</span>
+                    <span className="text-xs font-medium text-[#94A3B8]">Blockchain EVM Node</span>
                     <Layers className="h-4 w-4 text-[#00D6B4]" />
                   </div>
                   <div className="text-xl font-black text-[#F1F5F9]">
@@ -4538,7 +4538,7 @@ export default function DashboardPage() {
 
                 <div className="card bg-[#243247] border border-[#304257] shadow-sm rounded-2xl p-4 space-y-2">
                   <div className="flex items-center justify-between text-[#94A3B8]">
-                    <span className="text-[10px] uppercase font-bold tracking-wider">V8 Heap & Memory</span>
+                    <span className="text-xs font-medium text-[#94A3B8]">V8 Heap & Memory</span>
                     <Server className="h-4 w-4 text-[#00D6B4]" />
                   </div>
                   <div className="text-xl font-black text-[#F1F5F9]">
@@ -4559,10 +4559,10 @@ export default function DashboardPage() {
               <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border border-[#00D6B4]/30 text-xs font-bold uppercase tracking-wider shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
+                    <span className="inline-flex items-center rounded-full bg-[#00D6B4]/15 px-3 py-1 text-xs font-medium text-[#00D6B4] border border-[#00D6B4]/30 shrink-0 whitespace-nowrap">
                       Distributor GxP Operations
                     </span>
-                    <span className="badge bg-[#243247] text-[#94A3B8] border border-[#304257] text-xs font-mono shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
+                    <span className="inline-flex items-center rounded-full bg-[#243247] px-3 py-1 text-xs font-medium text-[#94A3B8] border border-[#304257] shrink-0 whitespace-nowrap">
                       Bay Area Cold-Chain Hub
                     </span>
                   </div>
@@ -4808,7 +4808,7 @@ export default function DashboardPage() {
 
                   <div className="lg:col-span-5 space-y-4">
                     <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#00D6B4] flex items-center gap-2">
+                      <h4 className="text-xs font-semibold text-[#00D6B4] flex items-center gap-2">
                         <ShieldCheck className="h-4 w-4 text-[#00D6B4]" /> GxP Dock Receiving Protocol
                       </h4>
                       <p className="text-xs text-[#94A3B8] leading-relaxed">
@@ -4835,7 +4835,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                      <h4 className="text-xs font-medium text-[#F1F5F9] flex items-center gap-2">
                         <Activity className="h-4 w-4 text-[#00D6B4]" /> Recent Inbound Inspection Log
                       </h4>
                       <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
@@ -4881,7 +4881,7 @@ export default function DashboardPage() {
                 <div className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#94A3B8]">
+                      <span className="text-xs font-medium text-[#94A3B8]">
                         Vault Active Consignments
                       </span>
                       <div className="text-2xl font-black text-[#F1F5F9]">
@@ -4891,7 +4891,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#94A3B8]">
+                      <span className="text-xs font-medium text-[#94A3B8]">
                         Zone A: Biologics (2°C - 8°C)
                       </span>
                       <div className="text-2xl font-black text-cyan-400">
@@ -4901,7 +4901,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#94A3B8]">
+                      <span className="text-xs font-medium text-[#94A3B8]">
                         Zone B: Cryo Vault (-20°C)
                       </span>
                       <div className="text-2xl font-black text-indigo-400">
@@ -4911,7 +4911,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#94A3B8]">
+                      <span className="text-xs font-medium text-[#94A3B8]">
                         FEFO Priority (&lt; 90 Days)
                       </span>
                       <div className="text-2xl font-black text-amber-400">
@@ -5551,7 +5551,7 @@ export default function DashboardPage() {
 
                   <div className="lg:col-span-5 space-y-4">
                     <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#00D6B4] flex items-center gap-2">
+                      <h4 className="text-xs font-semibold text-[#00D6B4] flex items-center gap-2">
                         <ShieldCheck className="h-4 w-4 text-[#00D6B4]" /> Legal Handover Compliance
                       </h4>
                       <p className="text-xs text-[#94A3B8] leading-relaxed">
@@ -5578,7 +5578,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                      <h4 className="text-xs font-medium text-[#F1F5F9] flex items-center gap-2">
                         <Activity className="h-4 w-4 text-[#00D6B4]" /> Delivered Batches (PoD Confirmed)
                       </h4>
                       <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
@@ -5620,10 +5620,10 @@ export default function DashboardPage() {
               <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border border-[#00D6B4]/30 text-xs font-bold uppercase tracking-wider shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
+                    <span className="inline-flex items-center rounded-full bg-[#00D6B4]/15 px-3 py-1 text-xs font-medium text-[#00D6B4] border border-[#00D6B4]/30 shrink-0 whitespace-nowrap">
                       DSCSA Title II Compliant
                     </span>
-                    <span className="badge bg-[#243247] text-[#94A3B8] border border-[#304257] text-xs font-mono shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
+                    <span className="inline-flex items-center rounded-full bg-[#243247] px-3 py-1 text-xs font-medium text-[#94A3B8] border border-[#304257] shrink-0 whitespace-nowrap">
                       Hospital Dispensary Bay 1
                     </span>
                   </div>
@@ -5801,7 +5801,7 @@ export default function DashboardPage() {
                       })()}
 
                       <div className="p-3 bg-[#0B1220] border border-[#304257] rounded-xl space-y-2">
-                        <span className="text-xs font-bold text-[#00D6B4] block uppercase tracking-wider">
+                        <span className="text-xs font-medium text-[#00D6B4] block">
                           DSCSA 3Ts Continuous Verification Checklist
                         </span>
                         <div className="space-y-1.5 text-xs text-[#F1F5F9]">
@@ -5936,7 +5936,7 @@ export default function DashboardPage() {
 
                   <div className="lg:col-span-5 space-y-4">
                     <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#00D6B4] flex items-center gap-2">
+                      <h4 className="text-xs font-semibold text-[#00D6B4] flex items-center gap-2">
                         <ShieldCheck className="h-4 w-4 text-[#00D6B4]" /> DSCSA Pharmacy Obligations
                       </h4>
                       <p className="text-xs text-[#94A3B8] leading-relaxed">
@@ -5963,7 +5963,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                      <h4 className="text-xs font-medium text-[#F1F5F9] flex items-center gap-2">
                         <Activity className="h-4 w-4 text-[#00D6B4]" /> Recent Pharmacy Receiving Records
                       </h4>
                       <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
@@ -6011,7 +6011,7 @@ export default function DashboardPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
                       <div className="flex items-center justify-between text-[#94A3B8]">
-                        <span className="text-[10px] uppercase font-bold tracking-wider">Vaccine Refrigerator 1</span>
+                        <span className="text-xs font-medium text-[#94A3B8]">Vaccine Refrigerator 1</span>
                         <Snowflake className="h-4 w-4 text-[#00D6B4]" />
                       </div>
                       <div className="text-2xl font-black text-[#F1F5F9]">
@@ -6025,7 +6025,7 @@ export default function DashboardPage() {
 
                     <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
                       <div className="flex items-center justify-between text-[#94A3B8]">
-                        <span className="text-[10px] uppercase font-bold tracking-wider">Biologics Chiller 2</span>
+                        <span className="text-xs font-medium text-[#94A3B8]">Biologics Chiller 2</span>
                         <Snowflake className="h-4 w-4 text-cyan-400" />
                       </div>
                       <div className="text-2xl font-black text-cyan-400">
@@ -6039,7 +6039,7 @@ export default function DashboardPage() {
 
                     <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
                       <div className="flex items-center justify-between text-[#94A3B8]">
-                        <span className="text-[10px] uppercase font-bold tracking-wider">Ambient Prescription Shelf</span>
+                        <span className="text-xs font-medium text-[#94A3B8]">Ambient Prescription Shelf</span>
                         <Package className="h-4 w-4 text-amber-400" />
                       </div>
                       <div className="text-2xl font-black text-amber-400">
@@ -6053,7 +6053,7 @@ export default function DashboardPage() {
 
                     <div className="card bg-[#172638] border border-[#304257] p-4 rounded-2xl space-y-1">
                       <div className="flex items-center justify-between text-[#94A3B8]">
-                        <span className="text-[10px] uppercase font-bold tracking-wider">Schedule II Safe Vault</span>
+                        <span className="text-xs font-medium text-[#94A3B8]">Schedule II Safe Vault</span>
                         <Lock className="h-4 w-4 text-rose-400" />
                       </div>
                       <div className="text-2xl font-black text-rose-400">
@@ -6209,7 +6209,7 @@ export default function DashboardPage() {
                                 <Flame className="h-5 w-5 text-emerald-400" />
                               </div>
                               <div>
-                                <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-bold block">
+                                <span className="text-xs font-mono text-emerald-400 font-medium block">
                                   On-Chain Digital Twin Decommission Confirmation
                                 </span>
                                 <h3 className="text-base font-black text-[#F1F5F9] tracking-tight">
@@ -6463,7 +6463,7 @@ export default function DashboardPage() {
 
                   <div className="lg:col-span-5 space-y-4">
                     <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#00D6B4] flex items-center gap-2">
+                      <h4 className="text-xs font-semibold text-[#00D6B4] flex items-center gap-2">
                         <ShieldCheck className="h-4 w-4 text-[#00D6B4]" /> Anti-Counterfeit Dispense Logic
                       </h4>
                       <p className="text-xs text-[#94A3B8] leading-relaxed">
@@ -6486,7 +6486,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                      <h4 className="text-xs font-medium text-[#F1F5F9] flex items-center gap-2">
                         <Activity className="h-4 w-4 text-[#00D6B4]" /> Recent Clinical Dispense Log
                       </h4>
                       <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
@@ -6646,7 +6646,7 @@ export default function DashboardPage() {
 
                   <div className="lg:col-span-5 space-y-4">
                     <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-2">
+                      <h4 className="text-xs font-semibold text-rose-400 flex items-center gap-2">
                         <ShieldCheck className="h-4 w-4 text-rose-400" /> Biohazard Destruction Compliance
                       </h4>
                       <p className="text-xs text-[#94A3B8] leading-relaxed">
@@ -6669,7 +6669,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] flex items-center gap-2">
+                      <h4 className="text-xs font-medium text-[#F1F5F9] flex items-center gap-2">
                         <Activity className="h-4 w-4 text-[#00D6B4]" /> Destruction & Returns Log
                       </h4>
                       <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
@@ -6789,7 +6789,7 @@ export default function DashboardPage() {
 
                   <div className="lg:col-span-5 space-y-4">
                     <div className="card bg-[#172638] border border-[#304257] rounded-2xl p-5 space-y-4 mb-20">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-2">
+                      <h4 className="text-xs font-semibold text-rose-400 flex items-center gap-2">
                         <AlertTriangle className="h-4 w-4 text-rose-400" /> Flag Suspected Counterfeit
                       </h4>
                       <p className="text-xs text-[#94A3B8]">
@@ -6854,10 +6854,10 @@ export default function DashboardPage() {
               <div className="card bg-[#172638] border border-[#304257] p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="badge bg-[#00D6B4]/20 text-[#00D6B4] border border-[#00D6B4]/30 text-xs font-bold uppercase tracking-wider shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
+                    <span className="inline-flex items-center rounded-full bg-[#00D6B4]/15 px-3 py-1 text-xs font-medium text-[#00D6B4] border border-[#00D6B4]/30 shrink-0 whitespace-nowrap">
                       US FDA & EMA Oversight
                     </span>
-                    <span className="badge bg-[#243247] text-[#94A3B8] border border-[#304257] text-xs font-mono shrink-0 whitespace-nowrap px-3.5 py-1.5 h-auto leading-none">
+                    <span className="inline-flex items-center rounded-full bg-[#243247] px-3 py-1 text-xs font-medium text-[#94A3B8] border border-[#304257] shrink-0 whitespace-nowrap">
                       21 CFR Part 11 & DSCSA 582
                     </span>
                   </div>
@@ -7825,7 +7825,7 @@ export default function DashboardPage() {
                             {alcoaData?.compositeScore ?? 98.4}%
                           </div>
                         </div>
-                        <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 shrink-0 whitespace-nowrap mt-3 w-fit h-auto leading-none">
+                        <span className="badge bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs font-medium px-2.5 py-0.5 rounded-full shrink-0 whitespace-nowrap mt-3 w-fit h-auto leading-none">
                           {String(alcoaData?.status ?? 'CERTIFIED_COMPLIANT').replace(/_/g, ' ')}
                         </span>
                       </div>
@@ -8144,7 +8144,7 @@ export default function DashboardPage() {
         <div className="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="card bg-[#172638] border border-amber-500/50 shadow-2xl rounded-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-[#304257] pb-3">
-              <div className="flex items-center gap-2 text-amber-400 font-black text-sm uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
                 <AlertTriangle className="h-5 w-5 text-amber-400" /> Issue Compliance Warning
               </div>
               <button
@@ -8227,7 +8227,7 @@ export default function DashboardPage() {
         <div className="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="card bg-[#172638] border border-rose-500/50 shadow-2xl rounded-2xl max-w-lg w-full p-6 space-y-5 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-[#304257] pb-3">
-              <div className="flex items-center gap-2 text-rose-400 font-black text-base uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-rose-400 font-bold text-base">
                 <AlertOctagon className="h-5 w-5 text-rose-400" /> Issue Emergency Recall Directive
               </div>
               <button
