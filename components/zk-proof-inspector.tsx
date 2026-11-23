@@ -100,7 +100,7 @@ export function ZkProofInspector({
       <CardContent className="p-5 sm:p-6 space-y-6">
         <div className="bg-[#243247] border border-[#00D6B4]/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#00D6B4] flex items-center gap-1.5">
+            <span className="text-xs font-medium text-[#00D6B4] flex items-center gap-1.5">
               <Shield className="h-4 w-4 text-[#00D6B4]" /> Mathematical Invariance Guarantee
             </span>
             <p className="text-xs sm:text-sm text-[#F1F5F9] leading-relaxed">
