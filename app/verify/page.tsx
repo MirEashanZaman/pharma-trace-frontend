@@ -459,8 +459,8 @@ function VerifyContent() {
       <main className="flex-1 max-w-4xl mx-auto px-4 py-12 w-full">
         <div className="text-center space-y-3 mb-8">
           <div className="inline-flex items-center justify-center gap-2">
-            <Badge variant="teal" size="lg" className="uppercase tracking-wider px-3.5 py-1 text-[11px] font-bold">
-              Patient Safety & Medicine Verification
+            <Badge variant="teal" size="lg" className="px-3 py-1 text-xs font-medium">
+              Patient safety & medicine verification
             </Badge>
             {cabinetItems.length > 0 && (
               <button
@@ -505,7 +505,7 @@ function VerifyContent() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-12 px-6 bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] rounded-xl font-bold text-xs tracking-wider flex items-center justify-center gap-2 shadow-sm shrink-0 border-0 transition"
+                className="h-12 px-6 bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] rounded-xl font-medium text-xs flex items-center justify-center gap-2 shadow-sm shrink-0 border-0 transition"
               >
                 <CheckCircle2 className="h-4 w-4" />
                 <span>{loading ? 'Verifying...' : 'Verify Medicine'}</span>
@@ -516,7 +516,7 @@ function VerifyContent() {
               type="button"
               onClick={() => setShowScanner(true)}
               variant="secondary"
-              className="h-12 px-5 rounded-xl text-xs font-bold tracking-wider flex items-center justify-center gap-2 shadow-sm shrink-0 border border-[#304257] hover:border-[#00D6B4] bg-[#243247] hover:bg-[#1E2E44] text-[#F1F5F9] transition"
+              className="h-12 px-5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 shadow-sm shrink-0 border border-[#304257] hover:border-[#00D6B4] bg-[#243247] hover:bg-[#1E2E44] text-[#F1F5F9] transition"
             >
               <Camera className="h-4 w-4 text-[#00D6B4]" />
               <span>Scan Package Barcode</span>
@@ -525,7 +525,7 @@ function VerifyContent() {
 
           <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-[#94A3B8]">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] uppercase tracking-wider font-semibold text-[#94A3B8]">Try Sample:</span>
+              <span className="text-xs font-medium text-[#94A3B8]">Try sample:</span>
               {sampleSerials.map((serial) => (
                 <button
                   key={serial}
@@ -633,7 +633,7 @@ function VerifyContent() {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span
-                            className={`badge text-[10px] font-bold uppercase tracking-wider shrink-0 whitespace-nowrap px-2.5 py-0.5 ${
+                            className={`badge text-xs font-medium shrink-0 whitespace-nowrap px-2.5 py-0.5 rounded-full ${
                               recallInfo?.isRecalled
                                 ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
                                 : result.exists && result.isValid
@@ -693,7 +693,7 @@ function VerifyContent() {
 
                   {recallInfo?.isRecalled && (
                     <div className="mt-5 p-4 rounded-xl bg-rose-500/15 border-2 border-rose-500/40 text-rose-200 space-y-2">
-                      <div className="flex items-center gap-2 text-rose-400 font-black text-sm uppercase tracking-wider">
+                      <div className="flex items-center gap-2 text-rose-400 font-bold text-sm">
                         <AlertOctagon className="h-5 w-5" /> Mandatory Safety Recall: Do Not Ingest
                       </div>
                       <div className="text-xs">
@@ -720,7 +720,7 @@ function VerifyContent() {
                         ) : (
                           <Clock className="h-4 w-4 text-cyan-400 shrink-0" />
                         )}
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] truncate">
+                        <h3 className="text-xs font-semibold text-[#F1F5F9] truncate">
                           Dispensation Authenticity & Rx Provenance
                         </h3>
                       </div>
@@ -779,7 +779,7 @@ function VerifyContent() {
                     <div className="flex items-center justify-between border-b border-[#304257] pb-2.5 gap-2">
                       <div className="flex items-center gap-2 min-w-0">
                         <Calendar className="h-4 w-4 text-[#00D6B4] shrink-0" />
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9] truncate">
+                        <h3 className="text-xs font-semibold text-[#F1F5F9] truncate">
                           Shelf-Life & Cold-Chain Integrity
                         </h3>
                       </div>
@@ -828,7 +828,7 @@ function VerifyContent() {
                   <div className="flex items-center justify-between border-b border-[#304257] pb-2.5">
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-[#00D6B4]" />
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#F1F5F9]">
+                      <h3 className="text-xs font-semibold text-[#F1F5F9]">
                         Patient Administration Leaflet Summary
                       </h3>
                     </div>
@@ -937,7 +937,7 @@ function VerifyContent() {
                     <div className="p-3.5 bg-[#172638] rounded-xl border border-[#304257] flex items-center gap-3">
                       <Box className="h-5 w-5 text-[#00D6B4] shrink-0" />
                       <div>
-                        <span className="text-[#94A3B8] block text-[10px] uppercase font-sans">Drug Serial Number</span>
+                        <span className="text-[#94A3B8] block text-xs font-medium font-sans">Drug serial number</span>
                         <span className="text-[#F1F5F9] font-semibold">{result.drugSerialNumber}</span>
                       </div>
                     </div>
@@ -945,8 +945,8 @@ function VerifyContent() {
                     <div className="p-3.5 bg-[#172638] rounded-xl border border-[#304257] flex items-center gap-3">
                       <LinkIcon className="h-5 w-5 text-[#00D6B4] shrink-0" />
                       <div>
-                        <span className="text-[#94A3B8] block text-[10px] uppercase font-sans">Lifecycle Stage</span>
-                        <span className={`font-bold ${recallInfo?.isRecalled ? 'text-rose-400' : 'text-[#A3E635]'}`}>
+                        <span className="text-[#94A3B8] block text-xs font-medium font-sans">Lifecycle stage</span>
+                        <span className={`font-bold ${recallInfo?.isRecalled ? 'text-rose-400' : 'text-emerald-400'}`}>
                           {recallInfo?.type || result.eventType}
                         </span>
                       </div>
@@ -955,7 +955,7 @@ function VerifyContent() {
                     <div className="p-3.5 bg-[#172638] rounded-xl border border-[#304257] flex items-center gap-3">
                       <User className="h-5 w-5 text-[#00D6B4] shrink-0" />
                       <div>
-                        <span className="text-[#94A3B8] block text-[10px] uppercase font-sans">Signer Address</span>
+                        <span className="text-[#94A3B8] block text-xs font-medium font-sans">Signer address</span>
                         <span className="text-[#F1F5F9] truncate block max-w-[200px]">{result.signer}</span>
                       </div>
                     </div>
@@ -963,7 +963,7 @@ function VerifyContent() {
                     <div className="p-3.5 bg-[#172638] rounded-xl border border-[#304257] flex items-center gap-3">
                       <Clock className="h-5 w-5 text-[#00D6B4] shrink-0" />
                       <div>
-                        <span className="text-[#94A3B8] block text-[10px] uppercase font-sans">Anchored Timestamp</span>
+                        <span className="text-[#94A3B8] block text-xs font-medium font-sans">Anchored timestamp</span>
                         <span className="text-[#F1F5F9]">
                           {result.timestamp ? new Date(result.timestamp).toUTCString() : 'N/A'}
                         </span>
@@ -1086,7 +1086,7 @@ function VerifyContent() {
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-xs">{item.drugName}</span>
                             {item.isRecalled && (
-                              <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/40 text-[9px] font-bold uppercase shrink-0 whitespace-nowrap px-2 py-0.5">
+                              <span className="badge bg-rose-500/20 text-rose-300 border-rose-500/40 text-xs font-medium shrink-0 whitespace-nowrap px-2 py-0.5 rounded-full">
                                 Recalled
                               </span>
                             )}
@@ -1427,7 +1427,7 @@ function VerifyContent() {
                   bgColor="#ffffff"
                   fgColor="#0B1220"
                 />
-                <span className="font-mono text-xs font-black tracking-wider text-[#0B1220]">
+                <span className="font-mono text-xs font-bold text-[#0B1220]">
                   RMA: RECALL-2026-{result?.drugSerialNumber?.slice(-6) || 'SEC'}
                 </span>
                 <span className="text-[10px] text-slate-600">
