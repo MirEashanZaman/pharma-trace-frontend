@@ -31,8 +31,8 @@ export default function ProvenancePage() {
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8 overflow-x-hidden">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#304257] pb-6">
           <div className="space-y-1">
-            <div className="badge badge-sm bg-[#00D6B4]/15 border border-[#00D6B4]/30 text-[#00D6B4] font-bold uppercase tracking-wider py-2 px-3 gap-1.5">
-              <Network className="h-3.5 w-3.5 text-[#00D6B4]" /> GxP Regulatory Compliance &bull; Audit DAG
+            <div className="badge badge-sm bg-[#00D6B4]/15 border border-[#00D6B4]/30 text-[#00D6B4] font-medium py-1.5 px-3 gap-1.5">
+              <Network className="h-3.5 w-3.5 text-[#00D6B4]" /> GxP regulatory compliance &bull; Audit DAG
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-[#F1F5F9] tracking-tight">
               Decentralized Provenance &amp; Verification Suite
@@ -43,10 +43,10 @@ export default function ProvenancePage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="badge badge-sm bg-[#A3E635]/15 border border-[#A3E635]/30 text-[#A3E635] font-mono text-[11px] py-2 px-3">
+            <span className="badge badge-sm bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono text-xs py-1.5 px-3 rounded-full">
               Acyclic Provenance Verified
             </span>
-            <span className="badge badge-sm bg-[#00D6B4]/15 border border-[#00D6B4]/30 text-[#00D6B4] font-mono text-[11px] py-2 px-3">
+            <span className="badge badge-sm bg-[#00D6B4]/15 border border-[#00D6B4]/30 text-[#00D6B4] font-mono text-xs py-1.5 px-3 rounded-full">
               The Graph Indexed
             </span>
           </div>
