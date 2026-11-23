@@ -116,11 +116,11 @@ export default function DispensePage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="badge badge-sm bg-[#00D6B4]/20 text-[#00D6B4] border border-[#00D6B4]/30 font-mono font-bold">
-                  FDA DSCSA 2024 / GS1 DIGITAL LINK 1.2
+                <span className="badge badge-sm bg-[#00D6B4]/20 text-[#00D6B4] border border-[#00D6B4]/30 font-medium text-xs rounded-full">
+                  FDA DSCSA 2024 / GS1 Digital Link 1.2
                 </span>
-                <span className="badge badge-sm bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono font-bold">
-                  ANTI-RECIRCULATION BURN
+                <span className="badge badge-sm bg-rose-500/20 text-rose-300 border border-rose-500/30 font-medium text-xs rounded-full">
+                  Anti-recirculation burn
                 </span>
               </div>
               <h1 className="text-3xl font-extrabold tracking-tight text-[#F1F5F9]">
