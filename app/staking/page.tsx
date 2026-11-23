@@ -265,34 +265,34 @@ export default function StakingPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-[#172638] border border-[#304257] rounded-xl p-5 min-w-0">
-            <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Total Staked Collateral</span>
-            <div className="text-2xl font-black text-[#00D6B4] mt-1 font-mono truncate">
+            <span className="text-xs text-[#94A3B8] font-medium">Total staked collateral</span>
+            <div className="text-2xl font-bold text-[#00D6B4] mt-1 font-mono tabular-nums truncate">
               {accountData?.totalStaked != null ? `${Number(accountData.totalStaked).toLocaleString()} USDC` : '0 USDC'}
             </div>
-            <span className="text-[11px] text-[#94A3B8] mt-1 block">ERC-20 Staked Balance</span>
+            <span className="text-xs text-[#94A3B8] mt-1 block">ERC-20 Staked Balance</span>
           </div>
 
           <div className="bg-[#172638] border border-[#304257] rounded-xl p-5 min-w-0">
-            <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Active Locked Bonds</span>
-            <div className="text-2xl font-black text-amber-400 mt-1 font-mono truncate">
+            <span className="text-xs text-[#94A3B8] font-medium">Active locked bonds</span>
+            <div className="text-2xl font-bold text-amber-400 mt-1 font-mono tabular-nums truncate">
               {accountData?.lockedInBonds != null ? `${Number(accountData.lockedInBonds).toLocaleString()} USDC` : '0 USDC'}
             </div>
-            <span className="text-[11px] text-[#94A3B8] mt-1 block">Committed to Transit SLAs</span>
+            <span className="text-xs text-[#94A3B8] mt-1 block">Committed to Transit SLAs</span>
           </div>
 
           <div className="bg-[#172638] border border-[#304257] rounded-xl p-5 min-w-0">
-            <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Available Capacity</span>
-            <div className="text-2xl font-black text-emerald-400 mt-1 font-mono truncate">
+            <span className="text-xs text-[#94A3B8] font-medium">Available capacity</span>
+            <div className="text-2xl font-bold text-emerald-400 mt-1 font-mono tabular-nums truncate">
               {accountData ? `${(Number(accountData.totalStaked) - Number(accountData.lockedInBonds)).toLocaleString()} USDC` : '0 USDC'}
             </div>
-            <span className="text-[11px] text-[#94A3B8] mt-1 block">Free for New Shipments</span>
+            <span className="text-xs text-[#94A3B8] mt-1 block">Free for New Shipments</span>
           </div>
 
           <div className="bg-[#172638] border border-[#304257] rounded-xl p-5 min-w-0">
-            <span className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider">Accreditation Status</span>
+            <span className="text-xs text-[#94A3B8] font-medium">Accreditation status</span>
             <div className="mt-2 flex items-center gap-2">
               <span
-                className={`badge badge-sm font-bold uppercase ${
+                className={`badge badge-sm font-medium ${
                   accountData?.isAccredited
                     ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                     : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
@@ -301,7 +301,7 @@ export default function StakingPage() {
                 {accountData?.isAccredited ? 'Accredited Carrier' : 'Unaccredited'}
               </span>
             </div>
-            <span className="text-[11px] text-[#94A3B8] mt-1 block font-mono truncate">
+            <span className="text-xs text-[#94A3B8] mt-1 block font-mono tabular-nums truncate">
               Slashed: {accountData?.totalSlashed || 0} USDC
             </span>
           </div>
@@ -318,7 +318,7 @@ export default function StakingPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-[#94A3B8] block mb-1">Carrier Wallet Address</label>
+                <label className="text-xs font-semibold text-[#94A3B8] block mb-1">Carrier Wallet Address</label>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
@@ -330,7 +330,7 @@ export default function StakingPage() {
                   <button
                     onClick={() => loadAccountAndBonds(carrierAddress)}
                     disabled={loading}
-                    className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl px-4 shrink-0"
+                    className="btn btn-sm bg-[#243247] hover:bg-[#304257] text-[#00D6B4] border border-[#304257] rounded-xl px-4 shrink-0 font-medium"
                   >
                     Query
                   </button>
@@ -338,8 +338,8 @@ export default function StakingPage() {
               </div>
 
               <div className="p-4 bg-[#0B1220] rounded-xl border border-[#304257] space-y-3">
-                <span className="text-xs font-bold text-[#00D6B4] uppercase tracking-wider block">
-                  Deposit Collateral Stake
+                <span className="text-xs font-medium text-[#00D6B4] block">
+                  Deposit collateral stake
                 </span>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <input
@@ -352,7 +352,7 @@ export default function StakingPage() {
                   <button
                     onClick={handleDeposit}
                     disabled={loading}
-                    className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none font-bold rounded-xl px-5 shrink-0"
+                    className="btn btn-sm bg-[#00D6B4] hover:bg-[#00b89a] text-[#0B1220] border-none font-medium rounded-xl px-5 shrink-0"
                   >
                     Stake
                   </button>
@@ -360,8 +360,8 @@ export default function StakingPage() {
               </div>
 
               <div className="p-4 bg-[#0B1220] rounded-xl border border-[#304257] space-y-3">
-                <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">
-                  Withdraw Unlocked Collateral
+                <span className="text-xs font-medium text-amber-400 block">
+                  Withdraw unlocked collateral
                 </span>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <input
