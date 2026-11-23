@@ -270,10 +270,10 @@ export default function GovernancePage() {
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-[#00D6B4] truncate max-w-[150px]">
+                      <span className="text-xs font-medium text-[#00D6B4] truncate max-w-[150px]">
                         {name}
                       </span>
-                      <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-none font-bold">
+                      <span className="badge badge-xs bg-emerald-500/20 text-emerald-300 border-none font-medium">
                         {jurisdiction}
                       </span>
                     </div>
