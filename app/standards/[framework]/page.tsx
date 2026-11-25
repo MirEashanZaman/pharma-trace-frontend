@@ -1,4 +1,5 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Navigation } from '@/components/navigation';
@@ -162,6 +163,29 @@ export async function generateStaticParams() {
   return Object.keys(STANDARDS_DATA).map((slug) => ({
     framework: slug,
   }));
+}
+
+export function generateMetadata({
+  params,
+}: {
+  params: { framework: string };
+}): Metadata {
+  const standard = STANDARDS_DATA[params.framework];
+  if (!standard) {
+    return {
+      title: 'Regulatory Standard Not Found | PharmaTrace',
+      description: 'Requested regulatory standard framework is not indexed.',
+    };
+  }
+  return {
+    title: `${standard.title} | PharmaTrace Regulatory Compliance`,
+    description: standard.summary,
+    openGraph: {
+      title: `${standard.title} | PharmaTrace GxP Verification`,
+      description: standard.summary,
+      type: 'article',
+    },
+  };
 }
 
 export default function StandardDetailPage({

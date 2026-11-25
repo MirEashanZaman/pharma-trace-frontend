@@ -1,4 +1,5 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Navigation } from '@/components/navigation';
 import {
@@ -18,6 +19,11 @@ import {
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Live Blockchain Audit Ledger | PharmaTrace',
+  description: 'Real-time cryptographic audit trail of pharmaceutical custody transfers and cold-chain measurements.',
+};
 
 interface LedgerBatch {
   serialNumber: string;

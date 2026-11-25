@@ -1,4 +1,5 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Navigation } from '@/components/navigation';
 import {
@@ -15,6 +16,11 @@ import {
 } from 'lucide-react';
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: 'Medicine Catalog Directory | PharmaTrace',
+  description: 'Public registry of verified pharmaceutical batches, GS1 serialization, and cold-chain parameters.',
+};
 
 interface CatalogDrug {
   serialNumber: string;

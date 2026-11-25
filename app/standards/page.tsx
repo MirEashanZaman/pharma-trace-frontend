@@ -1,7 +1,13 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Navigation } from '@/components/navigation';
 import { ShieldCheck, Award, ArrowRight, CheckCircle2, Lock, FileText, Cpu, BookOpen } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Regulatory Compliance Matrix | PharmaTrace',
+  description: 'Direct mapping across FDA 21 CFR Part 11, EU GMP Annex 11, WHO TRS 961, and DSCSA US Title II.',
+};
 
 interface StandardSummary {
   slug: string;
